@@ -1,0 +1,80 @@
+INFO:
+http://www.nature.com/nature/authors/gta/index.html#a5.2
+http://www.nature.com/nature/authors/submissions/presubs/
+
+FORMAT:
+Letters are short reports of original research focused on an outstanding finding whose importance means that it will be of interest to scientists in other fields.
+
+They do not normally exceed 4 pages of Nature, and have no more than 30 references. They begin with a fully referenced paragraph, ideally of about 200 words, but certainly no more than 300 words, aimed at readers in other disciplines. This paragraph starts with a 2-3 sentence basic introduction to the field; followed by a one-sentence statement of the main conclusions starting 'Here we show' or equivalent phrase; and finally, 2-3 sentences putting the main findings into general context so it is clear how the results described in the paper have moved the field forwards.
+
+Please refer to our annotated example to see how the summary paragraph for a Letter should be constructed.
+
+The rest of the text is typically about 1,500 words long. Any discussion at the end of the text should be as succinct as possible, not repeating previous summary/introduction material, to briefly convey the general relevance of the work.
+
+Letters typically have 3 or 4 small display items (figures or tables).
+
+Word counts refer to the text of the paper. References, title, author list and acknowledgements do not have to be included in total word counts.
+
+
+********
+ABSTRACT:
+
+Language is the cornerstone of human communication. A defining feature of words  were defining feature of words in a linguistic communication system has been their arbitrary nature. However, this the  has 
+Our results provide convergent evidence that intuition supports coopera-tion in social dilemmas, and that reflection can undermine thesecooperative impulses.
+arbitrary
+
+[1] 
+[2]
+
+we show that proxies for complexity is are positively correlated with word length in 3 languages. 
+furthermore, we find that communicators are sensitive to this bias 
+
+conceptual compleixy
+empirical observation about lexicon (reflected in-the-moment judgements)
+The complexity principle: Complexity in thought tends to be reflected in complexity of expression.
+Together, challenges the long-standing assumption that the mapping between words and concepts in language is arbitrary. 
+* 
+
+Human mathematical competence emerges from two representational systems. Competence in some domains of mathematics, such as calculus, relies on symbolic representations that are unique to humans who have undergone explicit teaching1,2. More basic numerical intuitions are supported by an evolution- arily ancient approximate number system that is shared by adults3–6, infants7 and non-human animals8–13—these groups can all represent the approximate number of items in visual or aud- itory arrays without verbally counting, and use this capacity to guide everyday behaviour such as foraging. Despite the wide- spread nature of the approximate number system both across spe- cies and across development, it is not known whether some individuals have a more precise non-verbal ‘number sense’ than others. Furthermore, the extent to which this system interfaces with the formal, symbolic maths abilities that humans acquire by explicit instruction remains unknown. Here we show that there are large individual differences in the non-verbal approximation abilities of 14-year-old children, and that these individual differ- ences in the present correlate with children’s past scores on standardized maths achievement tests, extending all the way back to kindergarten. Moreover, this correlation remains significant when controlling for individual differences in other cognitive and per- formance factors. Our results show that individual differences in achievement in school mathematics are related to individual dif- ferences in the acuity of an evolutionarily ancient, unlearned approximate number sense. Further research will determine whether early differences in number sense acuity affect later maths learning, whether maths education enhances number sense acuity, and the extent to which tertiary factors can affect both.
+
+
+******
+In human language, the sound of a word has long been assumed to be independent of its meaning [. However, theories of efficient communication predict a systematic relationship between a word and meaning.  They predict more complex meanings should be associated with longer words. Here we show this systematicity is present in human language. In a naturalistic analysis, we asked participants to rate the conceptual complexity of word meanings. These judgements correlated highly with word length across XX languages, even when controlling for frequency and other conceptual measures. In a series of experimental studies, we found that this systematicity is also present in the minds of speakers. We reveal a bias to map longer words to more complex meanings for both known and novel words and known and novel meaning. We show that bias is present in both language comprehension and production. Collectively, these results point to a functional tradeoff in human language: shorter words for more frequent communication, longer words for more complex ideas. This result challenges the foundational assumption that human language contains entirely arbitrary mappings between word forms and meanings, and suggests that structure of the lexicon may be shaped by its communicative function. 
+
+
+Humans actively share resources with one another to a much greater degree than do other great apes, and much human sharing is governed by social norms of fairness and equity1–3. When in receipt of a windfall of resources, human children begin showing tendencies towards equitable distribution with others at five to seven years of age4–7. Arguably, however, the primordial situation for human shar- ing of resources is that which follows cooperative activities such as collaborative foraging, when several individuals must share the spoils of their joint efforts8–10. Here we show that children of around three years of age share with others much more equitably in collaborative activities than they do in either windfall or parallel-work situa- tions. By contrast, one of humans’ two nearest primate relatives, chimpanzees (Pan troglodytes), ‘share’ (make food available to another individual) just as often whether they have collaborated with them or not. This species difference raises the possibility that humans’ tendency to distribute resources equitably may have its evolutionary roots in the sharing of spoils after collaborative efforts.
+
+ Furthurmore, we show that this bias extends to novel objects. A bias to map novel words to more complex meanings
+
+
+ to novel meanings The finding suggests a functional tradeoff in word forms: shorter for more frequent communication, longer for more complex ideas. 
+Guides production
+Guides mapping choices
+Complexity correlated with RT in study task
+
+
+Can be applied to definitions
+both for known and novel words
+production expt. / comprehension
+Can even be applied to novel objects
+Guides production
+Guides mapping choices
+Complexity correlated with RT in study task
+
+
+
+
+Different human languages tend to use entirely different words to refer to the same meaning. 
+
+
+A foundational assumption of human language is that the relationship between a word and its meaning is arbitrary. This assumption is evidenced by the observation that different languages often use entirely different words to refer to the same meaning. However, despite the clear presence of some arbitrariness in language, While this prediction Despite the wide spread nature of the approximate number system both across species and across development, it is not known whether some individuals have a more precise non-verbal ‘number sense’ than others. However, the scope of this non-arbitrariness in language is not known. Here we show a trade-off in language between and length of a word and complexity in meaning. We compared word lengths across XX different languages and found that word length for a given word was correlated across languages with 
+the sliding of microtubules depending on their relative orientation.
+Collectively, these results point to a common generative process that is conserved across species, suggesting that the long-noted gap between perceptual versus motor combinatorial capabilities in human infants1 may arise partly from the challenges in constructing new pairwise vocal transitions.
+
+Communicative pressure to efficiency
+What if there is a tradeoff between complexity and efficiency?
+
+
+The relationship between a word and it's meaning in human language has long been assumed to be arbitrary. However, a number of 
+
+Human language contains a set of mappings between words and meanings. A foundational assumption about human language is that the relationship between a word and its meaning is arbitrary. However,   

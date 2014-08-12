@@ -1,0 +1,11 @@
+The length of words reflects their conceptual complexity
+
+Are the forms of words systematically related to their meaning? The “arbitrariness of the sign” has long been a foundational part of our understanding of human language.1,2 Theories of communication predict a relationship between form and meaning, however: longer descriptions should convey more complex meanings.3,4 Here we show that the lexicons of human languages reflect this relationship between linguistic and cognitive complexity. We asked participants to rate the conceptual complexity of word meanings and found that their judgements correlated highly with word length across 66 languages, even controlling for frequency and concreteness. This relationship is productively encoded in the minds of speakers, as well: Adults and children both mapped longer words to more complex meanings, and more complex meanings to longer words, in comprehension and production tasks and across a wide range of stimuli. In addition, explicit judgments of complexity were highly correlated with an implicit measure of study time in a memory task, suggesting that complexity is directly related to basic cognitive processes. These results point to a general regularity in the design of lexicons and suggests the importance of cognitive constraints on language evolution.5,6
+
+[1] de Saussure, F. (1983). Course in General Linguistics. C. Bally and A. Sechehaye, (Eds.). (R. Harris, Trans.). La Salle, Illinois: Open Court. (Original work published 1916).
+[2] Hockett, C. F. (1960). The origin of speech. Scientific American, 203, 88-96.
+[3] Horn, L. (1984). Toward a new taxonomy for pragmatic inference: Q-based and R-based implicature. Meaning, Form, and Use in Context, 42. 
+[4] Levy, R. and Jaeger, F.T. (2007). Speakers Optimize Information Density Through Syntactic Reduction.  Proceedings of the 20th Conference on Neural Information Processing Systems (NIPS).
+[5] Christiansen, M.H. & Chater, N. (2008). Language as shaped by the brain. Behavioral & Brain Sciences, 31, 489-558.
+[6] Lieberman, E., Michel, J.-B., Jackson, J., Tang, T. & Nowak, M. A. (2007). Quantifying the evolutionary dynamics of language. Nature, 449:713–16. 
+				
