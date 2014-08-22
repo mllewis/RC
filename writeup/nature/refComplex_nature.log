@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.8.22)  3 AUG 2014 09:16
+This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.8.22)  21 AUG 2014 21:28
 entering extended mode
 \write18 enabled.
  %&-line parsing enabled.
@@ -36,64 +36,121 @@ Package: scicite 2003/11/04  v 4.01
 ) (/usr/local/texlive/2008/texmf-dist/tex/latex/psnfss/times.sty
 Package: times 2005/04/12 PSNFSS-v9.2a (SPQR) 
 )
-\c@lastnote=\count87
+(/usr/local/texlive/2008/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+(/usr/local/texlive/2008/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2006/02/20 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/usr/local/texlive/2008/texmf/tex/latex/config/graphics.cfg
+File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+)
+Package graphics Info: Driver file: pdftex.def on input line 90.
+
+(/usr/local/texlive/2008/texmf-dist/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2008/07/16 v0.04k Graphics/color for pdfTeX
+\Gread@gobject=\count87
+))
+\Gin@req@height=\dimen103
+\Gin@req@width=\dimen104
+)
+\c@lastnote=\count88
 
 (./refComplex_nature.aux)
 \openout1 = `refComplex_nature.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 95.
-LaTeX Font Info:    ... okay on input line 95.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 95.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 93.
 
 (/usr/local/texlive/2008/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
+(/usr/local/texlive/2008/texmf-dist/tex/context/base/supp-pdf.tex
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count89
+\scratchdimen=\dimen105
+\scratchbox=\box26
+\nofMPsegments=\count90
+\nofMParguments=\count91
+\everyMPshowfont=\toks15
+\MPscratchCnt=\count92
+\MPscratchDim=\dimen106
+\MPnumerator=\count93
+\everyMPtoPDFconversion=\toks16
+)
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14.4> on input line 103.
+(Font)              <14.4> on input line 99.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 103.
+(Font)              <7> on input line 99.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 103.
+(Font)              <12> on input line 99.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 103.
+(Font)              <8> on input line 99.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 103.
+(Font)              <6> on input line 99.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 109.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 103.
 Missing character: There is no Ò in font ptmb7t!
 Missing character: There is no Ó in font ptmb7t!
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 110.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <12> not available
+(Font)              Font shape `OT1/ptm/b/it' tried instead on input line 104.
  [1
 
 {/usr/local/texlive/2008/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-No file refComplex_nature.bbl.
-[2] (./refComplex_nature.aux) ) 
+
+LaTeX Warning: Citation `hocket1960' on page 2 undefined on input line 111.
+
+<figs/geons_cropped.png, id=9, 721.69624pt x 606.265pt>
+File: figs/geons_cropped.png Graphic file (type png)
+
+<use figs/geons_cropped.png>
+<figs/real_objs_cropped.png, id=11, 722.7pt x 609.27625pt>
+File: figs/real_objs_cropped.png Graphic file (type png)
+
+<use figs/real_objs_cropped.png> [2] (./refComplex_nature.bbl
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 1.
+ [3 <./figs/geons_cropped.png>]) [4 <./figs/real_objs_cropped.png>] (./refCompl
+ex_nature.aux)
+
+LaTeX Warning: There were undefined references.
+
+ ) 
 Here is how much of TeX's memory you used:
- 359 strings out of 493886
- 4189 string characters out of 1151099
- 51889 words of memory out of 3000000
- 3692 multiletter control sequences out of 10000+50000
- 15296 words of font info for 36 fonts, out of 3000000 for 5000
+ 1053 strings out of 493886
+ 13570 string characters out of 1151099
+ 62401 words of memory out of 3000000
+ 4352 multiletter control sequences out of 10000+50000
+ 19116 words of font info for 41 fonts, out of 3000000 for 5000
  714 hyphenation exceptions out of 8191
- 22i,7n,19p,1360b,278s stack positions out of 5000i,500n,10000p,200000b,50000s
-{/usr/local/texlive/2008/texmf-dist/fonts/enc/dv
-ips/base/8r.enc}</usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmsy
-8.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></us
-r/local/texlive/2008/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on refComplex_nature.pdf (2 pages, 37665 bytes).
+ 25i,7n,19p,1390b,278s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/local/texlive/2008/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
+exlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmsy8.pfb></usr/local/texlive/200
+8/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2008/texmf-di
+st/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2008/texmf-dist/fonts/
+type1/urw/times/utmr8a.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/urw/
+times/utmri8a.pfb>
+Output written on refComplex_nature.pdf (4 pages, 320327 bytes).
 PDF statistics:
- 22 PDF objects out of 1000 (max. 8388607)
+ 41 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 131072)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 11 words of extra memory for PDF output out of 10000 (max. 10000000)
 

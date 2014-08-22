@@ -1,7 +1,7 @@
 Referential Complexity Analyses
 ================================
 M. Lewis 
-------
+
 `r as.character(format(Sys.Date(), format="%B %d, %Y"))`
 
 ***
@@ -20,35 +20,31 @@ M. Lewis
 
 3. [Novel real objects](#novelRealObjs)<br/> 
   (A) [Norms](#3a)<br/> 
-  (B) [Mappping task (adults)](#3b) TO DO<br/> 
+  (B) [Mappping task (adults)](#3b) <br/> 
   (C) [Mapping task (children)](#3c) TO DO <br/> 
-  (D) [Production task (labels + descriptions)](#3d) TO DO <br/> 
+  (D) [Production task (labels + descriptions)](#3d) <br/> 
 
 4. [Geons](#geons) <br/> 
   (A) [Norms](#4a) <br/> 
-  (B) [Mappping task](#4b) TO DO <br/>
+  (B) [Mappping task](#4b)<br/>
 
-figure out how to clear before start new experiment
-save to git hub
-clean up so that only see plots and critical statistical results
-check that all experients remove duplicates
-***
-***
-```{r include = FALSE}
-rm(list=ls())
-```
+* figure out how to clear before start new experiment
+* clean up so that only see plots and critical statistical results
+* check that all experients remove duplicates
 
 #### SET GLOBAL VARIABLES
 ```{r}
+rm(list=ls())
+
+whichSubjRemove = 'keepAll' #remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
 processNorms = TRUE # process norms or load norms? 
-removeRepeatSubj = TRUE  # remove repeat subjects?
-savePlots = FALSE # save plots to pdf?
+savePlots = TRUE # save plots to pdf?
 doSlow = TRUE # do time-consuming pre-processing steps?
 ```
 
 #### LOAD PACKAGES, FUNCTIONS, AND REPEAT SUBJ DATA FILE
 ```{r include = FALSE}
-#load libraries
+# load libraries
 library(corrplot)
 library(stringr)
 library(psych)
@@ -57,6 +53,7 @@ library(boot)
 
 # load functions
 source("/Documents/GRADUATE_SCHOOL/Ranalysis/useful.R")
+
 cor.mtest <- function(mat, conf.level = 0.95) {
   mat <- as.matrix(mat)
   n <- ncol(mat)
@@ -69,29 +66,34 @@ cor.mtest <- function(mat, conf.level = 0.95) {
       p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
       lowCI.mat[i, j] <- lowCI.mat[j, i] <- tmp$conf.int[1]
       uppCI.mat[i, j] <- uppCI.mat[j, i] <- tmp$conf.int[2]
+      }
     }
-  }
   return(list(p.mat, lowCI.mat, uppCI.mat))
-}
+  }
+
 boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){ 
-w = length(x); x.r = x; y.r = y 
-sm = 1:w; cor.b = 1:n 
-for (k in 1:n){ 
-s = sample(sm, w, replace = T) 
-for (i in 1:w) 
-{ 
-x.r[i] = x[s[i]] 
-y.r[i] = y[s[i]] 
-} 
-cor.b[k] = cor(x.r, y.r, use = "pairwise", method) 
-} 
-cor.b = sort(cor.b); a = round(n*(1-p)/2,0); b = round(n*(p+1)/2,0) 
-vec = c(cor.b[a+1], cor(x, y, use = "pairwise", method), cor.b[b-1]) 
-n.r = c("value"); n.c = c("lower_bound", "correlation", "upper_bound") 
-matrix(vec,1,3,dimnames = list(n.r,n.c)) 
-}# bootstrap CIs on CI (http://dodonovs.com/R/002-r.htm)
-bm.partial<-function(x,y,z) {round((cor(x,y, use="complete.obs")-cor(x,z, use="complete.obs")*cor(y,z, use="complete.obs"))/
-sqrt((1-cor(x,z, use="complete.obs")^2)*(1-cor(y,z, use="complete.obs")^2)),4)}
+  w = length(x); x.r = x; y.r = y 
+  sm = 1:w; cor.b = 1:n 
+  for (k in 1:n){ 
+    s = sample(sm, w, replace = T) 
+    for (i in 1:w) 
+      { 
+      x.r[i] = x[s[i]] 
+      y.r[i] = y[s[i]] 
+      } 
+    cor.b[k] = cor(x.r, y.r, use = "pairwise", method) 
+    } 
+  cor.b = sort(cor.b); a = round(n*(1-p)/2,0); b = round(n*(p+1)/2,0) 
+  vec = c(cor.b[a+1], cor(x, y, use = "pairwise", method), cor.b[b-1]) 
+  n.r = c("value"); n.c = c("lower_bound", "correlation", "upper_bound") 
+  matrix(vec,1,3,dimnames = list(n.r,n.c)) 
+  }# bootstrap CIs on CI (http://dodonovs.com/R/002-r.htm)
+
+bm.partial<-function(x,y,z) {
+  round((cor(x,y, use="complete.obs")-cor(x,z, use="complete.obs")*cor(y,z, use="complete.obs"))/
+                                     sqrt((1-cor(x,z, use="complete.obs")^2)*(1-cor(y,z, use="complete.obs")^2)),4)
+  }
+
 d.fc <- function(d) {
   cond <- all(intersect(levels(d$langCondition),c("\"long\"" , "\"short\"")) == c("\"long\"" , "\"short\""))
   
@@ -115,20 +117,18 @@ d.fc <- function(d) {
     ciul = effect_size + d_err
     rt.Mratio = mean(d$rt.ratio, na.rm = TRUE)
     c.Mratio = mean(d$c.ratio, na.rm = TRUE)
-    l.rt.Mratio = mean(d$l.rt.ratio, na.rm=TRUE)
     
     es <- data.frame(effect_size=effect_size,
                      cill = cill,
                      ciul = ciul,
                      rt.Mratio = rt.Mratio,
-                     c.Mratio = c.Mratio,
-                     l.rt.Mratio = l.rt.Mratio)
-  }
+                     c.Mratio = c.Mratio)
+    }
   return (es)
-}
+  }
 
 # read in repeat subject file
-setwd('/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/manuscript/analyses/')
+setwd('/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/analysis/')
 dups = read.csv("data/all_workerids.csv")
 ```
 
@@ -136,6 +136,7 @@ dups = read.csv("data/all_workerids.csv")
 ***
 
 <a name="google"/>
+
 ## (1) Cross-linguistic analyses [(Complexity norms task)][task26]
 
 <a name="1a"/>
@@ -148,10 +149,13 @@ if (processNorms) {
   d2 <- read.csv("data/RefComplex26.results",sep="\t",header=TRUE)
   d <- rbind(d1,d2)
   
-  if (removeRepeatSubj) {
+  if (whichSubjRemove == 'repeatSubj') {
     d = merge(d, dups, by=c("hitid","workerid"))
-    d = d[d$repeatSubj == "unique",]
-  }
+    d = da[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
   
   # take out people who missed check question
   d = d[d$Answer.value_18 == 7, ] 
@@ -257,7 +261,7 @@ ggplot(counts, aes(class, freq, fill = class)) +
 
 * look at accuracy for translations checks
 + preprocess
-```{r, inclue = FALSE}
+```{r, include = FALSE}
 checksR = read.csv("data/translation_accuracy.csv")[1:500,]
 checksR = checksR[checksR$ENGLISH != "peso",]
 
@@ -269,7 +273,7 @@ checksR$class = as.numeric(as.character(checksR$class))
 ```
 
 + plot and stats
-### plot accuracy
++  accuracy
 ```{r echo = FALSE}
 dfa = as.data.frame(accuracy)
 dfa$lang = row.names(dfa)
@@ -319,7 +323,6 @@ mean(cmat)
 <a name="1c"/>
 ###  ( C ) Correlation between all lengths, controling for frequency
 ```{r}
-
 ## all words
 xling_len_p = xling[,c(lens, which(names(xling)== "log.e.freq"))] 
 names(xling_len_p) = as.character(tolower(lapply(str_split(names(xling_len_p),"_"),function(x) {x[1]})))
@@ -396,80 +399,6 @@ c_l$uci = ifelse(c_l$Checked == "yes",  c_l$upper.ci, 0)
 c_l$lci = ifelse(c_l$Checked == "yes",  c_l$lower.ci, 0)
 
 ### Plot with bootsrapped CIs on pearsons are, and parial frequencies
-if (savePlots) {pdf("figure/p0.pdf", width = 10, height = 6 )}
-ggplot(c_l, aes(language, 0, fill = Checked)) + 
-  geom_bar(stat = "identity", ) + 
-  ylab("Pearson's r") + xlab("Language") + 
-  #ggtitle("Correlation between word length and complexity norms") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  #geom_linerange(aes(ymax=uci, ymin=lci)) +
-  #geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
-  #geom_hline(y=mean(c_l$corr),lty=2) +
-  theme(
-    plot.background = element_blank()
-   ,panel.grid.major = element_blank()
-   ,panel.grid.minor = element_blank()
-   #,panel.border = element_blank()
-  )  +
-  theme(axis.title.x = element_text( size=25), axis.text.x  = element_text( size=10),
-        axis.title.y = element_text( size=25), axis.text.y  = element_text( size=10)) +
-  theme(legend.text = element_text(size = 10), legend.title = element_text(size = 10)) +
- # annotate("text", x = 75, y =mean(c_l$corr) + .02 , label=paste("M=",round(mean(c_l$corr),2), sep = "")) +
-  scale_fill_manual(values=c("pink", "red")) +
-  theme(legend.position="none") +
- scale_y_continuous(limits = c(-.07, .7)) 
-if (savePlots) {dev.off()}
-
-if (savePlots) {pdf("figure/p1.pdf", width = 10, height = 6 )}
-ggplot(c_l, aes(language, checked_only, fill = Checked)) + 
-  geom_bar(stat = "identity", ) + 
-  ylab("Pearson's r") + xlab("Language") + 
-  #ggtitle("Correlation between word length and complexity norms") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  geom_linerange(aes(ymax=uci, ymin=lci)) +
-  #geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
-  #geom_hline(y=mean(c_l$corr),lty=2) +
-  theme(
-    plot.background = element_blank()
-   ,panel.grid.major = element_blank()
-   ,panel.grid.minor = element_blank()
-   #,panel.border = element_blank()
-  )  +
-  theme(axis.title.x = element_text( size=25), axis.text.x  = element_text( size=10),
-        axis.title.y = element_text( size=25), axis.text.y  = element_text( size=10)) +
-  theme(legend.text = element_text(size = 10), legend.title = element_text(size = 10)) +
- # annotate("text", x = 75, y =mean(c_l$corr) + .02 , label=paste("M=",round(mean(c_l$corr),2), sep = "")) +
-  scale_fill_manual(values=c("pink", "red")) +
-  theme(legend.position="none") +
-   scale_y_continuous(limits = c(-.07, .7)) 
-if (savePlots) {dev.off()}
-
-### Plot with bootsrapped CIs on pearsons are, and parial frequencies
-if (savePlots) {pdf("figure/p2.pdf", width = 10, height = 6 )}
-
-ggplot(c_l, aes(language, corr, fill = Checked)) + 
-  geom_bar(stat = "identity", ) + 
-  ylab("Pearson's r") + xlab("Language") + 
-  #ggtitle("Correlation between word length and complexity norms") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  geom_linerange(aes(ymax=upper.ci, ymin=lower.ci)) +
-  #geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
-  geom_hline(y=mean(c_l$corr),lty=2) +
-  theme(
-    plot.background = element_blank()
-   ,panel.grid.major = element_blank()
-   ,panel.grid.minor = element_blank()
-   #,panel.border = element_blank()
-  )  +
-  theme(axis.title.x = element_text( size=25), axis.text.x  = element_text( size=10),
-        axis.title.y = element_text( size=25), axis.text.y  = element_text( size=10)) +
-  theme(legend.text = element_text(size = 10), legend.title = element_text(size = 10)) +
- # annotate("text", x = 75, y =mean(c_l$corr) + .02 , label=paste("M=",round(mean(c_l$corr),2), sep = "")) +
-  scale_fill_manual(values=c("pink", "red")) +
-  theme(legend.position="none") +
- scale_y_continuous(limits = c(-.07, .7)) 
-if (savePlots) {dev.off()}
-
 if (savePlots) {pdf("figure/p3.pdf", width = 10, height = 6 ) }
 ggplot(c_l, aes(language, corr, fill = Checked)) + 
   geom_bar(stat = "identity", ) + 
@@ -492,10 +421,9 @@ ggplot(c_l, aes(language, corr, fill = Checked)) +
   scale_fill_manual(values=c("pink", "red")) +
   theme(legend.position="none") +
   scale_y_continuous(limits = c(-.07, .7)) 
-
 if (savePlots) {dev.off()}
 
-#verify correlations by looking at English
+# verify correlations by looking at English
 partial.r(xlingOC,c(1,which(names(xlingOC) == "complexity")), which(names(xlingOC) == "log.e.freq"))
 cor(xlingOC$english,xlingOC$complexity, use = "pairwise")
 ```
@@ -509,16 +437,20 @@ mean(c_l$corr)
 ***
 
 <a name="HF"/>
-## (2) High frequency words in mapping task  [(Task)][task32]
 
-### read in data and prep variables
+## (2) High frequency words in mapping task [(Task)][task32]
+
+* read in data and prep variables
 ```{r include = FALSE}
 # read in data
 raw <- read.csv("data/RefComplex32.results",sep="\t",header=TRUE)
 
-if (removeRepeatSubj) {
-  raw = merge(raw, dups, by=c("hitid","workerid"))
-  raw = raw[raw$repeatSubj == "unique",]
+if (whichSubjRemove == 'repeatSubj') {
+    raw = merge(raw, dups, by=c("hitid","workerid"))
+    raw = raw[!raw$repeatSubj,]
+  } else if (whichSubjRemove == 'withinRepeatSubj') {
+    raw = merge(raw, dups, by=c("hitid","workerid"))
+    raw = raw[!raw$withinRepeatSubj,]
   }
   
 # prep data frame
@@ -547,17 +479,17 @@ d$word1 <- as.factor(d$word1)
 d$word2 <- as.factor(d$word2)
 ```
 
-### merge in stuff
+* merge in stuff
 ```{r include = FALSE}
 index <- match(d$engWord, englishComplexityNorms$word)
-d$complexity<- englishComplexityNorms$complexity[index]
+d$complexity <- englishComplexityNorms$complexity[index]
 d$complexity_cil <- englishComplexityNorms$cil[index]
 d$complexity_cih <- englishComplexityNorms$cih[index]
 
 d$log.e.freq <- englishComplexityNorms$log.e.freq[index]
 ```
 
-### get quintiles
+* get quintiles
 ```{r include = FALSE}
 normsC = englishComplexityNorms[is.element(englishComplexityNorms$word, d$engWord),] #get only 100 words
 
@@ -580,16 +512,16 @@ qs$quintile[81:100] = 5
 
 index <- match(d$engWord, qs$word)
 d$quintile <- qs$quintile[index]
-
 ```
-### aggregate by word
-```{r}
+
+* aggregate by word
+```{r, include = FALSE}
 ms <- aggregate(LongBet  ~ engWord + complexity + log.e.freq + complexity_cil + complexity_cih + quintile, data=d, mean)
 ms$bet_cil <- aggregate(LongBet  ~ engWord + complexity + log.e.freq + complexity_cil + complexity_cih, data=d, ci.low)$LongBet 
 ms$bet_cih <- aggregate(LongBet  ~ engWord + complexity + log.e.freq + complexity_cil + complexity_cih, data=d, ci.high)$LongBet  
 ```
 
-### plot bet to long word vs. complexity norms
+* plot bet to long word vs. complexity norms
 ```{r}
 ggplot(ms, aes(norms.lf, LongBet)) +
   geom_point() + 
@@ -603,7 +535,7 @@ ggplot(ms, aes(norms.lf, LongBet)) +
   ggtitle("High Frequency meanings (words)")
 ```
 
-### correlation between norms and length
+* correlation between norms and length
 ```{r}
 # correlation between norms and bets to long word (all)
 cor.test(d$LongBet,d$complexity)
@@ -615,10 +547,9 @@ cor.test(ms$LongBet,ms$complexity)
 bm.partial(ms$LongBet,ms$complexity, ms$log.e.freq  )
 
 summary(lmer(LongBet ~ complexity + log.e.freq + (1|trial) + (1|workerid), d))
-
 ```
 
-### plot by quintiles
+* plot by quintiles
 ```{r}
 #aggregate by quintile
 ms <- aggregate(LongBet  ~ quintile , data=d, mean)
@@ -638,7 +569,7 @@ ggplot(ms, aes(quintile, LongBet)) +
   ggtitle("High Frequency meanings (words)")
 ```
 
-### correlations with quintiles
+* correlations with quintiles
 ```{r}
 # correlation between norms quintiles and bets to long word 
 cor.test(d$quintile, d$LongBet)
@@ -647,8 +578,8 @@ cor.test(d$quintile, d$LongBet)
 cor.test(ms$quintile, ms$LongBet)
 ```
 
-### residual quintiles (controls for frequency)
-### get quintiles
+* residual quintiles (controls for frequency)
++ get quintiles
 ```{r include = FALSE}
 normsC = englishComplexityNorms[is.element(englishComplexityNorms$word, d$engWord),] #get only 100 words
 
@@ -680,7 +611,7 @@ index <- match(d$engWord, qs$all_words)
 d$resid.quintile <- qs$resid.quintile[index]
 ```
 
-###Plot
+* plot
 ```{r}
 #aggregate by quintile
 ms.qr <- aggregate(LongBet  ~ resid.quintile , data=d, mean)
@@ -700,7 +631,7 @@ ggplot(ms.qr, aes(resid.quintile, LongBet)) +
 ggtitle("High Frequency meanings (words)")
 ```
 
-### residual quintiles correlations
+* residual quintiles correlations
 ```{r}
 cor.test(d$resid.quintile, d$LongBet) ### highly correlated
 cor.test(ms.qr$resid.quintile, ms.qr$LongBet) 
@@ -708,91 +639,128 @@ cor.test(ms.qr$resid.quintile, ms.qr$LongBet)
 ***
 ***
 <a name="novelRealObjs"/>
+
 ## (3) Novel real objects
 
 <a name="3a"/>
 ### (A) Norms [Complexity norming task][task30] [RT task][task9]
 
-### Complexity Norms
+#### Complexity Norms
 ```{r , include = FALSE}
 if (processNorms){
   ## Sample #1
   da <- read.csv("data/RefComplex9a.results",sep="\t",header=TRUE)
-  
-  if (removeRepeatSubj) {
-    da = merge(da, dups, by=c("hitid","workerid"))
-    da = da[da$repeatSubj == "unique",]
-    }
-  
   da[,31:92] <- lapply(da[,31:92],as.character)
   da[,31:92] <- lapply(da[,31:92],as.numeric)
   
   # melt
   md <- melt(da,id.vars=c("workerid"),measure.vars=names(da)[grepl("rating",names(da))])
   names(md) <- c("workerid", "rating", "value")
-  
-  # aggregate
-  ms <- aggregate(value ~ rating, md, mean)
-  
+  ms = aggregate(value ~ rating, md, mean)
+
   ## Sample #2
   db <- read.csv("data/RefComplex9b.results",sep="\t",header=TRUE)
-  
-  if (removeRepeatSubj) {
-    db = merge(db, dups, by=c("hitid","workerid"))
-    db = db[db$repeatSubj == "unique",]
-    }
-  
   db[,30:92] <- lapply(db[,30:92],as.character)
   db[,30:92] <- lapply(db[,30:92],as.numeric)
   
   # melt
   mdb <- melt(db,id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
   names(mdb) <- c("workerid", "rating", "value")
+  msb = aggregate(value ~ rating, mdb, mean)
   
-  # aggregate
-  msb <- aggregate(value ~ rating, mdb, mean)
-  
-  ## merge two samples together to get lists for experiments 
+  # merge two samples together to get lists for experiments 
   all_ratings = rbind(md, mdb)
   all_ms = aggregate(value ~ rating, all_ratings, mean)
-  all_ms$ratingNum <- matrix(sapply(str_split(matrix(sapply(str_split(all_ms$rating,"rating"),function(x) {x[2]})),"_"),function(x){x[1]}))
+  all_ms$ratingNum <- matrix(sapply(str_split(matrix(sapply(str_split(all_ms$rating,"rating"),
+                                                            function(x) {x[2]})),"_"),function(x){x[1]}))
   all_ms$ratingNum<- as.numeric(str_replace_all(as.character(all_ms$ratingNum),"\\\"",""))
   all_ms$cil = aggregate(value ~ rating, all_ratings, ci.low)$value
   all_ms$cih = aggregate(value ~ rating, all_ratings, ci.high)$value
   
   all_ms = all_ms[!is.na(all_ms$ratingNum),] # get rid of ball and motherboard
   
+  # add back in ratings for each samples
   all_ms = merge(all_ms, ms, by="rating")
   all_ms = merge(all_ms, msb, by="rating")
-  names(all_ms) = c("rating", "meanRating" , "ratingNum", "cil", "cih" ,"rating_1","rating_2" )
   
+  all_ms$rating <- NULL
+  names(all_ms) = c("meanRating" , "ratingNum", "cil", "cih" ,"rating_1","rating_2" )
+  all_ms <- all_ms[c(2,1,3:6)]
+  
+  # get quintiles
+  q = quantile(all_ms$meanRating, seq(0,1, by=.2))
+  one = all_ms[which(all_ms$meanRating<q[2]), "ratingNum"]
+  two = all_ms[which(all_ms$meanRating>q[2] & all_ms$meanRating<q[3]), "ratingNum"]
+  three = all_ms[which(all_ms$meanRating>q[3] & all_ms$meanRating<q[4]), "ratingNum"]
+  four = all_ms[which(all_ms$meanRating>q[4] & all_ms$meanRating<q[5]), "ratingNum"]
+  five = all_ms[which(all_ms$meanRating>q[5]), "ratingNum"]
+  
+  one # 54 57 19 28 3 59 20 46 44 13 15 29
+  two # 22 6  17 5 34 2 55 9 4 49 37 10
+  three # 12 50 7 8 48 16 1 39 40 56 24 60
+  four # 26 18 11 47 42 30 23 31 51 58 41 45
+  five # 32 43 33 25 21 52 14 53 27 36 38 35
+  
+  all_ms$quintile = ifelse(is.element(all_ms$ratingNum, one), 1, 
+                           ifelse(is.element(all_ms$ratingNum, two), 2,
+                                  ifelse(is.element(all_ms$ratingNum, three), 3,
+                                         ifelse(is.element(all_ms$ratingNum, four), 4,
+                                                ifelse(is.element(all_ms$ratingNum, five), 5,
+                                                       "error")))))
+  all_ms$quintile = as.numeric(all_ms$quintile)
+  
+  # write to csv (use write.table to can exclude headers, so matlab can read for figure)
+  write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
+            row.names=FALSE, col.names=FALSE, sep=",")
+  
+  # write to csv
   write.csv(all_ms, "data/complicatedNormsObjs_BYITEM.csv")
   }
+
 co_norms = read.csv("data/complicatedNormsObjs_BYITEM.csv")
-
 ```
 
-## Get reliability between two samples
+* Get reliability between two samples
 ```{r}
-  cor(co_norms$rating_1, co_norms$rating_2)
+  cor.test(co_norms$rating_1, co_norms$rating_2)
 ```
 
-### Complexity Norms
+* There is one participant who was in both samples. Look at correlation between samples without this participant in Sample #2.
+```{r}
+  ## Sample #2 
+  # melt
+  mdb <- melt(db[db$workerid != 'A1BQEX75BE1AYE',],id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
+  names(mdb) <- c("workerid", "rating", "value")
+  msb = aggregate(value ~ rating, mdb, mean)
+  
+  co_norms_unique_sample = merge( ms, msb, by="rating")
+  co_norms_unique_sample$ratingNum <- as.numeric(matrix(sapply(str_split(matrix(sapply(str_split(co_norms_unique_sample$rating,"rating")
+                                                                                       ,function(x) {x[2]})),"_"),function(x){x[1]})))
+  co_norms_unique_sample = co_norms_unique_sample[!is.na(co_norms_unique_sample$ratingNum),] # get rid of ball and motherboard
+
+  co_norms_unique_sample$rating <- NULL
+  names(co_norms_unique_sample) = c( "rating_1", "rating_2", "ratingNum")
+  cor(co_norms_unique_sample$rating_1, co_norms_unique_sample$rating_2) # nearly identical to original sample
+```
+
+#### RT Norms
 ```{r, include = FALSE}
 if (processNorms){
   raw <- read.csv("data/RefComplex30.results",sep="\t",header=TRUE)
   
-  if (removeRepeatSubj) {
+  if (whichSubjRemove == 'repeatSubj') {
     raw = merge(raw, dups, by=c("hitid","workerid"))
-    raw = raw[raw$repeatSubj == "unique",]
-    }
-  
+    raw = raw[!raw$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      raw = merge(raw, dups, by=c("hitid","workerid"))
+      raw = raw[!raw$withinRepeatSubj,]
+      }
+    
   # look at accuracy, and exclude those below chance
   boxplot(raw$Answer.correct)
   raw = raw[raw$Answer.correct > 30, ]
   
-  #--PREP DATAFRAME--
-  # Accuracy data frame
+  # accuracy dataframe
   n <- names(raw)
   cols = c( n[grepl("test",n)])
   mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
@@ -811,6 +779,13 @@ if (processNorms){
   da$Answer.test_answer = as.factor(da$Answer.test_answer)
   da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
   da$Answer.test_image  = as.factor(da$Answer.test_image)
+  
+  # look at memory performance (correct: CR or hit)
+  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
+  numH = length(which(da$Answer.test_answerEval == "\"H\""))
+
+  correct = (numCR + numH)/ dim(da)[1]
+  correct
   
   # RT dataframe
   n <- names(raw)
@@ -838,35 +813,48 @@ if (processNorms){
   
   #exclude outlier 2 standard deviations above and below mean (in log space)
   d$log.rt = log(d$Answer.train_rt)
-  sd2 = 2*sd(d$log.rt)
   total = dim(d)[1]
-  d = d[ (d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
+  sd2 = 2*sd(d$log.rt)
+  d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
   print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
   hist(d$log.rt)
   
   # aggregate
   ms <- aggregate(log.rt  ~ Answer.train_image, data=d, mean)
-  ms$rt_cil <- aggregate(log.rt  ~ Answer.train_image, data=d, ci.low)$log.rt 
-  ms$rt_cih <- aggregate(log.rt  ~ Answer.train_image, data=d, ci.high)$log.rt 
+  ms$rt_cil <- aggregate(log.rt ~ Answer.train_image, data=d, ci.low)$log.rt 
+  ms$rt_cih <- aggregate(log.rt ~ Answer.train_image, data=d, ci.high)$log.rt 
   
+  ms = ms[ms$Answer.train_image != 61,] # get rid of ball and motherboard
+  ms = ms[ms$Answer.train_image != 62,] 
+
   write.csv(ms, "data/rtNormsObjs_BYITEM.csv")
   }
 
 rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv")
 ```
 
+* correlation between norms
+```{r}
+index <- match(co_norms$ratingNum, rto_norms$Answer.train_image)
+co_norms$log.rt <- rto_norms$log.rt[index]
+cor.test(co_norms$meanRating, rto_norms$log.rt)
+```
+
 <a name="3b"/>
 ### (B) Mapping task (adults) [(Task)][task34]
 
-### read in data and format
+* read in data and format
 ```{r include = FALSE}
 if (doSlow) {
   d <- read.csv("data/RefComplex35.results",sep="\t",header=TRUE)
   
-  if (removeRepeatSubj) {
+  if (whichSubjRemove == 'removeRepeatSubj') {
     d = merge(d, dups, by=c("hitid","workerid"))
-    d = d[d$repeatSubj == "unique",]
-    }
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
   
   # get in long form
   # get trial info
@@ -884,50 +872,51 @@ if (doSlow) {
   md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
   dc = dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
   dc$seq <- NULL
-  write.csv(dc, "data/dc_long.csv")
+  
+  write.csv(dc, "data/RC35_long.csv")
   }
-dc <-  read.csv("data/dc_long.csv")
+
+dc <-  read.csv("data/RC35_long.csv")
 ```
 
-### make everything factors
+* make everything factors
 ```{r include = FALSE}
 dc$criticalComplicated= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalComplicated))
 dc$criticalSimple= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalSimple))
 
 dc$criticalComplicated <- as.factor(dc$criticalComplicated)
-dc$criticalSimple   <- as.factor(dc$criticalSimple)
-dc$langCondition   <- as.factor(dc$langCondition)
-dc$objCondition   <- as.factor(dc$objCondition)
-dc$response   <- as.factor(dc$response)
-dc$responseSide   <- as.factor(dc$responseSide)
-dc$responseValue   <- as.factor(dc$responseValue)
+dc$criticalSimple <- as.factor(dc$criticalSimple)
+dc$langCondition <- as.factor(dc$langCondition)
+dc$objCondition <- as.factor(dc$objCondition)
+dc$response <- as.factor(dc$response)
+dc$responseSide <- as.factor(dc$responseSide)
+dc$responseValue<- as.factor(dc$responseValue)
 dc$word <- as.factor(dc$word)
-dc$trial = as.numeric(dc$trial)
+dc$trial <- as.numeric(dc$trial)
 ```
 
-### merge in norms
+* merge in norms
 ```{r include = FALSE}
 index <- match(dc$criticalSimple, co_norms$ratingNum)
 dc$criticalSimple_c.norms <- co_norms$meanRating[index]
 index <- match(dc$criticalComplicated, co_norms$ratingNum)
 dc$criticalComplicated_c.norms <- co_norms$meanRating[index]
 
-index <- match(dc$criticalSimple,  rto_norms$Answer.train_image)
+index <- match(dc$criticalSimple, rto_norms$Answer.train_image)
 dc$criticalSimple_rt.norms <- rto_norms$log.rt [index]
 index <- match(dc$criticalComplicated, rto_norms$Answer.train_image)
 dc$criticalComplicated_rt.norms <- rto_norms$log.rt [index]
 
 dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
 dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
-dc$l.rt.ratio = log(dc$criticalSimple_rt.norms)/log(dc$criticalComplicated_rt.norms)
 ```
 
-### get effect sizes
+* get effect sizes
 ```{r include = FALSE}
-de <- ddply(dc, .(objCondition), function (d) {d.fc(d)}, .inform = TRUE, .drop = TRUE)
+de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
 ```
 
-### get obj conds
+* get obj conds
 ```{r include = FALSE}
 de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
 de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
@@ -936,45 +925,58 @@ de$cond2<- as.factor(gsub("[[:punct:]]", "", de$cond2))
 de$objRatio = as.numeric(de$cond1)/as.numeric(de$cond2)
 de$l.objRatio <- log(de$objRatio)
 
+de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
 ```
 
-### ratio plots
+* plot
 ```{r}
-ggplot(de, aes(y=effect_size, x=objRatio)) +
-  geom_pointrange(aes(ymax = cill, ymin=ciul))+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  geom_text(aes(objRatio+.03, effect_size, label=objCondition)) +
-  ylab("effect size") +
-  xlab("object ratio") +
-  theme(text = element_text(size=20), plot.title = element_text(size=20)) +
-  ggtitle("Object ratio vs. effect size") +
-  annotate("text", x=.3, y=-.2, col = "red",label=paste("r=",round(cor(de$effect_size, de$objRatio, use = "complete"), 2)))
+# set graphical params
+fs = 25
+rs = 8
 
-ggplot(de, aes(y=effect_size, x=c.Mratio)) +
+# complexity plot
+obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   geom_pointrange(aes(ymax = cill, ymin=ciul),position="dodge")+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  geom_text(aes(c.Mratio+.02, effect_size, label=objCondition), position="dodge") +
-  ylab("effect size") +
-  xlab("object ratio") + 
-  ggtitle("complexity ratio vs. effect size") +
-  theme(text = element_text(size=20), plot.title = element_text(size=20)) +
-  annotate("text", x=.5, y=-.2, col = "red",label=paste("r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)))
+  #geom_text(aes(c.Mratio+.03, effect_size, label=objCondition2), position="dodge") +
+  geom_text(aes(c.Mratio+.04, effect_size, label=objCondition2), position="dodge") +
+  ylab("effect size (Cohen's d)") +
+  xlab("complexity rating ratio") + 
+  #ggtitle("complexity ratio vs. effect size") +
+  scale_x_continuous(limits = c(.25, 1.29)) +
+  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
+  annotate("text", x=1, y=.5, col = "red",label=paste(
+    "r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)), size = rs) +
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) +
+  scale_y_continuous(limits = c(-.33, .66))
 
-ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
+# RT ratio plot
+obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   geom_pointrange( aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  geom_text(aes(rt.Mratio+.0008, effect_size, label=objCondition)) +
-  ylab("effect size") +
-  xlab("RT ratio") +
-   ggtitle("RT ratio vs. effect size") +
-  theme(text = element_text(size=20), plot.title = element_text(size=20)) +
-  annotate("text", x=.985, y=-.2, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)))
+  #geom_text(aes(rt.Mratio+.0008, effect_size, label=objCondition2)) +
+  geom_text(aes(rt.Mratio+.002, effect_size, label=objCondition2)) +
+  ylab("effect size (Cohen's d)") +
+  xlab("reaction time ratio") +
+  scale_x_continuous(limits = c(.949, 1.005)) +
+  #ggtitle("RT ratio vs. effect size") +
+  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
+  annotate("text", x=1, y=.5, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)), size = rs) +  
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) +
+  scale_y_continuous(limits = c(-.33, .66))
+
+if (savePlots) {pdf("figure/realobjs.pdf", height = 6, width = 12)}
+multiplot(obj_c_plot, obj_rt_plot, cols = 2)
+if (savePlots) {dev.off()}
 ```
 
-### correlations between effect size at complexity conditions
+* correlations between effect size at complexity conditions
 ```{r}
 cor.test(de$objRatio, de$effect_size)
 cor.test(de$c.Mratio, de$effect_size)
@@ -986,16 +988,19 @@ cor.test(de$rt.Mratio, de$effect_size)
 
 <a name="3d"/>
 ### (D) Production task (labels + desecriptions) 
-### (1) Labels [(Task)][task27]
-### read in data and prep data frame
+#### (1) Labels [(Task)][task27]
+##### read in data and prep data frame
 ```{r include = FALSE}
 d <- read.csv("data/RefComplex27.results",sep="\t",header=TRUE)
 
-if (removeRepeatSubj) {
-  d = merge(d, dups, by=c("hitid","workerid"))
-  d = d[d$repeatSubj == "unique",]
-  }
-
+if (whichSubjRemove == 'repeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
 n <- names(d)
 d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
 d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
@@ -1041,17 +1046,15 @@ md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
 md$log.length <- log(md$length) 
 md$log.trial <- log(md$trial)
 md <- md[md$numWords == 1,]  #remove multi word responses
-
 ```
 
-### relationship between condition and description length
+* relationship between condition and description length
 ```{r}
 t.test(md[md$condition == '"complex"',"log.length"],md[md$condition == '"simple"',"log.length"],paired = TRUE)
 summary(lmer(log.length~condition + (1+trial|workerid), md))
-
 ```
 
-### relationship with complicated norms
+* relationship with complicated norms
 ```{r}
 index <- match(md$picture, co_norms$ratingNum)
 md$c.norms <- co_norms$meanRating[index]
@@ -1068,10 +1071,12 @@ ggplot(ms, aes(c.norms,log.length)) +
   theme_bw() +
   xlab("Object Complexity Norms") +
   ylab("Log Word Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) 
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
+  annotate("text", x=.75, y=1.6, color = "red", size = 8,
+    label=paste("r=",round(cor(md$log.length,md$c.norms), 2)))
 ```
 
-### relationship with RT norms
+* relationship with RT norms
 ```{r}
 index <- match(md$picture, rto_norms$Answer.train_image)
 md$rt.norms <- rto_norms$log.rt[index]
@@ -1088,20 +1093,25 @@ ggplot(ms, aes(rt.norms,log.length)) +
   theme_bw() +
   xlab("Object Complexity Norms") +
   ylab("Log Word Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) 
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+
+  annotate("text", x=.75, y=1.6, color = "red", size = 8,
+    label=paste("r=",round(cor(md$log.length,md$rt.norms), 2)))
 ```
 
-### (2) Descriptions [(Task)][task25]
-### read in data and prep data frame
-```{r include = FALSE}
+#### (2) Descriptions [(Task)][task25]
 
+* read in data and prep data frame
+```{r include = FALSE}
 d <- read.csv("data/RefComplex25.results",sep="\t",header=TRUE)
 
-if (removeRepeatSubj) {
-  d = merge(d, dups, by=c("hitid","workerid"))
-  d = d[d$repeatSubj == "unique",]
-  }
-
+if (whichSubjRemove == 'repeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
 n <- names(d)
 #d[,n[grepl("pic",n)]] = as.factor(as.character(d[,n[grepl("pic",n)]])
 d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
@@ -1118,7 +1128,6 @@ d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
 cols = c( n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
 md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
 md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
-
 
 md1 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("pic",n)],na.rm=TRUE)
 md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
@@ -1154,7 +1163,7 @@ md$length_c= nchar(as.character(md$description_clean))
 md$log.length_c = log(md$length_c)
 ```
 
-### relationship between condition and description length
+* relationship between condition and description length
 ```{r}
 #summary(lmer(length_c~condition + (1|workerid), md))
 #summary(lmer(length_c~condition + trial + (1+trial|workerid), md))
@@ -1166,7 +1175,7 @@ summary(lmer(log.length_c~condition + trial + (1+trial|workerid), md))
 ggplot(md, aes(x=log.length_c, fill=condition)) + geom_density(alpha = 0.2)
 ```
 
-### correlations with complexity norms
+* correlations with complexity norms
 ```{r}
 index <- match(md$picture, co_norms$ratingNum)
 md$c.norms <- co_norms$meanRating[index]
@@ -1176,9 +1185,9 @@ summary(lmer(log.length_c~c.norms + trial + (1|workerid), md))
 # complexity norms predict length
 
 cor.test(md$log.length_c,md$c.norms)
-
 ```
-### complexity norms plot
+
+* complexity norms plot
 ```{r}
 ms <- aggregate(log.length_c ~ c.norms + picture, data=md, mean)
 ms$cih <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.high)$log.length_c
@@ -1194,7 +1203,7 @@ ggplot(ms, aes(c.norms,log.length_c)) +
   theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) 
 ```
 
-### correlations with RT norms
+* correlations with RT norms
 ```{r}
 index <- match(md$picture, rto_norms$Answer.train_image)
 md$rt.norms <- rto_norms$log.rt[index]
@@ -1207,7 +1216,7 @@ cor.test(md$log.length_c,md$rt.norms)
 
 ```
 
-### rt norms plot
+* rt norms plot
 ```{r}
 ms <- aggregate(log.length_c ~ rt.norms + picture, data=md, mean)
 ms$cil <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.low)$log.length_c
@@ -1228,23 +1237,18 @@ ggplot(ms, aes(rt.norms,log.length_c)) +
 ***
 ***
 <a name="geons"/>
+
 ## (4) Geons
 
 <a name="4a"/>
 ### (A) Norms [(Complexity Task)][task34] [(RT task)][task35]
-### (1) Complexity Norms 
-
+#### (1) Complexity Norms 
 ```{r, include = FALSE}
 if (processNorms) {
-  #Read in data
+  # read in data
   d <- read.csv("data/RefComplex34.results",sep="\t",header=TRUE)
   
-  if (removeRepeatSubj) {
-    d = merge(d, dups, by=c("hitid","workerid"))
-    d = d[d$repeatSubj == "unique",]
-  }
-  
-  #Melt
+  # melt
   md <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("obj",names(d))])
   md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
   md$obj <- unlist(matrix(lapply(str_split(md$value,"j"),function(x) {x[2]})))
@@ -1252,49 +1256,53 @@ if (processNorms) {
   md$complexityLevel <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[1]})))
   md$objID <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[2]})))
   md$value <- NULL; md$variable <- NULL
-  control = md[(md$trial == 0 | md$trial == 1),] # save ball and circuit to add back in later
   md = md[(md$trial != 0 & md$trial != 1),] # get rid of ball and circuit
   
-  #get rating info
+  # get rating info
   mdr <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("rating",names(d))])
   mdr$trial <- matrix(lapply(str_split(mdr$variable,"_"),function(x) {x[2]}))
   mdr$variable <- NULL
   
-  #merge together based on trial and workerid
+  # merge together based on trial and workerid
   m = merge(md,mdr,by=c("workerid","trial"))
   m$value <- as.numeric(as.character(m$value))
   
-  #Get norms by objects
-  # by object
+  # get norms by objects
   ms_all <- aggregate(value ~ obj, data=m, mean)
   ms_all$cih <- aggregate(value ~ obj, data=m, ci.high)$value
   ms_all$cil <- aggregate(value ~ obj, data=m, ci.low)$value
   
-  names(ms_all)[1] = "meanRating"
+  names(ms_all)[2] = "meanRating"
   
+  # save complexity by item
   write.csv(ms_all, "data/complicatedNormsGeons_BYITEM.csv")
   } 
+
+cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")
 ```
 
-### (2) RT Norms 
-
+#### (2) RT Norms 
 ```{r, include = FALSE}
 if (processNorms) {
-  
-  #Read in data
+  # read in data
   raw <- read.csv("data/RefComplex37.results",sep="\t",header=TRUE)
   
-  if (removeRepeatSubj) {
+  # remove repeat subjects?
+  if (whichSubjRemove == 'removeRepeatSubj') {
     raw = merge(raw, dups, by=c("hitid","workerid"))
-    raw = raw[raw$repeatSubj == "unique",]
-  }
+    raw = raw[!raw$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      raw = merge(raw, dups, by=c("hitid","workerid"))
+      raw = raw[!raw$withinRepeatSubj,]
+      }
   
-  #Look at accuracy, and exclude those below chance
+  # look at accuracy, and exclude those below chance
   boxplot(raw$Answer.correct)
   raw = raw[raw$Answer.correct > 20, ]
   
-  #--PREP DATAFRAME--
-  #Accuracy data frame
+  # prep data frame
+  # accuracy data frame
+  # melt
   n <- names(raw)
   cols = c( n[grepl("test",n)])
   mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
@@ -1314,14 +1322,21 @@ if (processNorms) {
   da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
   da$Answer.test_image  = as.factor(da$Answer.test_image)
   
-  #get obj condition variable
+  # look at memory performance (correct: CR or hit)
+  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
+  numH = length(which(da$Answer.test_answerEval == "\"H\""))
+
+  correct = (numCR + numH)/ dim(da)[1]
+  correct
+  
+  # get obj condition variable
   da$test_image2 <- as.character(matrix(lapply(str_split(da$Answer.test_image,"j"), function(x) {x[2]})))
-  da$objCondition <- as.factor(as.character(
-    matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[1]}))))
+  da$objCondition <- as.factor(as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[1]}))))
   da$objItem <- as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[2]})))
   da$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", da$objItem)))
   
-  #RT dataframe
+  # RT dataframe
+  # melt
   n <- names(raw)
   cols = c(n[grepl("train", n)])
   cols = cols[1:40]
@@ -1344,7 +1359,7 @@ if (processNorms) {
   
   d$Answer.train_rt = as.numeric(d$Answer.train_rt)
   
-  #Exclude outlier 2 standard deviations above and below mean (in log space)
+  # exclude outlier 2 standard deviations above and below mean (in log space)
   d$log.rt = log(d$Answer.train_rt)
   total = dim(d)[1]
   sd2 = 2*sd(d$log.rt)
@@ -1352,21 +1367,23 @@ if (processNorms) {
   print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
   hist(d$log.rt)
   
-  #Get obj condition
-  d = d[d$trial > 1,] #exclude anchors (not interesting because order not randomized)
+  # get obj condition
+  d = d[d$trial > 1,] # exclude anchors (not interesting because order not randomized)
   d$train_image2 <- as.character(matrix(lapply(str_split(d$Answer.train_image,"j"), function(x) {x[2]})))
   d$objCondition <- as.factor(as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[1]}))))
   d$objItem <- as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[2]})))
   d$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", d$objItem)))
   d$obj <- paste("\"", d$objCondition, "-" ,d$objItem,"\"", sep = "" )
   
-  #rt by condition
+  # RT by condition
   ms <- aggregate(log.rt  ~ objCondition, data=d, mean)
   ms$n <- aggregate(log.rt  ~ objCondition, data=d, n.unique)$workerid
   ms$cih <- aggregate(log.rt  ~ objCondition, data=d, ci.high)$log.rt
   ms$cil <- aggregate(log.rt  ~ objCondition, data=d, ci.low)$log.rt
   
   ms$objCondition  = as.numeric(ms$objCondition)
+  
+  # plot
   ggplot(ms, aes(y=log.rt, x=as.numeric(objCondition))) +
     geom_errorbar(data=ms, mapping=aes(x=objCondition, ymax = log.rt+cih, 
                                        ymin=log.rt-cil), width=0.2, size=1, color="black") + 
@@ -1375,30 +1392,35 @@ if (processNorms) {
     xlab("Object Condition") +
     ylab("Log RT (ms)") 
   
-  #rt by item
+  # rt by item
   ms_all <- aggregate(log.rt  ~ obj, data=d, mean)
   ms_all$cih <- aggregate(log.rt ~ obj, data=d, ci.high)$log.rt
   ms_all$cil <- aggregate(log.rt ~ obj, data=d, ci.low)$log.rt
   
-  #Save RT by item
+  # save RT by item
   write.csv(ms_all, "data/rtNormsGeons_BYITEM.csv")
-    } 
+  } 
+
+rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv")
 ```
 
 <a name="4b"/> 
 ### (B) Mapping task  [(Task)][task37] 
-
-```{r}
-#--READ IN DATA-- 
+```{r, include = FALSE}
+# read in data
 d <- read.csv("data/RefComplex38.results",sep="\t",header=TRUE)
- 
-if (removeRepeatSubj) {
-    d = merge(d, dups, by=c("hitid","workerid"))
-    d = d[d$repeatSubj == "unique",]
-  }
 
-# get in long form
-md <- melt(d,id.vars=c("workerid", "assignmentaccepttime"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+# remove repeat subjects?
+if (whichSubjRemove == 'removeRepeatSubj') {
+  d = merge(d, dups, by=c("hitid","workerid"))
+  d = d[!d$repeatSubj,]
+  } else if (whichSubjRemove == 'withinRepeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$withinRepeatSubj,]
+    }
+
+# melt
+md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
 md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
 md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
 md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
@@ -1408,44 +1430,47 @@ md$trial <- as.factor(as.character(md$trial))
 md$value <- as.factor(as.character(md$value))
 md$workerid <- as.factor(as.character(md$workerid))
 
-md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
-dc1 = dcast(workerid + assignmentaccepttime + seq + trial ~ variable, data = md, value.var = "value")
-dc1$seq <- NULL
+md$seq <- with(md, ave(value, workerid, variable, trial, FUN = seq_along))
+dc <- dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
+dc$seq <- NULL
 
-#make everything factors
+# make everything factors
 dc$criticalComplicated <- as.factor(dc$criticalComplicated)
-dc$criticalSimple   <- as.factor(dc$criticalSimple)
-dc$langCondition   <- as.factor(dc$langCondition)
-dc$objCondition   <- as.factor(dc$objCondition)
-dc$response   <- as.factor(dc$response)
-dc$responseSide   <- as.factor(dc$responseSide)
-dc$responseValue   <- as.factor(dc$responseValue)
+dc$criticalSimple <- as.factor(dc$criticalSimple)
+dc$langCondition <- as.factor(dc$langCondition)
+dc$objCondition <- as.factor(dc$objCondition)
+dc$response <- as.factor(dc$response)
+dc$responseSide <- as.factor(dc$responseSide)
+dc$responseValue  <- as.factor(dc$responseValue)
 dc$word <- as.factor(dc$word)
 
+# remove quotes from norms
+cg_norms$obj = as.factor(paste("\"", cg_norms$obj, "\"", sep = ""))
+
 # merge in norms
-#complicated
-cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")
-
-cg_norms$obj = as.character(paste("\"", cg_norms$obj, "\"", sep = ""))
+# complicated
 index <- match(dc$criticalSimple, cg_norms$obj)
-dc$criticalSimple_c.norms <- cg_norms$mean_rating[index]
+dc$criticalSimple_c.norms <- cg_norms$meanRating[index]
 index <- match(dc$criticalComplicated,cg_norms$obj)
-dc$criticalComplicated_c.norms <- cg_norms$value[index]
+dc$criticalComplicated_c.norms <- cg_norms$meanRating[index]
 
-#rt
-rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv")
+# rt
 index <- match(dc$criticalSimple, rg_norms$obj)
 dc$criticalSimple_rt.norms <- rg_norms$log.rt [index]
 index <- match(dc$criticalComplicated, rg_norms$obj)
-dc$criticalComplicated_rt.norms <- rg_normslog.rt [index]
+dc$criticalComplicated_rt.norms <- rg_norms$log.rt [index]
 
 dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
 dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
+```
 
-#get effect sizes
-de <- ddply(dc, .(objCondition), function (d) {d.fc(d)}, .inform = TRUE, .drop = TRUE)
+* get effect sizes
+```{r include = FALSE}
+de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
+```
 
-#get obj conds
+* get obj conds
+```{r  include = FALSE}
 de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
 de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
 de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
@@ -1453,33 +1478,52 @@ de$cond2<- as.numeric(gsub("[[:punct:]]", "", de$cond2))
 de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
 ```
 
-# Plot
+* plot
 ```{r}
-ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
-  geom_pointrange( aes(ymax = cill, ymin=ciul))+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
-  ylab("effect size (cohen's d)") +
-  xlab("RT ratio") + 
-  theme(text = element_text(size=25)) +  
-  scale_y_continuous(limits = c(-.33, .66)) +
-  annotate("text", x=.997, y=.55, color = "red", size = 8,
-   label=paste("r=",round(cor(de$effect_size, de$rt.Mratio), 2)))
+# set graphical params
+fs = 25
+rs = 8
 
-ggplot(de, aes(y=effect_size, x=c.Mratio)) +
+# complexity ratio
+geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   geom_pointrange( aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
   geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
-  ylab("effect size (cohen's d)") +
+  ylab("effect size (Cohen's d)") +
   xlab("complexity rating ratio") + 
-  theme(text = element_text(size=25))  +
+  theme(text = element_text(size=fs))  +
   scale_y_continuous(limits = c(-.33, .66)) +
-  annotate("text", x=1.15, y=.55, color = "red", size = 8,
-    label=paste("r=",round(cor(de$effect_size, de$c.Mratio), 2)))
+  scale_x_continuous(limits = c(.25, 1.29)) +
+  annotate("text", x=1.15, y=.5, color = "red", size = rs,
+           label=paste("r=",round(cor(de$effect_size, de$c.Mratio), 2))) +
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) 
+
+# rt ratio
+geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
+  geom_pointrange( aes(ymax = cill, ymin=ciul))+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
+  ylab("effect size (Cohen's d)") +
+  xlab("reaction time ratio") + 
+  theme(text = element_text(size=fs)) +  
+  scale_y_continuous(limits = c(-.33, .66)) +
+  scale_x_continuous(limits = c(.949, 1.005)) +
+  annotate("text", x=.997, y=.5, color = "red", size = rs,
+           label=paste("r=",round(cor(de$effect_size, de$rt.Mratio), 2))) +
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) 
+
+if (savePlots) {pdf("figure/geon.pdf", height = 6, width = 12)}
+multiplot(geon_c_plot, geon_rt_plot, cols = 2)
+if (savePlots) {dev.off()}
 ```
 
+* correlations between norms and effect sizes
 ```{r}
 cor.test(de$rt.Mratio, de$effect_size)
 cor.test(de$c.Mratio, de$effect_size)

@@ -2,6 +2,7 @@
 
 \documentclass[12pt]{article}
 
+
 % Users of the {thebibliography} environment or BibTeX should use the
 % scicite.sty package, downloadable from *Science* at
 % www.sciencemag.org/about/authors/prep/TeX_help/ .
@@ -14,6 +15,7 @@
 % following line.
 
 \usepackage{times}
+\usepackage{graphicx}
 
 % The preamble here sets up a lot of new/revised commands and
 % environments.  It's annoying, but please do *not* try to strip these
@@ -23,7 +25,6 @@
 
 
 % The following parameters seem to provide a reasonable page setup.
-
 \topmargin 0.0cm
 \oddsidemargin 0.2cm
 \textwidth 16cm 
@@ -78,7 +79,7 @@
 \normalsize{Psychology Department, Stanford University,}\\
 \normalsize{450 Serra Mall, Stanford, CA 94305, USA}\\
 \\
-\normalsize{$^\ast$To whom correspondence should be addressed; E-mail:  mll@stanford.edu.}
+\normalsize{$^\ast$To whom correspondence should be addressed; E-mail: mll@stanford.edu.}
 }
 
 
@@ -89,36 +90,65 @@
 
 
 %%%%%%%%%%%%%%%%% END OF PREAMBLE %%%%%%%%%%%%%%%%
-
-
-
 \begin{document} 
 
 % Double-space the manuscript.
-
 \baselineskip24pt
 
 % Make the title.
-
 \maketitle 
-
-
 
 % Place your abstract within the special {sciabstract} environment.
 
 \begin{sciabstract}
- Are the forms of words systematically related to their meaning? The “arbitrariness of the sign” has long been a foundational part of our understanding of human language.\textsuperscript{1,2} Theories of communication predict a relationship between form and meaning, however: longer descriptions should convey more complex meanings.\textsuperscript{3,4}  Here we show that the lexicons of human languages reflect this relationship between linguistic and cognitive complexity. We asked participants to rate the conceptual complexity of word meanings and found that their judgements correlated highly with word length across 66 languages, even controlling for frequency and concreteness. This relationship is productively encoded in the minds of speakers, as well: Adults and children both mapped longer words to more complex meanings, and more complex meanings to longer words, in comprehension and production tasks and across a wide range of stimuli. In addition, explicit judgments of complexity were highly correlated with an implicit measure of study time in a memory task, suggesting that complexity is directly related to basic cognitive processes. These results point to a general regularity in the design of lexicons and suggests the importance of cognitive constraints on language evolution.\textsuperscript{5,6} 
+ Are the forms of words systematically related to their meaning? The “arbitrariness of the sign” has long been a foundational part of our understanding of human language\cite{saussure, hockett1960}. Theories of communication predict a relationship between form and meaning, however: longer descriptions should convey more complex meanings\cite{horn1984,jaeger2006}. Here we show that the lexicons of human languages reflect this relationship between linguistic and cognitive complexity. We asked participants to rate the conceptual complexity of word meanings and found that their judgements correlated highly with word length across XX languages, even controlling for frequency and concreteness. This relationship is productively encoded in the minds of speakers, as well: Adults and children both mapped longer words to more complex meanings, and more complex meanings to longer words, in comprehension and production tasks and across a wide range of stimuli. In addition, explicit judgments of complexity were highly correlated with an implicit measure of study time in a memory task, suggesting that complexity is directly related to basic cognitive processes. These results point to a general regularity in the design of lexicons and suggests the importance of cognitive constraints on language evolution\cite{christiansen2008,lieberman2007}.
  \end{sciabstract}
 
 
 %Letters no more than 4 pages, of Nature. A typical Letter to Nature contains about 1,500 words of text (excluding the first paragraph of Letters, figure legends, reference list and the methods section if applicable) and four small display items (figures and/or tables) with brief legends. A composite figure (with several panels) usually needs to take about half a page, equivalent to about 600 words, in order for all the elements to be visible (see section 5.9 for instructions on sizing figures).
 
 % intro
-Human languages universally contain sequences of sounds --- words --- that are associated with particular meanings. A foundational part of our understanding of human language is that these associations are arbitrary. This assumption is supported by a superficial survey of word forms across languages: different languages use different words to refer to similar meanings.  However, theories of communication predict a systematicity in these mappings. They predict that longer words should be associated with more complex meanings. Here we address whether this type of systematicity is present in language. We first examine lexicons of XX languages. We then explore whether this systematicity is productively encoded in the minds of speakers. 
+Human languages universally contain sequences of sounds --- words --- that are associated with particular meanings. A foundational part of our understanding of human language is that these associations are arbitrary \cite{saussure,hocket1960}. This assumption is supported by a superficial survey of word forms across languages: different languages use different words to refer to similar meanings.  However, several theories of communication predict a systematicity in these mappings\cite{horn1984,jaeger2006}.  They predict that longer utterances should be associated with more complex meanings (a complexity bias). Here we address whether this bias is present in language at the level of words. We first examine whether speakers have a lexical complexity bias that is productive by asking how speakers interpret novel words. Given evidence for a productive complexity bias in words, we then ask whether this systematicity is encoded in the lexicon of XX languages. 
 
-% actual language
-% real objects
-% geons
+%communicative pressures should lead to a complexity bias that operates at the moment of language interpretation.
+
+%Uniform information theory predicts that  speakers should try to maintain a constant rate of information transfer across the speech stream. A straight forward consequence of this prediction is that speakers should try to use longer linguistic forms to refer to less predictable meanings.
+%More specifically, they predict that com- municative pressures should lead to a complexity bias that op- erates at the moment of language interpretation.
+
+%Uniform information theory predicts that  speakers should try to maintain a constant rate of information transfer across the speech stream. A straight forward consequence of this prediction is that speakers should try to use longer linguistic forms to refer to less predictable meanings. 
+
+In Study 1, we asked whether speakers show a bias to map a relatively long novel word onto a relatively more complex referent. 
+Participants were presented with 
+
+From an information theoretic perspective, 
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[scale = .5]{figs/geons_cropped.png}
+\end{center}
+\end{figure}
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[scale = .5]{figs/real_objs_cropped.png}
+\end{center}
+\end{figure}
+
+
+
+
+In Study 1, we asked whether speakers  norms + mapping
+
+In Study 2, norms + mapping + production (a single sentence)
+
+In Study , we did complexity norms. Highly correlated.
+
+In Study 4, cross linguistic. 
+
+Figs. 
+(1) six panels with sorted display of images on left (geons + objects) and effect size plots on right (complexity + RT)
+(2) bar graph of correlations (study 4) (with parial correlations, mono morphemic, and open class only)
+
 % conclusion
 
 \paragraph*{Tables}
@@ -130,7 +160,7 @@ Human languages universally contain sequences of sounds --- words --- that are a
 \paragraph*{Author Information}
 
 
-\bibliography{scibib}
+\bibliography{biblibrary}
 
 \bibliographystyle{Science}
 
@@ -162,23 +192,6 @@ Human languages universally contain sequences of sounds --- words --- that are a
 
 
 \end{document}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,0 +1,28 @@
+## Results when remove subjects who completed earlier experiment within experiment class
+
+- That is, in the real object experiments, remove subjects who rated objects for complexity in RT, mapping, and production tasks
+- And, in the geon experiments, remove subjects who rated geons for complexity in RT and mapping tasks
+
+REAL OBJECTS
+(1) RT task
+N_removed: 16 (of 500)
+
+(2) Mapping task
+N_removed: 27 (of 1500)
+correlation between RT and effect size: .7 (p<.01)
+correlation between complexity and effect size: .68 (p<.01)
+
+(3) Production task
+(a) labels: N_removed: 2 (of 60), t=-4.17
+(b) descriptions: N_removed: 7 (of 60), t=-2.7
+
+
+GEONS
+(1) RT task
+N_removed: 15 (of 250)
+
+(2) Mapping task
+N_removed: 21 (of 750)
+correlation between RT and effect size: .79 (p<.01)
+correlation between complexity and effect size: .84 p<.01)
+
