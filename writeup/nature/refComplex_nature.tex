@@ -16,6 +16,8 @@
 
 \usepackage{times}
 \usepackage{graphicx}
+\usepackage{caption} % removes colon after empty caption
+
 
 % The preamble here sets up a lot of new/revised commands and
 % environments.  It's annoying, but please do *not* try to strip these
@@ -47,7 +49,7 @@
 % The following lines set up an environment for the last note in the
 % reference list, which commonly includes acknowledgments of funding,
 % help, etc.  It's intended for users of BibTeX or the {thebibliography}
-% environment.  Users who are hand-coding their references at the end
+% environment.  Users who ae hand-coding their references at the end
 % using a list environment such as {enumerate} can simply add another
 % item at the end, and it will be numbered automatically.
 
@@ -108,51 +110,69 @@
 %Letters no more than 4 pages, of Nature. A typical Letter to Nature contains about 1,500 words of text (excluding the first paragraph of Letters, figure legends, reference list and the methods section if applicable) and four small display items (figures and/or tables) with brief legends. A composite figure (with several panels) usually needs to take about half a page, equivalent to about 600 words, in order for all the elements to be visible (see section 5.9 for instructions on sizing figures).
 
 % intro
-Human languages universally contain sequences of sounds --- words --- that are associated with particular meanings. A foundational part of our understanding of human language is that these associations are arbitrary \cite{saussure,hocket1960}. This assumption is supported by a superficial survey of word forms across languages: different languages use different words to refer to similar meanings.  However, several theories of communication predict a systematicity in these mappings\cite{horn1984,jaeger2006}.  They predict that longer utterances should be associated with more complex meanings (a complexity bias). Here we address whether this bias is present in language at the level of words. We first examine whether speakers have a lexical complexity bias that is productive by asking how speakers interpret novel words. Given evidence for a productive complexity bias in words, we then ask whether this systematicity is encoded in the lexicon of XX languages. 
+Human languages universally contain sequences of sounds --- words --- that are associated with particular meanings. A foundational part of our understanding of human language is that these associations are arbitrary \cite{saussure,hockett1960}. This assumption is supported by a superficial survey of word forms across languages: different languages use different words to refer to similar meanings.  However, several theories of communication predict a systematicity in these mappings\cite{horn1984,jaeger2006}. They predict that longer utterances should be associated with more complex meanings (a complexity bias). Here we address whether this bias is present in language at the level of words. We first examine whether speakers have a lexical complexity bias that is productive by asking how speakers interpret novel words. Given evidence for a productive complexity bias in words, we then ask whether this systematicity is encoded in the lexicon of XX languages. 
+
+[a paragraph here about how theories of communication predict a complexity bias?]
 
 %communicative pressures should lead to a complexity bias that operates at the moment of language interpretation.
 
 %Uniform information theory predicts that  speakers should try to maintain a constant rate of information transfer across the speech stream. A straight forward consequence of this prediction is that speakers should try to use longer linguistic forms to refer to less predictable meanings.
-%More specifically, they predict that com- municative pressures should lead to a complexity bias that op- erates at the moment of language interpretation.
+%More specifically, they predict that communicative pressures should lead to a complexity bias that op- erates at the moment of language interpretation.
 
 %Uniform information theory predicts that  speakers should try to maintain a constant rate of information transfer across the speech stream. A straight forward consequence of this prediction is that speakers should try to use longer linguistic forms to refer to less predictable meanings. 
-
-In Study 1, we asked whether speakers show a bias to map a relatively long novel word onto a relatively more complex referent. 
-Participants were presented with 
-
-From an information theoretic perspective, 
 
 \begin{figure}[t]
 \begin{center}
 \includegraphics[scale = .5]{figs/geons_cropped.png}
+\caption{}
 \end{center}
+\label{fig:geons}
 \end{figure}
 
 \begin{figure}[t]
 \begin{center}
 \includegraphics[scale = .5]{figs/real_objs_cropped.png}
+\caption{}
 \end{center}
+\label{fig:real_objs}
 \end{figure}
 
 
+%We began by asking how speakers interpreted the meaning of novel words of varying lengths
+We began by asking whether speakers were biased to interpret a long novel word as being more likely to refer to a more complex novel referent. We presented 750 adult English speakers with a novel word and two possible alternative referents. Participants were asked to select from the two alternatives the intended referent of the word. The possible referents were novel artificial objects of varying complexity. We manipulated complexity by varying the number of parts the object  contained (1-5 parts;  Fig.\ 1a). This manipulation was highly correlated with speakers' explicit judgements of object complexity ($r = .93$, $p<.01$). We tested every unique combination of complexity of the object alternatives (1 vs.\ 2 parts, 1 vs.\ 3 parts, 1 vs.\ 4 parts, etc.). Word length was manipulated across trials to have 2 or 4 syllables. Each participant completed 8 trials total, with four short words and four long words.
+
+For each object complexity condition, we calculated the relative bias between the short and long word conditions  to select the more complex referent (effect size). Figure 1b shows the effect size for each complexity condition plotted as a function of the ratio of the explicit complexity judgments of the object alternatives. Effect size and complexity judgment ratio were highly negatively correlated ($r = .87$, $p<.01$), suggesting that participants were more likely to select the more complex referent when they were presented with a long word compared to a short word. Furthermore, this judgement was sensitive to the relative complexity of the two alternatives: the complexity bias was larger when there was a larger discrepancy in  complexity between the two referent alternatives.
+
+Next we asked whether this bias extended to more naturalistic objects. We recruited 60 participants to rate the complexity of 60 novel, real objects. In a second sample of 60 participants, this judgement had a test-retest reliability of\  $.93$. We divided the objects into quintiles based on these complexity ratings (Fig.\ 2a), and used these as stimuli in a reference task identical in design to that of the artificial objects. As with the artificial objects,  effect size was highly negatively correlated with the complexity judgment ratio between the referent alternatives ($N=1500$; $r = .70$, $p<.01$, Fig. 2b). We also found the same bias in language production: participants were more likely to produce a longer novel label or a longer description of objects that were rated as more complex.
+
+These experiments suggest that speakers' explicit complexity judgements  are related to the length of novel words. We reasoned that if complexity is related to a basic cognitive process, we should be able to measure the complexity of stimuli in an implicit task. In particular, we predicted that a stimulus that contains more information should take more time to process \cite{alvarez2004capacity}. To test this prediction, we  measured participants' reaction time to a stimulus in a memory task. Participants were told they would be presented with some pictures of objects, and then their memory for those objects would be tested. In the training phase, each participant viewed half of the objects in the stimulus set one at a time (20 for the artificial objects and 30 for the novel real objects). In the testing phase, participants were asked to indicate whether each object was old or new for each object in the stimulus set (40 for the artificial objects and 60 for the novel real objects). Critically, the training phase was self-paced, such that participants were allowed to study each object for as much time as they wanted. We recruited 250 participants to complete the task with the artificial objects and 500 participants to complete the task with the novel real objects.
+
+We used the mean study time for each object as a measure of the complexity of the object. This measure was highly correlated with the explicit complexity norms for both the artificial objects ($r = .89$, $p<.01$) and the novel real objects ($r = .54$, $p<.01$). As for the complexity judgements, we calculated the ratio in reaction time between the two object alternatives for each reference condition. The reaction time ratio was negatively correlated with effect size both for the artificial objects ($r = .82$, $p<.01$; Fig 1c) and the novel real objects ($r = .71$, $p<.01$; Fig 2c), suggesting that the reference judgement is supported by a basic cognitive process related to the complexity of the stimulus.
+
+These experiments point to a productive complexity bias in language: Words that are longer tend to be associated with meanings that are more complex in terms of both explicit and implicit judgements. Given the presence of a productive complexity bias, we predicted that this bias might also be encoded in the structure of natural languages. We asked XX participants to rate the complexity of the meaning of 499 English words. Each participant rated the complexity of the meaning of a random subset of 30 words using a 7-point Likert scale. These judgements were highly correlated with word length, in terms of syllables ($r = XX$, $p<.01$), phonemes ($r = XX$, $p<.01$), and morphemes ($r = XX$, $p<.01$) . This relationship also held for the subset of mono-morphemic words in our sample (n=xxx; syllables: $r =XX$, $p<.01$; phonemes: $r = XX$, $p<.01$), and  for the subset of open class words in our sample (n=xxx; syllables: $r =XX$, $p<.01$; phonemes: $r = XX$, $p<.01$).
+
+If the complexity bias relies on a universal cognitive process, this bias should generalize to the lexicons of other languages beyond English. Thus we examined this bias in XX additional languages, using Google Translate to translate our set of 499 words.  Native speakers checked the accuracy of these translations for XX of the XX language, and found and accuracy of XX within this sample. 
+
+We found... (Fig.\ 3). 
+
+Finally, we examined whether the lengths of real words are related to the complexity of known meanings measured in a reaction time task.
+
+[some sort of brief conclusion]
 
 
-In Study 1, we asked whether speakers  norms + mapping
+%Figs. 
+%(1) six panels with sorted display of images on left (geons + objects) and effect size plots on right (complexity + RT)
+%(2) bar graph of correlations (study 4) (with parial correlations, mono morphemic, and open class only)
 
-In Study 2, norms + mapping + production (a single sentence)
 
-In Study , we did complexity norms. Highly correlated.
-
-In Study 4, cross linguistic. 
-
-Figs. 
-(1) six panels with sorted display of images on left (geons + objects) and effect size plots on right (complexity + RT)
-(2) bar graph of correlations (study 4) (with parial correlations, mono morphemic, and open class only)
-
-% conclusion
-
-\paragraph*{Tables}
+%\paragraph*{Tables}
 \paragraph*{Figure Legends}
+
+Figure 1: 
+
+Figure 2: 
+
+Figure 3:
 \paragraph*{Methods}
 \paragraph*{References}
 \paragraph*{Acknowledgements}
@@ -170,8 +190,6 @@ Figs.
 % preamble and that allows authors to add a reference at the end of the
 % list that's not signaled in the text; such references are used in
 % *Science* for acknowledgments of funding, help, etc.
-
-
 
 
 

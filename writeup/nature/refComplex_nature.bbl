@@ -10,15 +10,19 @@ C.~Hockett, {\it Scientific American\/} {\bf 203}, 88 (1960).
 L.~Horn, {\it Meaning, form, and use in context\/} {\bf 42} (1984).
 
 \bibitem{jaeger2006}
-T.~Jaeger, R.~P. Levy, {\it Advances in neural information processing
-  systems\/} (2006), pp. 849--856.
+T.~Jaeger, R.~P. Levy, {\it Advances in Neural Information Processing
+  Systems\/} (2006), pp. 849--856.
 
 \bibitem{christiansen2008}
-M.~H. Christiansen, N.~Chater, {\it Behavioral and brain sciences\/} {\bf 31},
-  489 (2008).
+M.~H. Christiansen, N.~Chater, {\it Behavioral and {B}rain {S}ciences\/} {\bf
+  31}, 489 (2008).
 
 \bibitem{lieberman2007}
 E.~Lieberman, J.-B. Michel, J.~Jackson, T.~Tang, M.~A. Nowak, {\it Nature\/}
   {\bf 449}, 713 (2007).
+
+\bibitem{alvarez2004capacity}
+G.~A. Alvarez, P.~Cavanagh, {\it Psychological {S}cience\/} {\bf 15}, 106
+  (2004).
 
 \end{thebibliography}

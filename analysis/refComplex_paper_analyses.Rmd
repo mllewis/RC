@@ -33,7 +33,7 @@ M. Lewis
 * check that all experients remove duplicates
 
 #### SET GLOBAL VARIABLES
-```{r}
+```{r global_vars}
 rm(list=ls())
 
 whichSubjRemove = 'keepAll' #remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
@@ -143,7 +143,7 @@ dups = read.csv("data/all_workerids.csv")
 ###  (A) Norms
 
 * preprocess
-```{r, include = FALSE}
+```{r xling_preprocess, include = FALSE}
 if (processNorms) {
   d1 <- read.csv("data/RefComplex26.results1",sep="\t",header=TRUE)
   d2 <- read.csv("data/RefComplex26.results",sep="\t",header=TRUE)
@@ -239,7 +239,7 @@ englishComplexityNorms = read.csv("data/englishComplexityNorms.csv")
 ```
 
 * read in xling data and merge with English complexity norms
-```{r, include = FALSE}
+```{r xling_read, include = FALSE}
 xling = read.csv("data/xling_csv.csv") 
 xling = merge(xling, englishComplexityNorms, by.x = "ENGLISH", by.y = "word")
 
@@ -248,7 +248,7 @@ xling = xling[xling$ENGLISH != "peso",]
 ```
 
 * look at words by class
-```{r, echo = FALSE}
+```{r xling_classes, echo = FALSE}
 xling$Open_class = as.factor(xling$Open_class)
 counts = as.data.frame(summary(xling$Open_class))
 counts$class = c("closed class", "open class bare", "open class inflected")
@@ -261,7 +261,7 @@ ggplot(counts, aes(class, freq, fill = class)) +
 
 * look at accuracy for translations checks
 + preprocess
-```{r, include = FALSE}
+```{r xling_trans_preprocess, include = FALSE}
 checksR = read.csv("data/translation_accuracy.csv")[1:500,]
 checksR = checksR[checksR$ENGLISH != "peso",]
 
@@ -274,7 +274,7 @@ checksR$class = as.numeric(as.character(checksR$class))
 
 + plot and stats
 +  accuracy
-```{r echo = FALSE}
+```{r xling_trans_accuracy, echo = FALSE}
 dfa = as.data.frame(accuracy)
 dfa$lang = row.names(dfa)
 
@@ -298,7 +298,7 @@ print(paste("open_bare_accuracy:", mean(accuracy_open_bare)))
 
 <a name="1b"/>
 ###  (B) Correlation between all lengths
-```{r}
+```{r xling_len_corrs}
 lens = c(which(grepl("LEN",names(xling)))) # get length column indices
 col1 <- colorRampPalette(c("blue", "white" , "red"))
 
@@ -322,7 +322,7 @@ mean(cmat)
 ```
 <a name="1c"/>
 ###  ( C ) Correlation between all lengths, controling for frequency
-```{r}
+```{r xling_len_freq_corrs}
 ## all words
 xling_len_p = xling[,c(lens, which(names(xling)== "log.e.freq"))] 
 names(xling_len_p) = as.character(tolower(lapply(str_split(names(xling_len_p),"_"),function(x) {x[1]})))
@@ -353,7 +353,7 @@ mean(cmat.p)
 
 <a name="1d"/>
 ###  (D) Correlation between  lengths and complexity, open class only, controling for frequency
-```{r include = FALSE}
+```{r xling_open, include = FALSE}
 
 ## get open class words only
 xlingOC = xling[xling$Open_class != 0 ,c(lens, which(names(xling)== "log.e.freq"), which(names(xling)== "complexity"))] #df with open class words only
@@ -393,7 +393,7 @@ c_l$language <- factor(c_l$language, levels =  rev(as.character(c_l$language)))
 
 ```
 
-```{r , fig.width=10}
+```{r xling_open_plots , fig.width=10}
 c_l$checked_only = ifelse(c_l$Checked == "yes", c_l$corr, 0)
 c_l$uci = ifelse(c_l$Checked == "yes",  c_l$upper.ci, 0)
 c_l$lci = ifelse(c_l$Checked == "yes",  c_l$lower.ci, 0)
@@ -428,7 +428,7 @@ partial.r(xlingOC,c(1,which(names(xlingOC) == "complexity")), which(names(xlingO
 cor(xlingOC$english,xlingOC$complexity, use = "pairwise")
 ```
 
-```{r}
+```{r xling_openn_corr}
 # mean correlation
 mean(c_l$corr)
 ```
@@ -695,11 +695,11 @@ if (processNorms){
   four = all_ms[which(all_ms$meanRating>q[4] & all_ms$meanRating<q[5]), "ratingNum"]
   five = all_ms[which(all_ms$meanRating>q[5]), "ratingNum"]
   
-  one # 54 57 19 28 3 59 20 46 44 13 15 29
-  two # 22 6  17 5 34 2 55 9 4 49 37 10
+  one # 13 15 19 20 28 29  3 44 46 54 57 59
+  two # 10 17  2 22 34 37  4 49  5 55  6  9
   three # 12 50 7 8 48 16 1 39 40 56 24 60
   four # 26 18 11 47 42 30 23 31 51 58 41 45
-  five # 32 43 33 25 21 52 14 53 27 36 38 35
+  five # 14 21 25 27 32 33 35 36 38 43 52 53
   
   all_ms$quintile = ifelse(is.element(all_ms$ratingNum, one), 1, 
                            ifelse(is.element(all_ms$ratingNum, two), 2,
@@ -708,6 +708,7 @@ if (processNorms){
                                                 ifelse(is.element(all_ms$ratingNum, five), 5,
                                                        "error")))))
   all_ms$quintile = as.numeric(all_ms$quintile)
+  all_ms <- all_ms[order(all_ms$meanRating),]
   
   # write to csv (use write.table to can exclude headers, so matlab can read for figure)
   write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
@@ -827,7 +828,7 @@ if (processNorms){
   ms = ms[ms$Answer.train_image != 61,] # get rid of ball and motherboard
   ms = ms[ms$Answer.train_image != 62,] 
 
-  write.csv(ms, "data/rtNormsObjs_BYITEM.csv")
+  write.csv(ms,"data/rtNormsObjs_BYITEM.csv")
   }
 
 rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv")
@@ -837,7 +838,7 @@ rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv")
 ```{r}
 index <- match(co_norms$ratingNum, rto_norms$Answer.train_image)
 co_norms$log.rt <- rto_norms$log.rt[index]
-cor.test(co_norms$meanRating, rto_norms$log.rt)
+cor.test(co_norms$meanRating, co_norms$log.rt)
 ```
 
 <a name="3b"/>
@@ -940,13 +941,13 @@ obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
   #geom_text(aes(c.Mratio+.03, effect_size, label=objCondition2), position="dodge") +
-  geom_text(aes(c.Mratio+.04, effect_size, label=objCondition2), position="dodge") +
+  #geom_text(aes(c.Mratio+.04, effect_size, label=objCondition2), position="dodge") +
   ylab("effect size (Cohen's d)") +
   xlab("complexity rating ratio") + 
   #ggtitle("complexity ratio vs. effect size") +
   scale_x_continuous(limits = c(.25, 1.29)) +
   theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
-  annotate("text", x=1, y=.5, col = "red",label=paste(
+  annotate("text", x=1.15, y=.5, col = "red",label=paste(
     "r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)), size = rs) +
   theme(plot.background = element_blank(),
   panel.grid.major = element_blank(),
@@ -959,13 +960,13 @@ obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
   #geom_text(aes(rt.Mratio+.0008, effect_size, label=objCondition2)) +
-  geom_text(aes(rt.Mratio+.002, effect_size, label=objCondition2)) +
+  #geom_text(aes(rt.Mratio+.002, effect_size, label=objCondition2)) +
   ylab("effect size (Cohen's d)") +
   xlab("reaction time ratio") +
   scale_x_continuous(limits = c(.949, 1.005)) +
   #ggtitle("RT ratio vs. effect size") +
   theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
-  annotate("text", x=1, y=.5, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)), size = rs) +  
+  annotate("text", x=.997, y=.5, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)), size = rs) +  
   theme(plot.background = element_blank(),
   panel.grid.major = element_blank(),
   panel.grid.minor = element_blank()) +
@@ -1273,7 +1274,8 @@ if (processNorms) {
   ms_all$cil <- aggregate(value ~ obj, data=m, ci.low)$value
   
   names(ms_all)[2] = "meanRating"
-  
+  ms_all <- ms_all[order(ms_all$meanRating),]
+
   # save complexity by item
   write.csv(ms_all, "data/complicatedNormsGeons_BYITEM.csv")
   } 
@@ -1404,6 +1406,27 @@ if (processNorms) {
 rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv")
 ```
 
+* Get correlation between between # geons and complexity rating, and RT and complexity rating
+```{r}
+# remove quotes from norms
+cg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
+cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
+cg_norms$obj_item = as.numeric(substr(cg_norms$obj, 2, 2))
+
+rg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", rg_norms$obj)))
+rg_norms$obj_class = substr(rg_norms$obj, 1, 1)
+rg_norms$obj_item = substr(rg_norms$obj, 2, 2)
+
+index <- match(cg_norms$obj, rg_norms$obj)
+cg_norms$rt_meanRating <- rg_norms$log.rt[index]
+
+# correlation between num geons and complexity
+cor.test(cg_norms$obj_class, cg_norms$meanRating)
+
+# correlation between RT and complexity
+cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
+```
+
 <a name="4b"/> 
 ### (B) Mapping task  [(Task)][task37] 
 ```{r, include = FALSE}
@@ -1431,7 +1454,7 @@ md$value <- as.factor(as.character(md$value))
 md$workerid <- as.factor(as.character(md$workerid))
 
 md$seq <- with(md, ave(value, workerid, variable, trial, FUN = seq_along))
-dc <- dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
+dc <- dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
 dc$seq <- NULL
 
 # make everything factors
@@ -1443,9 +1466,6 @@ dc$response <- as.factor(dc$response)
 dc$responseSide <- as.factor(dc$responseSide)
 dc$responseValue  <- as.factor(dc$responseValue)
 dc$word <- as.factor(dc$word)
-
-# remove quotes from norms
-cg_norms$obj = as.factor(paste("\"", cg_norms$obj, "\"", sep = ""))
 
 # merge in norms
 # complicated
@@ -1489,7 +1509,7 @@ geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   geom_pointrange( aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
+  #geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
   ylab("effect size (Cohen's d)") +
   xlab("complexity rating ratio") + 
   theme(text = element_text(size=fs))  +
@@ -1506,7 +1526,7 @@ geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   geom_pointrange( aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
+  #geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
   ylab("effect size (Cohen's d)") +
   xlab("reaction time ratio") + 
   theme(text = element_text(size=fs)) +  
