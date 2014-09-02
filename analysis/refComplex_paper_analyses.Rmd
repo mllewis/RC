@@ -16,8 +16,6 @@ M. Lewis
   (D) [Correlation between all lengths and complexity, controling for frequency](#1d) <br/> 
   (E) [Translation check data](#1e) <br/> 
   
-2. [High frequency words in mapping task](#HF)
-
 3. [Novel real objects](#novelRealObjs)<br/> 
   (A) [Norms](#3a)<br/> 
   (B) [Mappping task (adults)](#3b) <br/> 
@@ -28,10 +26,6 @@ M. Lewis
   (A) [Norms](#4a) <br/> 
   (B) [Mappping task](#4b)<br/>
 
-* figure out how to clear before start new experiment
-* clean up so that only see plots and critical statistical results
-* check that all experients remove duplicates
-
 #### SET GLOBAL VARIABLES
 ```{r global_vars}
 rm(list=ls())
@@ -39,7 +33,7 @@ rm(list=ls())
 whichSubjRemove = 'keepAll' #remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
 processNorms = TRUE # process norms or load norms? 
 savePlots = TRUE # save plots to pdf?
-doSlow = TRUE # do time-consuming pre-processing steps?
+doSlow = FALSE # do time-consuming pre-processing steps?
 ```
 
 #### LOAD PACKAGES, FUNCTIONS, AND REPEAT SUBJ DATA FILE
@@ -71,6 +65,7 @@ cor.mtest <- function(mat, conf.level = 0.95) {
   return(list(p.mat, lowCI.mat, uppCI.mat))
   }
 
+# bootstrap CIs on CI (http://dodonovs.com/R/002-r.htm)
 boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){ 
   w = length(x); x.r = x; y.r = y 
   sm = 1:w; cor.b = 1:n 
@@ -87,13 +82,15 @@ boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){
   vec = c(cor.b[a+1], cor(x, y, use = "pairwise", method), cor.b[b-1]) 
   n.r = c("value"); n.c = c("lower_bound", "correlation", "upper_bound") 
   matrix(vec,1,3,dimnames = list(n.r,n.c)) 
-  }# bootstrap CIs on CI (http://dodonovs.com/R/002-r.htm)
+  }
 
+# partial corerlation
 bm.partial<-function(x,y,z) {
   round((cor(x,y, use="complete.obs")-cor(x,z, use="complete.obs")*cor(y,z, use="complete.obs"))/
                                      sqrt((1-cor(x,z, use="complete.obs")^2)*(1-cor(y,z, use="complete.obs")^2)),4)
   }
 
+# effect size for forced choice tasks
 d.fc <- function(d) {
   cond <- all(intersect(levels(d$langCondition),c("\"long\"" , "\"short\"")) == c("\"long\"" , "\"short\""))
   
@@ -151,11 +148,8 @@ if (processNorms) {
   
   if (whichSubjRemove == 'repeatSubj') {
     d = merge(d, dups, by=c("hitid","workerid"))
-    d = da[!d$repeatSubj,]
-    } else if (whichSubjRemove == 'withinRepeatSubj') {
-      d = merge(d, dups, by=c("hitid","workerid"))
-      d = d[!d$withinRepeatSubj,]
-      }
+    d = d[!d$repeatSubj,]
+  }
   
   # take out people who missed check question
   d = d[d$Answer.value_18 == 7, ] 
@@ -175,7 +169,7 @@ if (processNorms) {
   # merge together
   index <- match(mdW$index, mdV$index)
   mdW$complexity <- mdV$value[index]
-  
+ 
   # delete variables
   mdW$index <- NULL; mdW$variable <- NULL; names(mdW)[2] <- "word"; md <- mdW
   
@@ -183,202 +177,198 @@ if (processNorms) {
   md$word= gsub(" ", "", gsub("[[:punct:]]", "", md$word))
   md$word = as.factor(md$word)
   
-  # remove anchor questions
-  md = md[md$word != "ball" ,]
-  md = md[md$word != "motherboard" ,]
-  md = md[md$word != "43" ,]
+  # remove non-words
+  md = md[md$word != "ball",] # anchor
+  md = md[md$word != "motherboard",] # anchor
+  md = md[md$word != "43",] # take out check question
+  md = md[md$word != "peso",] # take out bad word
   
-  # add number of letters count
-  md$len.chars <- nchar(as.character(md$word))
+  # add length in characters
+  md$nchars = nchar(as.character(md$word))
   
-  # add norms and freqs
-  # --add mrc data --
-  norms = read.csv("data/MRC_corpus.csv")
-  norms = norms[norms$mrc.syl != "NA",]
-  index <- match(md$word, norms$word)
-  md$fam <- norms$mrc.fam[index]
-  md$mrc.conc <- norms$mrc.conc[index]
-  md$imag <- norms$mrc.imag[index]
-  md$len.syl <- norms$mrc.syl[index]
+  # merge in word info
+  # -- add mrc data --
+  mrc = read.csv("data/MRC_corpus.csv")
+  mrc = mrc[mrc$mrc.syl != "NA",]
+  index <- match(md$word, mrc$word)
+  md$mrc.fam <- mrc$mrc.fam[index]
+  md$mrc.conc <- mrc$mrc.conc[index]
+  md$mrc.imag <- mrc$mrc.imag[index]
+  md$mrc.syl <- mrc$mrc.syl[index]
+ 
+  # -- add phonemes from MRC --
+  mrc = mrc[mrc$mrc.wtype != " ",]
+  index <- match(md$word, mrc$word)
+  md$mrc.phon <- mrc$mrc.phon[index]
 
   # -- add class --
   class = read.csv("data/english_class_codes.csv")
   index <- match(md$word, class$ENGLISH)
-  md$Open_class <- class$Open_class[index]
+  md$class <- class$class_MLL[index]
   
-  # aggregate
-  ms <- aggregate(complexity ~ word + len.chars + fam + mrc.conc + imag + 
-                    Open_class + len.syl, data= md, mean)
-  ms$cih <- aggregate(complexity ~ word + len.chars + fam + mrc.conc + imag +
-                        Open_class + len.syl,  data=md, ci.high)$complexity
-  ms$cil <- aggregate(complexity ~ word + len.chars + fam + mrc.conc + imag + 
-                        Open_class + len.syl,  data=md, ci.low)$complexity
+  # -- add morphemes --
+  morph = read.csv("data/numMorph_celex2.csv")
+  index <- match(md$word, morph$ENGLISH)
+  md$clx.morph <- morph$clx.numMorph[index]
   
-  # merge in stuff (they get removed when you aggregate due to missing values)
-  # -- add frequency data --
+  # -- add frequency --
   freqs = read.table("data/SUBTLEXusDataBase.txt",header=TRUE)
-  index <- match(ms$word, freqs$Word)
-  ms$log.e.freq <- freqs$Lg10WF[index]
+  index <- match(md$word, freqs$Word)
+  md$subt.log.freq <- freqs$Lg10WF[index]
   
   # -- add brysbaert concreteness --
   b <- read.csv("data/brysbaert_corpus.csv",header=TRUE)
   b <- b[b$Word != "",] # get rid of empty rows
   b <- b[b$Bigram == 0,]# get rid of two word lemmas
-  index <- match(ms$word, b$Word)
-  ms$b.conc <- b$Conc.M[index]
+  index <- match(md$word, b$Word)
+  md$b.conc <- b$Conc.M[index]
   
-  # -- phonemes from MRC --
-  norms = norms[norms$mrc.syl != "NA",]
-  index <- match(ms$word, norms$word)
-  ms$len.phon <- norms$mrc.phon[index]
-  
-  write.csv(ms, "data/englishComplexityNorms.csv")
+  write.csv(md, "data/englishComplexityNorms.csv")
  }
+
+eng = read.csv("data/englishComplexityNorms.csv")
+```
+
+* aggregate across words of the same length
+```{r}
+ms2 <- aggregate(complexity ~ nchars, data=ms, mean)
+ms2$cih <- aggregate(complexity ~ nchars,  data=ms, ci.high)$complexity
+ms2$cil <- aggregate(complexity ~ nchars,  data=ms, ci.low)$complexity
+
+ggplot(ms2, aes(complexity, nchars)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbarh(aes(xmax=complexity+cih,xmin=complexity-cil), size=.15, colour="black") +
+  annotate("text", x=2, y=10, size = 10, label=paste("r=",round(cor(ms$complexity, ms$nchars), 2)))+
+  scale_y_continuous(limits = c(0, 15), breaks = 1:14, labels = 1:14) +
+  scale_x_continuous(limits = c(0, 7), breaks = 1:7, labels = 1:7)  +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
+  xlab('Complexity Rating') +
+  ylab('Word Length (characters)') +
+  ggtitle("Number of characters vs. complexity rating")
+```
+
+* aggregate across participants 
+``` {r}
+  # have to do this separately for each length variable because drops words for which there are NAs *for any of the length vars*
+  ms.syl <- aggregate(complexity ~ word + mrc.syl, data=eng, mean)
+  ms.phon <- aggregate(complexity ~ word + mrc.phon, data=eng, mean)
+  ms.morph <- aggregate(complexity ~ word + clx.morph, data=eng, mean)
+```
+
+* Correlations
+``` {r}
+cor.test(ms.syl$complexity, ms.syl$mrc.syl)
+cor.test(ms.phon$complexity, ms.phon$mrc.phon)
+cor.test(ms.morph$complexity, ms.morph$clx.morph)
+
+# mono-morphemic
+ms_mono.syl = aggregate(complexity ~ word + mrc.syl, data=md[md$clx.morph == 1,], mean)
+ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=md[md$clx.morph == 1,], mean)
+
+cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
+cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
+
+# open class
+ms_open.syl = aggregate(complexity ~ word + mrc.syl, data=md[md$class != 0,], mean)
+ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=md[md$class != 0,], mean)
+ms_open.morph = aggregate(complexity ~ word + clx.morph, data=md[md$class != 0,], mean)
+summary(ms_open.syl)
+
+cor.test(ms_open.syl$complexity, ms_open.syl$mrc.syl)
+cor.test(ms_open.phon$complexity, ms_open.phon$mrc.phon)
+cor.test(ms_open.morph$complexity, ms_open.morph$clx.morph)
+```
+
+* relationship beween length and complexity, control for everything
+```{r}
+# all
+m_syl = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
+m_phon = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
+m_morph = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
+summary(m_syl)
+summary(m_phon)
+summary(m_morph)
+
+# mono-morphemic
+m_syl_m = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$clx.morph == 1,])
+m_phon_m = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$clx.morph == 1,])
+summary(m_syl_m)
+summary(m_phon_m)
+
+# open class
+m_syl_o = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$class != 0,])
+m_phon_o = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$class != 0,])
+m_morph_o = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$class != 0,])
+summary(m_syl_o)
+summary(m_phon_o)
+summary(m_morph_o)
+```
+
+* create english word data frame with relevant variables for xling analysis
+```{r}
+  xling.eng <- aggregate(complexity ~ word + class, data=eng, mean)
+
+  # -- add morphemes --
+  morph = read.csv("data/numMorph_celex2.csv")
+  index <- match(xling.eng$word, morph$ENGLISH)
+  xling.eng$clx.morph <- morph$clx.numMorph[index]
+
+  # -- add frequency --
+  freqs = read.table("data/SUBTLEXusDataBase.txt",header=TRUE)
+  index <- match(xling.eng$word, freqs$Word)
+  xling.eng$subt.log.freq <- freqs$Lg10WF[index]
   
-englishComplexityNorms = read.csv("data/englishComplexityNorms.csv")
+  xling.eng$class = as.factor(xling.eng$class)
+  xling.eng$clx.morph = as.factor(xling.eng$clx.morph)
 ```
 
 * read in xling data and merge with English complexity norms
 ```{r xling_read, include = FALSE}
 xling = read.csv("data/xling_csv.csv") 
-xling = merge(xling, englishComplexityNorms, by.x = "ENGLISH", by.y = "word")
+index <- match(xling$ENGLISH, xling.eng$word)
 
-# get rid of bad item (peso)
+xling$complexity <- xling.eng$complexity[index]
+xling$class <- xling.eng$class[index]
+xling$clx.morph <- xling.eng$clx.morph[index]
+xling$subt.log.freq  <- xling.eng$subt.log.freq [index]
+xling$X <- NULL
+
 xling = xling[xling$ENGLISH != "peso",]
 ```
 
-* look at words by class
-```{r xling_classes, echo = FALSE}
-xling$Open_class = as.factor(xling$Open_class)
-counts = as.data.frame(summary(xling$Open_class))
-counts$class = c("closed class", "open class bare", "open class inflected")
-names(counts) = c("freq", "class")
-
-ggplot(counts, aes(class, freq, fill = class)) + 
-  geom_bar(stat = "identity") +
-  ggtitle("Word types in corpus")
-```
-
 * look at accuracy for translations checks
-+ preprocess
 ```{r xling_trans_preprocess, include = FALSE}
 checksR = read.csv("data/translation_accuracy.csv")[1:500,]
 checksR = checksR[checksR$ENGLISH != "peso",]
 
-index <- match(checksR$ENGLISH, xling$ENGLISH)
-checksR$class <- xling$Open_class[index]
-row.names(checksR) = checksR$ENGLISH
-checksR$ENGLISH <- NULL
-checksR$class = as.numeric(as.character(checksR$class))
-```
-
-+ plot and stats
-+  accuracy
-```{r xling_trans_accuracy, echo = FALSE}
-dfa = as.data.frame(accuracy)
-dfa$lang = row.names(dfa)
-
-#plot
-ggplot(dfa, aes(lang, accuracy, fill = lang)) + 
-  geom_bar(stat = "identity") + 
-  xlab("Language") + 
-  ggtitle("Google Translate Check Accuracy") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
-
-accuracy = colSums(checksR[,1:12], dims = 1)/ dim(checksR[,])[1]
-print(paste("total accuracy:", mean(accuracy)))
-
-accuracy_open = colSums(checksR[checksR$class != 0,1:12], dims = 1)/ dim(checksR[checksR$class != 0,])[1]
-print(paste("open accuracy:", mean(open_accuracy)))
-
-accuracy_open_bare = colSums(checksR[checksR$class ==1,1:12], dims = 1)/ dim(checksR[checksR$class == 1,])[1]
-print(paste("open_bare_accuracy:", mean(accuracy_open_bare)))
+accuracy = colSums(checksR[,2:13], dims = 1)/ dim(checksR[,])[1]
+print(paste("total accuracy:", round(mean(accuracy),2)))
 ```
 
 <a name="1b"/>
-###  (B) Correlation between all lengths
+###  (B) Correlation between complextity and length
 ```{r xling_len_corrs}
 lens = c(which(grepl("LEN",names(xling)))) # get length column indices
-col1 <- colorRampPalette(c("blue", "white" , "red"))
+xlingCORR = xling[c(lens, which(names(xling)== "subt.log.freq"), which(names(xling)== "complexity"), which(names(xling)== "clx.morph"), which(names(xling)== "class"))] 
 
-## Correlations between all lengths, all words
-xling_len = xling[, lens] 
-names(xling_len) = as.character(tolower(lapply(str_split(names(xling_len),"_"),function(x) {x[1]})))
-
-# Correlations between all lengths
-cmat = cor(xling_len, use = "pairwise.complete.obs")
-corrplot(cmat,  tl.cex=.5, tl.srt=45, method = "color", tl.col = "black" ,col =col1(100),order = "FPC")
-mean(cmat)
-
-## Correlations between all lengths, open class words only
-xlingO = xling[xling$Open_class != 0,lens] 
-names(xlingO) = as.character(tolower(lapply(str_split(names(xlingO),"_"),function(x) {x[1]})))
-
-# Correlations between all lenghts
-cmat = cor(xlingO, use = "pairwise.complete.obs")
-corrplot(cmat,  tl.cex=.5, tl.srt=45, method = "color", tl.col = "black" ,col =col1(100), order = "FPC")
-mean(cmat)
-```
-<a name="1c"/>
-###  ( C ) Correlation between all lengths, controling for frequency
-```{r xling_len_freq_corrs}
-## all words
-xling_len_p = xling[,c(lens, which(names(xling)== "log.e.freq"))] 
-names(xling_len_p) = as.character(tolower(lapply(str_split(names(xling_len_p),"_"),function(x) {x[1]})))
-
-# correlations between all lengths, open class only
-cmat.p = partial.r(xling_len_p,1:80,81 ) 
-mean(cmat.p)
-
-## open class words only
-xlingOF = xling[xling$Open_class !=0 ,c(lens, which(names(xling)== "log.e.freq"))] 
-names(xlingOF) = as.character(tolower(lapply(str_split(names(xlingOF),"_"),function(x) {x[1]})))
-
-# correlations between all lengths, open class only
-cmat.p = partial.r(xlingOF,1:80,81 ) 
-
-# sorted by first principle component
-if (savePlots) {pdf('sort.pdf',height = 10, width = 10)}
-corrplot(cmat.p,  tl.cex=.5, tl.srt=45,  order = "FPC", method = "color", tl.col = "black" ,col =col1(100))
-if (savePlots) {dev.off() }
-# sorted by  angular order of the eigenvectors.
-corrplot(cmat.p,  tl.cex=.5, tl.srt=45,  order = "AOE", method = "color", tl.col = "black" ,col =col1(100))
-# sorted by hierarchical clustering
-corrplot(cmat.p,  tl.cex=.5, tl.srt=45,  order = "hclus", method = "color", tl.col = "black", col =col1(100) )
-
-mean(cmat.p)
-```
-
-
-<a name="1d"/>
-###  (D) Correlation between  lengths and complexity, open class only, controling for frequency
-```{r xling_open, include = FALSE}
-
-## get open class words only
-xlingOC = xling[xling$Open_class != 0 ,c(lens, which(names(xling)== "log.e.freq"), which(names(xling)== "complexity"))] #df with open class words only
-names(xlingOC) = as.character(tolower(lapply(str_split(names(xlingOC),"_"),function(x) {x[1]})))
-
-# get correlations with bootstrapped CIs
+# get correlations with for all 499 words bootstrapped CIs
 if (doSlow) {
   c_l = data.frame (language = character(), lower.ci = numeric(0), corr = numeric(0), upper.ci = numeric(0))
-  levels(c_l$language) = names(xlingOC)
-  complexity_i = which(names(xlingOC)== "complexity")
+  levels(c_l$language) = names(xlingCORR)
+  complexity_i = which(names(xlingCORR)== "complexity")
   
   for (i in 1:length(lens)){
-    c_l[i, 2:4] = boot.cor(xlingOC[,i], xlingOC[,complexity_i])
-    c_l[i, "language"] = names(xlingOC)[i]
-    print(names(xlingOC)[i])
+    c_l[i, 2:4] = boot.cor(xlingCORR[,i], xlingCORR[,complexity_i])
+    c_l[i, "language"] = names(xlingCORR)[i]
+    print(names(xlingCORR)[i])
     }
   write.csv(c_l, "data/complexity_length_corrs.csv")
-  }
- c_l = read.csv("data/complexity_length_corrs.csv")
+}
+c_l = read.csv("data/complexity_length_corrs.csv")
 
-coded_languages = c("english", "spanish", "welsh", "vietnamese", "russian", "portuguese", "persian", "bosnian", "french", "hebrew", "italian", "korean", "polish" )
-c_l$Checked = as.factor(ifelse( is.element(c_l$language, coded_languages), "yes", "no"))
-
-# get correlations, partialing out frequency
-cmat.p = partial.r(xlingOC,c(1:80, which(names(xlingOC) == "complexity")), which(names(xlingOC) == "log.e.freq") )
+# now do correlations, partialling out frequency
+cmat.p = partial.r(xlingCORR,c(1:80, which(names(xlingCORR) == "complexity")), which(names(xlingCORR) == "subt.log.freq") )
 cxl = as.data.frame(cmat.p[which(row.names(cmat.p) == "complexity"),1:80])
 cxl$lang = row.names(cxl)
 names(cxl) = c("corr", "lang")
@@ -387,258 +377,86 @@ names(cxl) = c("corr", "lang")
 index <- match(c_l$language, cxl$lang)
 c_l$p.corr<- cxl$corr[index]
 
-#sort by correlation
-c_l = c_l[order(c_l$corr),]
+# get correlations for mono only
+mono_cor = data.frame (language = character(), mono.cor = numeric(0))
+complexity_i = which(names(xlingCORR)== "complexity")
+levels(mono_cor$language) = names(xlingCORR)
+
+
+for (i in 1:length(lens)){
+  mono_cor[i, "mono.cor"] = cor(xlingCORR[xlingCORR$clx.morph == 1, i], 
+                                xlingCORR[xlingCORR$clx.morph == 1, complexity_i], use = "complete")
+  mono_cor[i, "language"] = names(xlingCORR)[i]
+}
+
+# merge in mono
+index <- match(c_l$language, mono_cor$language)
+c_l$mono.cor<- mono_cor$mono.cor[index]
+
+# get correlations for open only
+open_cor = data.frame(language = character(), open.cor = numeric(0))
+complexity_i = which(names(xlingCORR)== "complexity")
+levels(open_cor$language) = names(xlingCORR)
+
+for (i in 1:length(lens)){
+  open_cor[i, "open.cor"] = cor(xlingCORR[xlingCORR$class != 0, i], 
+                                xlingCORR[xlingCORR$class != 0, complexity_i], use = "complete")
+  open_cor[i, "language"] = names(xlingCORR)[i]
+}
+
+# merge in open
+index <- match(c_l$language, open_cor$language)
+c_l$open.cor<- open_cor$open.cor[index]
+
+# prep for plotting
+c_l = c_l[order(c_l$corr),] # sort by correlation
+c_l$language=  as.character(tolower(lapply(str_split(c_l$language,"_"),function(x) {x[1]}))) # clean up names
 c_l$language <- factor(c_l$language, levels =  rev(as.character(c_l$language)))
 
-```
 
-```{r xling_open_plots , fig.width=10}
-c_l$checked_only = ifelse(c_l$Checked == "yes", c_l$corr, 0)
-c_l$uci = ifelse(c_l$Checked == "yes",  c_l$upper.ci, 0)
-c_l$lci = ifelse(c_l$Checked == "yes",  c_l$lower.ci, 0)
-
-### Plot with bootsrapped CIs on pearsons are, and parial frequencies
-if (savePlots) {pdf("figure/p3.pdf", width = 10, height = 6 ) }
-ggplot(c_l, aes(language, corr, fill = Checked)) + 
-  geom_bar(stat = "identity", ) + 
-  ylab("Pearson's r") + xlab("Language") + 
-  #ggtitle("Correlation between word length and complexity norms") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  geom_linerange(aes(ymax=upper.ci, ymin=lower.ci)) +
-  geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
-  geom_hline(y=mean(c_l$corr),lty=2) +
-  theme(
-    plot.background = element_blank()
-   ,panel.grid.major = element_blank()
-   ,panel.grid.minor = element_blank()
-   #,panel.border = element_blank()
-  )  +
-  theme(axis.title.x = element_text( size=25), axis.text.x  = element_text( size=10),
-        axis.title.y = element_text( size=25), axis.text.y  = element_text( size=10)) +
-  theme(legend.text = element_text(size = 10), legend.title = element_text(size = 10)) +
- # annotate("text", x = 75, y =mean(c_l$corr) + .02 , label=paste("M=",round(mean(c_l$corr),2), sep = "")) +
-  scale_fill_manual(values=c("pink", "red")) +
-  theme(legend.position="none") +
-  scale_y_continuous(limits = c(-.07, .7)) 
-if (savePlots) {dev.off()}
-
-# verify correlations by looking at English
-partial.r(xlingOC,c(1,which(names(xlingOC) == "complexity")), which(names(xlingOC) == "log.e.freq"))
-cor(xlingOC$english,xlingOC$complexity, use = "pairwise")
-```
-
-```{r xling_openn_corr}
-# mean correlation
-mean(c_l$corr)
-```
-
-***
-***
-
-<a name="HF"/>
-
-## (2) High frequency words in mapping task [(Task)][task32]
-
-* read in data and prep variables
-```{r include = FALSE}
-# read in data
-raw <- read.csv("data/RefComplex32.results",sep="\t",header=TRUE)
-
-if (whichSubjRemove == 'repeatSubj') {
-    raw = merge(raw, dups, by=c("hitid","workerid"))
-    raw = raw[!raw$repeatSubj,]
-  } else if (whichSubjRemove == 'withinRepeatSubj') {
-    raw = merge(raw, dups, by=c("hitid","workerid"))
-    raw = raw[!raw$withinRepeatSubj,]
-  }
-  
-# prep data frame
-n <- names(raw)
-cols = c( n[grepl("Bet",n)], n[grepl("word",n)], n[grepl("Word",n)])
-cols = cols[c(1:20, 22:51)] #exclude na
-md <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
-md$trial <- matrix(lapply(str_split(md$variable,"T"),function(x) {x[2]}))
-md$trial = as.character(md$trial)
-md$trial <- as.numeric(matrix(lapply(str_split(md$trial,"_"),function(x) {x[1]})))                                     
-md$var <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
-md$variable <- NULL
-md$var = as.character(md$var)
-md$value = as.character(md$value)
-
-md$seq <- with(md, ave(value, workerid, as.factor(var), FUN = seq_along))
-d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
-d$seq <- NULL
-
-# fix data frame types
-d$LongBet <-  as.numeric(str_replace_all(as.character(d$LongBet),"\\\"","")) #make ratings numeric
-d$ShortBet <-  as.numeric(str_replace_all(as.character(d$ShortBet),"\\\"","")) 
-d$engWord <- as.factor(d$engWord)
-d$engWord= gsub(" ", "", gsub("[[:punct:]]", "", d$engWord)) #get rid of quotes
-d$word1 <- as.factor(d$word1)
-d$word2 <- as.factor(d$word2)
-```
-
-* merge in stuff
-```{r include = FALSE}
-index <- match(d$engWord, englishComplexityNorms$word)
-d$complexity <- englishComplexityNorms$complexity[index]
-d$complexity_cil <- englishComplexityNorms$cil[index]
-d$complexity_cih <- englishComplexityNorms$cih[index]
-
-d$log.e.freq <- englishComplexityNorms$log.e.freq[index]
-```
-
-* get quintiles
-```{r include = FALSE}
-normsC = englishComplexityNorms[is.element(englishComplexityNorms$word, d$engWord),] #get only 100 words
-
-# get complexity only quintile
-q = quantile(normsC$complexity, seq(0,1, by=.2))
-one = normsC[which(normsC$complexity<q[2]), "word"]
-two = normsC[which((normsC$complexity>q[2]| normsC$complexity==q[2])  & normsC$complexity<q[3]), "word"]
-three = normsC[which((normsC$complexity>q[3]| normsC$complexity==q[3])  & normsC$complexity<q[4]), "word"]
-four = normsC[which((normsC$complexity>q[4]| normsC$complexity==q[4])  & normsC$complexity<q[5]), "word"]
-five = normsC[which((normsC$complexity>q[5]| normsC$complexity==q[5]) ), "word"]
-
-all = c(as.character(one),as.character(two), as.character(three), as.character(four), as.character(five))
-qs = as.data.frame(all)
-names(qs) = "word"
-qs$quintile = 1
-qs$quintile[21:40] = 2
-qs$quintile[41:60] = 3
-qs$quintile[61:80] = 4
-qs$quintile[81:100] = 5
-
-index <- match(d$engWord, qs$word)
-d$quintile <- qs$quintile[index]
-```
-
-* aggregate by word
-```{r, include = FALSE}
-ms <- aggregate(LongBet  ~ engWord + complexity + log.e.freq + complexity_cil + complexity_cih + quintile, data=d, mean)
-ms$bet_cil <- aggregate(LongBet  ~ engWord + complexity + log.e.freq + complexity_cil + complexity_cih, data=d, ci.low)$LongBet 
-ms$bet_cih <- aggregate(LongBet  ~ engWord + complexity + log.e.freq + complexity_cil + complexity_cih, data=d, ci.high)$LongBet  
-```
-
-* plot bet to long word vs. complexity norms
-```{r}
-ggplot(ms, aes(norms.lf, LongBet)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbarh(aes(xmin=complexity_cil, xmax=complexity_cih), size=0.2, colour="grey") +
-  geom_errorbar(aes(ymin=bet_cil, ymax=bet_cih), size=0.2, colour="grey") +
-  annotate("text", x=6, y=25, label=paste("r=",round(cor(ms$norms.lf, ms$LongBet, use = "complete"), 2)))+
-  xlab("Complexity Norms") +
-  ylab("Bet to Long Word") +
-  geom_vline(xintercept = q, col = "red") +
-  ggtitle("High Frequency meanings (words)")
-```
-
-* correlation between norms and length
-```{r}
-# correlation between norms and bets to long word (all)
-cor.test(d$LongBet,d$complexity)
-bm.partial(d$LongBet,d$complexity, d$log.e.freq )
-#partial.r(d[,c(4,8,10)],c(1,2),3 )
-
-# correlation between norms and bets to long word (aggregated across words)
-cor.test(ms$LongBet,ms$complexity)
-bm.partial(ms$LongBet,ms$complexity, ms$log.e.freq  )
-
-summary(lmer(LongBet ~ complexity + log.e.freq + (1|trial) + (1|workerid), d))
-```
-
-* plot by quintiles
-```{r}
-#aggregate by quintile
-ms <- aggregate(LongBet  ~ quintile , data=d, mean)
-ms$bet_cil <- aggregate(LongBet  ~ quintile, data=d, ci.low)$LongBet  
-ms$bet_cih <- aggregate(LongBet  ~ quintile, data=d, ci.high)$LongBet  
-
-ggplot(ms, aes(quintile, LongBet)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymin=bet_cil, ymax=bet_cih), size=0.2, colour="black") +
-  annotate("text", x=5, y=25, label=paste("r=",round(cor(ms$quintile, ms$LongBet, use = "complete"), 2)))+
-  scale_y_continuous(limits = c(20, 80)) +
-  #scale_x_continuous(limits = c(0, 7), breaks = 1:7, labels = 1:7)  +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
-  xlab("Complexity Norm quintile") +
-  ylab("Bet to Long Word") +
-  ggtitle("High Frequency meanings (words)")
-```
-
-* correlations with quintiles
-```{r}
-# correlation between norms quintiles and bets to long word 
-cor.test(d$quintile, d$LongBet)
-
-# correlation between norms quintiles and bets to long word (aggregated across words)
-cor.test(ms$quintile, ms$LongBet)
-```
-
-* residual quintiles (controls for frequency)
-+ get quintiles
-```{r include = FALSE}
-normsC = englishComplexityNorms[is.element(englishComplexityNorms$word, d$engWord),] #get only 100 words
-
-# get residuals quintile
-m = lm(complexity ~ log.e.freq, normsC)
-normsC = merge( normsC, m$residuals, by="row.names",all.x=T)
-normsC = normsC[,3:8]
-names(normsC)[6] = "residual"
-
-q = quantile(normsC$residual, seq(0,1, by=.2), na.rm = TRUE)
-one = normsC[which(normsC$residual<q[2]), "word"]
-two = normsC[which((normsC$residual>q[2]| normsC$residual==q[2])  & normsC$residual<q[3]), "word"]
-three = normsC[which((normsC$residual>q[3]| normsC$complexity==q[3])  & normsC$residual<q[4]), "word"]
-four = normsC[which((normsC$residual>q[4]| normsC$residual==q[4])  & normsC$residual<q[5]), "word"]
-five = normsC[which((normsC$residual>q[5]| normsC$residual==q[5]) ), "word"]
-
-all_words = c(as.character(one),as.character(two), as.character(three), as.character(four), as.character(five))
-ones = rep(1, length(one))
-twos = rep(2, length(two))
-threes = rep(3, length(three))
-fours = rep(4, length(four))
-fives = rep(5, length(five))
-
-all_qs= c(ones, twos, threes, fours, fives)
-qs = as.data.frame(all_words)
-qs$resid.quintile = all_qs
-
-index <- match(d$engWord, qs$all_words)
-d$resid.quintile <- qs$resid.quintile[index]
+# add check information
+coded_languages = c("english", "spanish", "welsh", "vietnamese", "russian", "portuguese", "persian", "bosnian", "french", "hebrew", "italian", "korean", "polish" )
+c_l$checked = as.factor(ifelse( is.element(c_l$language, coded_languages), "yes", "no"))
 ```
 
 * plot
 ```{r}
-#aggregate by quintile
-ms.qr <- aggregate(LongBet  ~ resid.quintile , data=d, mean)
-ms.qr$bet_cil <- aggregate(LongBet  ~ resid.quintile, data=d, ci.low)$LongBet  
-ms.qr$bet_cih <- aggregate(LongBet  ~ resid.quintile, data=d, ci.high)$LongBet  
+if (savePlots) {pdf("figure/xling.pdf", height = 6, width = 12)}
 
-ggplot(ms.qr, aes(resid.quintile, LongBet)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymin=bet_cil, ymax=bet_cih), size=0.2, colour="black") +
-  annotate("text", x=5, y=25, label=paste("r=",round(cor(d$resid.quintile, d$LongBet, use = "complete"), 2)))+
-  scale_y_continuous(limits = c(20, 80)) +
-  #scale_x_continuous(limits = c(0, 7), breaks = 1:7, labels = 1:7)  +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
-  xlab("RESIDUAL Complexity Norm quintile") +
-  ylab("Bet to Long Word") +
-ggtitle("High Frequency meanings (words)")
+ggplot(c_l, aes(language, corr, fill = checked)) + 
+  geom_bar(stat = "identity") + 
+  geom_linerange(aes(ymax=upper.ci, ymin=lower.ci)) +
+  geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
+  geom_point(data=c_l, mapping=aes(x=language, y=mono.cor), size=2, shape = 16) +
+  geom_point(data=c_l, mapping=aes(x=language, y=open.cor), size=2, shape = 15) +
+  geom_hline(y=mean(c_l$corr), lty=2) +
+  ylab("Pearson's r") +
+  xlab("Language") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(plot.background = element_blank(),
+   panel.grid.major = element_blank(),
+   panel.grid.minor = element_blank(),
+   panel.border = element_blank())  +
+  theme(axis.title.x = element_text(size=25), axis.text.x  = element_text(size=10),
+        axis.title.y = element_text(size=25), axis.text.y  = element_text(size=10)) +
+  theme(legend.text = element_text(size = 10), legend.title = element_text(size = 10)) +
+  theme(axis.line = element_line(color = 'black'))+
+  scale_fill_manual(values=c("pink", "red")) +
+  theme(legend.position="none") +
+  scale_y_continuous(limits = c(-.07, .75)) 
+if(savePlots){dev.off()}
 ```
 
-* residual quintiles correlations
+* Grand means
 ```{r}
-cor.test(d$resid.quintile, d$LongBet) ### highly correlated
-cor.test(ms.qr$resid.quintile, ms.qr$LongBet) 
+mean(c_l$corr)
+mean(c_l$mono.cor)
+mean(c_l$open.cor)
+mean(c_l$p.corr)
 ```
+
 ***
 ***
-<a name="novelRealObjs"/>
 
 ## (3) Novel real objects
 
@@ -983,9 +801,6 @@ cor.test(de$objRatio, de$effect_size)
 cor.test(de$c.Mratio, de$effect_size)
 cor.test(de$rt.Mratio, de$effect_size)
 ```
-
-<a name="3c"/>
-### (C) Mapping task (children) [(Task)][task15]
 
 <a name="3d"/>
 ### (D) Production task (labels + desecriptions) 
