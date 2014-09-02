@@ -1,6 +1,6 @@
-writeup/misc/**
+writeup/misc/
 
-analysis/figure/**
+analysis/figure/
 
 *.DS_Store
 
