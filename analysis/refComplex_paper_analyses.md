@@ -1,41 +1,34 @@
 Referential Complexity Analyses
-================================
+====
 M. Lewis 
-
-September 02, 2014
+====
+September 03, 2014
+====
 
 ***
 ***
 
 <h2> Analyses:<h2>
 
-1. [Cross-linguistic analyses](#google) <br/> 
-  (A) [Complexity Norms](#1a) <br/>
-  (B) [Correlation between all lengths](#1b) <br/> 
-  (C) [Correlation between all lengths, controling for frequency, open class only](#1c) <br/> 
-  (D) [Correlation between all lengths and complexity, controling for frequency](#1d) <br/> 
-  (E) [Translation check data](#1e) <br/> 
+1. [Geons](#geons) <br/> 
+  (A) [Norms](#1a) <br/> 
+  (B) [Mappping task](#1b)<br/>
   
-3. [Novel real objects](#novelRealObjs)<br/> 
-  (A) [Norms](#3a)<br/> 
-  (B) [Mappping task (adults)](#3b) <br/> 
-  (C) [Mapping task (children)](#3c) TO DO <br/> 
-  (D) [Production task (labels + descriptions)](#3d) <br/> 
+2. [Novel real objects](#novelRealObjs)<br/> 
+  (A) [Norms](#2a)<br/> 
+  (B) [Mappping task (adults)](#2b) <br/> 
+  (\(C\)) [Production task (labels + descriptions)](#2c) <br/> 
 
-4. [Geons](#geons) <br/> 
-  (A) [Norms](#4a) <br/> 
-  (B) [Mappping task](#4b)<br/>
+3. [Natural language](#xling) <br/> 
+  (A) [English norms](#3a) <br/>
+  (B) [Xling translation accuracy](#3b) <br/> 
+  (\(C\)) [Xling correlation between lengths and complexity](#3c) <br/> 
+  
+***
+***
 
 #### SET GLOBAL VARIABLES
 
-```r
-rm(list=ls())
-
-whichSubjRemove = 'keepAll' #remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
-processNorms = TRUE # process norms or load norms? 
-savePlots = TRUE # save plots to pdf?
-doSlow = FALSE # do time-consuming pre-processing steps?
-```
 
 #### LOAD PACKAGES, FUNCTIONS, AND REPEAT SUBJ DATA FILE
 
@@ -43,48 +36,1560 @@ doSlow = FALSE # do time-consuming pre-processing steps?
 ***
 ***
 
-<a name="google"/>
+<a name="geons"/>
 
-## (1) Cross-linguistic analyses [(Complexity norms task)][task26]
+## (1) Geons
 
 <a name="1a"/>
-###  (A) Norms
 
-* preprocess
-
-
-* aggregate across words of the same length
+### (A) Norms [(Complexity Task)][task34] [(RT task)][task35]
+### (1) Complexity Norms
+### *get data into long form*
 
 ```r
-ms2 <- aggregate(complexity ~ nchars, data=ms, mean)
+if (processNorms) {
+  # read in data
+  d <- read.csv("data/RefComplex34.results",sep="\t",header=TRUE)
+  
+  # melt
+  md <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("obj",names(d))])
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$obj <- unlist(matrix(lapply(str_split(md$value,"j"),function(x) {x[2]})))
+  md$obj <- unlist(matrix(lapply(str_split(md$obj,".p"),function(x) {x[1]})))
+  md$complexityLevel <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[1]})))
+  md$objID <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[2]})))
+  md$value <- NULL; md$variable <- NULL
+  md = md[(md$trial != 0 & md$trial != 1),] # remove ball and circuit
+  
+  # get rating info
+  mdr <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("rating",names(d))])
+  mdr$trial <- matrix(lapply(str_split(mdr$variable,"_"),function(x) {x[2]}))
+  mdr$variable <- NULL
+  
+  # merge together based on trial and workerid
+  m = merge(md,mdr,by=c("workerid","trial"))
+  m$value <- as.numeric(as.character(m$value))
+  
+  # get norms by objects
+  ms_all <- aggregate(value ~ obj, data=m, mean)
+  ms_all$cih <- aggregate(value ~ obj, data=m, ci.high)$value
+  ms_all$cil <- aggregate(value ~ obj, data=m, ci.low)$value
+  
+  names(ms_all)[2] = "meanRating"
+  ms_all <- ms_all[order(ms_all$meanRating),]
+
+  # save complexity by item
+  write.csv(ms_all, "data/complicatedNormsGeons_BYITEM.csv")
+  } 
+
+cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")
+```
+
+### *plot complexity norm by condition*
+
+```r
+  # remove quotes from norms
+  cg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
+  cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
+  cg_norms$obj_item = as.numeric(substr(cg_norms$obj, 2, 2))
+
+  ms <- aggregate(meanRating  ~ obj_class, data=cg_norms, mean)
+  ms$cih <- aggregate(meanRating  ~ obj_class, data=cg_norms, ci.high)$meanRating
+  ms$cil <- aggregate(meanRating  ~ obj_class, data=cg_norms, ci.low)$meanRating
+    
+  # plot
+  ggplot(ms, aes(y=meanRating, x=as.numeric(obj_class))) +
+    geom_errorbar(data=ms, mapping=aes(x=obj_class, ymax = meanRating+cih, 
+                                       ymin=meanRating-cil), width=0.2, size=1, color="black") + 
+    geom_point(data=ms, mapping=aes(x=obj_class, y=meanRating), size=6)  +
+    geom_line() +
+    xlab("Object Condition") +
+    ylab("Complexity rating") +
+    ggtitle("complexity norm vs. number of geons")
+```
+
+![plot of chunk unnamed-chunk-1](figure/unnamed-chunk-1.png) 
+
+### *get complexity norm and condition correlation*
+
+```r
+# make object class numeric
+cg_norms$obj_class = as.numeric(cg_norms$obj_class) 
+
+# correlation between num geons and complexity
+cor.test(cg_norms$obj_class, cg_norms$meanRating)
 ```
 
 ```
-## Error: object 'ms' not found
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  cg_norms$obj_class and cg_norms$meanRating
+## t = 15.39, df = 38, p-value < 2.2e-16
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.8677 0.9617
+## sample estimates:
+##    cor 
+## 0.9283
+```
+
+
+### (2) RT Norms 
+### *get data into long form (accuracy and RT df) and do exclusions*
+
+```r
+if (processNorms) {
+  # read in data
+  raw <- read.csv("data/RefComplex37.results",sep="\t",header=TRUE)
+  
+  # remove repeat subjects?
+  if (whichSubjRemove == 'removeRepeatSubj') {
+    raw = merge(raw, dups, by=c("hitid","workerid"))
+    raw = raw[!raw$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      raw = merge(raw, dups, by=c("hitid","workerid"))
+      raw = raw[!raw$withinRepeatSubj,]
+      }
+  
+  # look at accuracy, and exclude those below chance
+  boxplot(raw$Answer.correct)
+  raw = raw[raw$Answer.correct > 20, ]
+  
+  # prep accuracy and RT dataframes
+  # accuracy data frame
+  # melt
+  n <- names(raw)
+  cols = c( n[grepl("test",n)])
+  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  mda$trial <-as.numeric(matrix(lapply(str_split(mda$variable,"_"),function(x) {x[3]})))
+  mda$var1 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[1]}))
+  mda$var2 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[2]}))
+  mda$var <- paste(mda$var1, mda$var2, sep = "_")
+  mda$variable <- NULL; mda$var1 <- NULL; mda$var2 <- NULL
+  
+  mda$seq <- with(mda, ave(value, workerid, var, FUN = seq_along))
+  da = dcast(workerid + seq + trial ~ var, data = mda, value.var = "value")
+  da$seq <- NULL
+  
+  da=da[!is.na(da$trial),]
+  
+  da$Answer.test_answer = as.factor(da$Answer.test_answer)
+  da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
+  da$Answer.test_image  = as.factor(da$Answer.test_image)
+  
+  # look at memory performance (correct: CR or hit)
+  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
+  numH = length(which(da$Answer.test_answerEval == "\"H\""))
+
+  correct = (numCR + numH)/ dim(da)[1]
+  print(paste("percent correct:" , round(correct)))
+
+  # get obj condition variable
+  da$test_image2 <- as.character(matrix(lapply(str_split(da$Answer.test_image,"j"), function(x) {x[2]})))
+  da$objCondition <- as.factor(as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[1]}))))
+  da$objItem <- as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[2]})))
+  da$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", da$objItem)))
+  
+  # RT dataframe
+  # melt
+  n <- names(raw)
+  cols = c(n[grepl("train", n)])
+  cols = cols[1:40]
+  md <- melt(raw, id.vars=c("workerid"), measure.vars=cols)
+  md$trial <- as.numeric(matrix(lapply(str_split(md$variable,"_"),function(x) {x[3]})))
+  md$var1 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]}))
+  md$var2 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$var <- paste(md$var1, md$var2, sep = "_")
+  md$variable <- NULL; md$var1 <- NULL; md$var2 <- NULL
+  
+  md$seq <- with(md, ave(value, workerid, var, FUN = seq_along))
+  d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
+  d$Answer.train_NA <- NULL; d$seq <- NULL
+  
+  d=d[!is.na(d$trial),]
+  d=d[!is.na(d$Answer.train_image),]
+  d=d[!is.na(d$Answer.train_rt),]
+  d=d[d$Answer.train_image != "undefined",]
+  d=d[d$Answer.train_image != "",]
+  
+  d$Answer.train_rt = as.numeric(d$Answer.train_rt)
+  
+  # exclude outlier 2 standard deviations above and below mean (in log space)
+  d$log.rt = log(d$Answer.train_rt)
+  total = dim(d)[1]
+  sd2 = 2*sd(d$log.rt)
+  d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
+  print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
+  hist(d$log.rt)
+  
+  # get obj condition
+  d = d[d$trial > 1,] # exclude anchors (not interesting because order not randomized)
+  d$train_image2 <- as.character(matrix(lapply(str_split(d$Answer.train_image,"j"), function(x) {x[2]})))
+  d$objCondition <- as.factor(as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[1]}))))
+  d$objItem <- as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[2]})))
+  d$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", d$objItem)))
+  d$obj <- paste("\"", d$objCondition, "-" ,d$objItem,"\"", sep = "" )
+  
+  # rt by item
+  ms_all <- aggregate(log.rt  ~ obj, data=d, mean)
+  ms_all$cih <- aggregate(log.rt ~ obj, data=d, ci.high)$log.rt
+  ms_all$cil <- aggregate(log.rt ~ obj, data=d, ci.low)$log.rt
+  
+  # save RT by item
+  write.csv(ms_all, "data/rtNormsGeons_BYITEM.csv")
+  } 
+
+rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv")
+```
+
+###  *plot RT by condition*
+
+```r
+  rg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", rg_norms$obj)))
+  rg_norms$obj_class = substr(rg_norms$obj, 1, 1)
+  rg_norms$obj_item = substr(rg_norms$obj, 2, 2)
+
+  ms <- aggregate(log.rt  ~ obj_class, data=rg_norms, mean)
+  ms$cih <- aggregate(log.rt  ~ obj_class, data=rg_norms, ci.high)$log.rt
+  ms$cil <- aggregate(log.rt  ~ obj_class, data=rg_norms, ci.low)$log.rt
+    
+  # plot
+  ggplot(ms, aes(y=log.rt, x=as.numeric(obj_class))) +
+    geom_errorbar(data=ms, mapping=aes(x=obj_class, ymax = log.rt+cih, 
+                                       ymin=log.rt-cil), width=0.2, size=1, color="black") + 
+    geom_point(data=ms, mapping=aes(x=obj_class, y=log.rt), size=6)  +
+    geom_line() +
+    xlab("Object Condition") +
+    ylab("Log RT (ms)") + 
+    ggtitle("RT vs. number of geons")
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+
+### *get RT correlation with condition*
+
+```r
+# make object class numeric
+rg_norms$obj_class = as.numeric(rg_norms$obj_class) 
+
+# correlation between num geons and complexity
+cor.test(rg_norms$obj_class, rg_norms$log.rt)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  rg_norms$obj_class and rg_norms$log.rt
+## t = 15.43, df = 38, p-value < 2.2e-16
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.8683 0.9619
+## sample estimates:
+##    cor 
+## 0.9286
+```
+
+### *get correlation between between complexity rating and RT*
+
+```r
+index <- match(cg_norms$obj, rg_norms$obj)
+cg_norms$rt_meanRating <- rg_norms$log.rt[index]
+
+cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  cg_norms$rt_meanRating and cg_norms$meanRating
+## t = 12.14, df = 38, p-value = 1.199e-14
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.8033 0.9416
+## sample estimates:
+##    cor 
+## 0.8917
+```
+
+<a name="1b"/>
+
+### (B) Mapping task [(Task)][task37] 
+### *get data into long form*
+
+```r
+if (doSlow){
+  # read in data
+  d <- read.csv("data/RefComplex38.results",sep="\t",header=TRUE)
+  
+  # remove repeat subjects?
+  if (whichSubjRemove == 'removeRepeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
+  # melt
+  md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+  md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
+  
+  md$variable <- as.factor(as.character(md$variable))
+  md$trial <- as.factor(as.character(md$trial))
+  md$value <- as.factor(as.character(md$value))
+  md$workerid <- as.factor(as.character(md$workerid))
+  
+  md$seq <- with(md, ave(value, workerid, variable, trial, FUN = seq_along))
+  dc <- dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
+  dc$seq <- NULL
+  
+  # make everything factors
+  dc$criticalComplicated  <- as.factor(as.numeric(gsub("[[:punct:]]", "", dc$criticalComplicated))) #strip punctuations
+  dc$criticalSimple  <- as.factor(as.numeric(gsub("[[:punct:]]", "", dc$criticalSimple))) #strip punctuations
+  dc$langCondition <- as.factor(dc$langCondition)
+  dc$objCondition <- as.factor(dc$objCondition)
+  dc$response <- as.factor(dc$response)
+  dc$responseSide <- as.factor(dc$responseSide)
+  dc$responseValue  <- as.factor(dc$responseValue)
+  dc$word <- as.factor(dc$word)
+  
+  # merge in norms
+  # complicated
+  index <- match(dc$criticalSimple, cg_norms$obj)
+  dc$criticalSimple_c.norms <- cg_norms$meanRating[index]
+  index <- match(dc$criticalComplicated,cg_norms$obj)
+  dc$criticalComplicated_c.norms <- cg_norms$meanRating[index]
+  
+  # rt
+  index <- match(dc$criticalSimple, rg_norms$obj)
+  dc$criticalSimple_rt.norms <- rg_norms$log.rt [index]
+  index <- match(dc$criticalComplicated, rg_norms$obj)
+  dc$criticalComplicated_rt.norms <- rg_norms$log.rt [index]
+  
+  dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
+  dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
+  
+  write.csv(dc, "data/RC38_long.csv")
+  }
+
+dc <- read.csv('data/RC38_long.csv')
+```
+
+### *get effect sizes*
+
+```r
+de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
+```
+
+### *get obj conditions*
+
+```r
+de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
+de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
+de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
+de$cond2<- as.numeric(gsub("[[:punct:]]", "", de$cond2))
+de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
+```
+
+### *plot complexity ratios as a function of condition*
+
+```r
+# set graphical params
+fs = 25
+rs = 8
+
+# complexity ratio
+geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
+  geom_pointrange( aes(ymax = cill, ymin=ciul))+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  #geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
+  ylab("effect size (Cohen's d)") +
+  xlab("complexity rating ratio") + 
+  theme(text = element_text(size=fs))  +
+  scale_y_continuous(limits = c(-.33, .66)) +
+  scale_x_continuous(limits = c(.25, 1.29)) +
+  annotate("text", x=1.15, y=.5, color = "red", size = rs,
+           label=paste("r=",round(cor(de$effect_size, de$c.Mratio), 2))) +
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) 
+
+# rt ratio
+geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
+  geom_pointrange( aes(ymax = cill, ymin=ciul))+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  #geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
+  ylab("effect size (Cohen's d)") +
+  xlab("reaction time ratio") + 
+  theme(text = element_text(size=fs)) +  
+  scale_y_continuous(limits = c(-.33, .66)) +
+  scale_x_continuous(limits = c(.949, 1.005)) +
+  annotate("text", x=.997, y=.5, color = "red", size = rs,
+           label=paste("r=",round(cor(de$effect_size, de$rt.Mratio), 2))) +
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) 
+
+if (savePlots){ 
+  pdf("figure/geon.pdf", height = 6, width = 12)
+  multiplot(geon_c_plot, geon_rt_plot, cols = 2)
+  dev.off()
+}else {
+  multiplot(geon_c_plot, cols = 1)
+  multiplot(geon_rt_plot, cols = 1)
+}
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-81.png) ![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-82.png) 
+
+###  *correlations between norms and effect sizes*
+
+```r
+cor.test(de$rt.Mratio, de$effect_size)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  de$rt.Mratio and de$effect_size
+## t = -5.249, df = 13, p-value = 0.0001572
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  -0.9397 -0.5400
+## sample estimates:
+##     cor 
+## -0.8243
 ```
 
 ```r
-ms2$cih <- aggregate(complexity ~ nchars,  data=ms, ci.high)$complexity
+cor.test(de$c.Mratio, de$effect_size)
 ```
 
 ```
-## Error: object 'ms' not found
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  de$c.Mratio and de$effect_size
+## t = -6.219, df = 13, p-value = 3.121e-05
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  -0.9544 -0.6337
+## sample estimates:
+##     cor 
+## -0.8651
+```
+
+***
+***
+
+<a name="novelRealObjs"/>
+
+## (2) Novel real objects
+
+<a name="2a"/>
+
+### (A) Norms [Complexity norming task][task30] [RT task][task9]
+
+### (1) Complexity Norms
+### *get data into long form, compute correlations between 2 samples, figure out quintiles, remove dupliate subjects*
+
+```r
+if (processNorms){
+  ## Sample #1
+  da <- read.csv("data/RefComplex9a.results",sep="\t",header=TRUE)
+  da[,31:92] <- lapply(da[,31:92],as.character)
+  da[,31:92] <- lapply(da[,31:92],as.numeric)
+  
+  # melt
+  md <- melt(da,id.vars=c("workerid"),measure.vars=names(da)[grepl("rating",names(da))])
+  names(md) <- c("workerid", "rating", "value")
+  ms = aggregate(value ~ rating, md, mean)
+
+  ## Sample #2
+  db <- read.csv("data/RefComplex9b.results",sep="\t",header=TRUE)
+  db[,30:92] <- lapply(db[,30:92],as.character)
+  db[,30:92] <- lapply(db[,30:92],as.numeric)
+  
+  # melt
+  mdb <- melt(db,id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
+  names(mdb) <- c("workerid", "rating", "value")
+  msb = aggregate(value ~ rating, mdb, mean)
+  
+  # merge two samples together to get lists for experiments 
+  all_ratings = rbind(md, mdb)
+  all_ms = aggregate(value ~ rating, all_ratings, mean)
+  all_ms$ratingNum <- matrix(sapply(str_split(matrix(sapply(str_split(all_ms$rating,"rating"),
+                                                            function(x) {x[2]})),"_"),function(x){x[1]}))
+  all_ms$ratingNum<- as.numeric(str_replace_all(as.character(all_ms$ratingNum),"\\\"",""))
+  all_ms$cil = aggregate(value ~ rating, all_ratings, ci.low)$value
+  all_ms$cih = aggregate(value ~ rating, all_ratings, ci.high)$value
+  
+  all_ms = all_ms[!is.na(all_ms$ratingNum),] # get rid of ball and motherboard
+  
+  # add back in ratings for each samples
+  all_ms = merge(all_ms, ms, by="rating")
+  all_ms = merge(all_ms, msb, by="rating")
+  
+  all_ms$rating <- NULL
+  names(all_ms) = c("meanRating" , "ratingNum", "cil", "cih" ,"rating_1","rating_2" )
+  all_ms <- all_ms[c(2,1,3:6)]
+  
+  # get quintiles
+  q = quantile(all_ms$meanRating, seq(0,1, by=.2))
+  one = all_ms[which(all_ms$meanRating<q[2]), "ratingNum"]
+  two = all_ms[which(all_ms$meanRating>q[2] & all_ms$meanRating<q[3]), "ratingNum"]
+  three = all_ms[which(all_ms$meanRating>q[3] & all_ms$meanRating<q[4]), "ratingNum"]
+  four = all_ms[which(all_ms$meanRating>q[4] & all_ms$meanRating<q[5]), "ratingNum"]
+  five = all_ms[which(all_ms$meanRating>q[5]), "ratingNum"]
+  
+  one # 13 15 19 20 28 29  3 44 46 54 57 59
+  two # 10 17  2 22 34 37  4 49  5 55  6  9
+  three # 12 50 7 8 48 16 1 39 40 56 24 60
+  four # 26 18 11 47 42 30 23 31 51 58 41 45
+  five # 14 21 25 27 32 33 35 36 38 43 52 53
+  
+  all_ms$quintile = ifelse(is.element(all_ms$ratingNum, one), 1, 
+                           ifelse(is.element(all_ms$ratingNum, two), 2,
+                                  ifelse(is.element(all_ms$ratingNum, three), 3,
+                                         ifelse(is.element(all_ms$ratingNum, four), 4,
+                                                ifelse(is.element(all_ms$ratingNum, five), 5,
+                                                       "error")))))
+  all_ms$quintile = as.numeric(all_ms$quintile)
+  all_ms <- all_ms[order(all_ms$meanRating),]
+  
+  # there is one participant who was in both samples. Look at correlation between samples without this participant in Sample #2 
+  # Sample #2 
+  # melt
+  mdb <- melt(db[db$workerid != 'A1BQEX75BE1AYE',],id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
+  names(mdb) <- c("workerid", "rating", "value")
+  msb = aggregate(value ~ rating, mdb, mean)
+  
+  co_norms_unique_sample = merge(ms, msb, by="rating")
+  co_norms_unique_sample$ratingNum <- as.numeric(matrix(sapply(str_split(matrix(sapply(str_split(co_norms_unique_sample$rating,"rating")
+                                                                                       ,function(x) {x[2]})),"_"),function(x){x[1]})))
+  co_norms_unique_sample = co_norms_unique_sample[!is.na(co_norms_unique_sample$ratingNum),] # get rid of ball and motherboard
+
+  co_norms_unique_sample$rating <- NULL
+  names(co_norms_unique_sample) = c( "rating_1", "rating_2", "ratingNum")
+  print('reliability, removing duplicate subj:',round(cor(co_norms_unique_sample$rating_1, co_norms_unique_sample$rating_2),2)) # nearly identical to original sample
+  
+  # write to csv (use write.table to can exclude headers, so matlab can read for figure)
+  write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
+            row.names=FALSE, col.names=FALSE, sep=",")
+  
+  # write to csv
+  write.csv(all_ms, "data/complicatedNormsObjs_BYITEM.csv")
+  }
+
+co_norms = read.csv("data/complicatedNormsObjs_BYITEM.csv")
+```
+
+### *get reliability between two samples*
+
+```r
+cor.test(co_norms$rating_1, co_norms$rating_2)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  co_norms$rating_1 and co_norms$rating_2
+## t = 18.91, df = 58, p-value < 2.2e-16
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.8812 0.9563
+## sample estimates:
+##    cor 
+## 0.9276
+```
+
+### (2) RT Norms
+### *get data into long form (accuracy and RT df) and do exclusions*
+
+```r
+if (processNorms){
+  raw <- read.csv("data/RefComplex30.results",sep="\t",header=TRUE)
+  
+  if (whichSubjRemove == 'repeatSubj') {
+    raw = merge(raw, dups, by=c("hitid","workerid"))
+    raw = raw[!raw$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      raw = merge(raw, dups, by=c("hitid","workerid"))
+      raw = raw[!raw$withinRepeatSubj,]
+      }
+    
+  # look at accuracy, and exclude those below chance
+  boxplot(raw$Answer.correct)
+  raw = raw[raw$Answer.correct > 30, ]
+  
+  # accuracy dataframe
+  n <- names(raw)
+  cols = c( n[grepl("test",n)])
+  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  mda$trial <-as.numeric(matrix(lapply(str_split(mda$variable,"_"),function(x) {x[3]})))
+  mda$var1 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[1]}))
+  mda$var2 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[2]}))
+  mda$var <- paste(mda$var1, mda$var2, sep = "_")
+  mda$variable <- NULL; mda$var1 <- NULL; mda$var2 <- NULL
+  
+  mda$seq <- with(mda, ave(value, workerid, var, FUN = seq_along))
+  da = dcast(workerid + seq + trial ~ var, data = mda, value.var = "value")
+  da$seq <- NULL
+  
+  da=da[!is.na(da$trial),]
+  
+  da$Answer.test_answer = as.factor(da$Answer.test_answer)
+  da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
+  da$Answer.test_image  = as.factor(da$Answer.test_image)
+  
+  # look at memory performance (correct: CR or hit)
+  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
+  numH = length(which(da$Answer.test_answerEval == "\"H\""))
+
+  correct = (numCR + numH)/ dim(da)[1]
+  print(paste("percent correct:" , round(correct)))
+  
+  # RT dataframe
+  n <- names(raw)
+  cols = c(  n[grepl("train",n)], n["correct"])
+  cols = cols[1:154]
+  md <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  md$trial <-as.numeric(matrix(lapply(str_split(md$variable,"_"),function(x) {x[3]})))
+  md$var1 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]}))
+  md$var2 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$var <- paste(md$var1, md$var2, sep = "_")
+  md$variable <- NULL; md$var1 <- NULL; md$var2 <- NULL
+  
+  md$seq <- with(md, ave(value, workerid, var, FUN = seq_along))
+  d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
+  d$Answer.train_NA <- NULL; d$seq <- NULL
+  
+  d=d[!is.na(d$trial),]
+  d=d[!is.na(d$Answer.train_image),]
+  d=d[!is.na(d$Answer.train_rt),]
+  d=d[d$Answer.train_image != "undefined",]
+  d=d[d$Answer.train_image != "",]
+  
+  d$Answer.train_image = as.factor(d$Answer.train_image)
+  d$Answer.train_rt = as.numeric(d$Answer.train_rt)
+  
+  #exclude outlier 2 standard deviations above and below mean (in log space)
+  d$log.rt = log(d$Answer.train_rt)
+  total = dim(d)[1]
+  sd2 = 2*sd(d$log.rt)
+  d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
+  print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
+  hist(d$log.rt)
+  
+  # aggregate
+  ms <- aggregate(log.rt  ~ Answer.train_image, data=d, mean)
+  ms$rt_cil <- aggregate(log.rt ~ Answer.train_image, data=d, ci.low)$log.rt 
+  ms$rt_cih <- aggregate(log.rt ~ Answer.train_image, data=d, ci.high)$log.rt 
+  
+  ms = ms[ms$Answer.train_image != 61,] # get rid of ball and motherboard
+  ms = ms[ms$Answer.train_image != 62,] 
+
+  write.csv(ms,"data/rtNormsObjs_BYITEM.csv")
+  }
+
+rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv")
+```
+
+### *correlation between norms*
+
+```r
+index <- match(co_norms$ratingNum, rto_norms$Answer.train_image)
+co_norms$log.rt <- rto_norms$log.rt[index]
+cor.test(co_norms$meanRating, co_norms$log.rt)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  co_norms$meanRating and co_norms$log.rt
+## t = 4.865, df = 58, p-value = 9.152e-06
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.3294 0.6970
+## sample estimates:
+##    cor 
+## 0.5383
+```
+
+<a name="2b"/>
+
+### (B) Mapping task (adults) [(Task)][task34]
+
+### *get data into long form*
+
+```r
+if (doSlow) {
+  d <- read.csv("data/RefComplex35.results",sep="\t",header=TRUE)
+  
+  if (whichSubjRemove == 'removeRepeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
+  # get in long form
+  # get trial info
+  md <- melt(d,id.vars=c("workerid"),
+             measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+  md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
+  
+  md$variable <- as.factor(as.character(md$variable))
+  md$trial <- as.factor(as.character(md$trial))
+  md$value <- as.factor(as.character(md$value))
+  md$workerid <- as.factor(as.character(md$workerid))
+  
+  md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
+  dc = dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
+  dc$seq <- NULL
+  
+  write.csv(dc, "data/RC35_long.csv")
+  }
+
+dc <-  read.csv("data/RC35_long.csv")
+```
+
+### *make everything factors*
+
+```r
+dc$criticalComplicated= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalComplicated))
+dc$criticalSimple= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalSimple))
+
+dc$criticalComplicated <- as.factor(dc$criticalComplicated)
+dc$criticalSimple <- as.factor(dc$criticalSimple)
+dc$langCondition <- as.factor(dc$langCondition)
+dc$objCondition <- as.factor(dc$objCondition)
+dc$response <- as.factor(dc$response)
+dc$responseSide <- as.factor(dc$responseSide)
+dc$responseValue<- as.factor(dc$responseValue)
+dc$word <- as.factor(dc$word)
+dc$trial <- as.numeric(dc$trial)
+```
+
+### *merge in norms*
+
+```r
+index <- match(dc$criticalSimple, co_norms$ratingNum)
+dc$criticalSimple_c.norms <- co_norms$meanRating[index]
+index <- match(dc$criticalComplicated, co_norms$ratingNum)
+dc$criticalComplicated_c.norms <- co_norms$meanRating[index]
+
+index <- match(dc$criticalSimple, rto_norms$Answer.train_image)
+dc$criticalSimple_rt.norms <- rto_norms$log.rt [index]
+index <- match(dc$criticalComplicated, rto_norms$Answer.train_image)
+dc$criticalComplicated_rt.norms <- rto_norms$log.rt [index]
+
+dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
+dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
+```
+
+### *get effect sizes*
+
+```r
+de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
+```
+
+### *get obj conditions*
+
+```r
+de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
+de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
+de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
+de$cond2<- as.factor(gsub("[[:punct:]]", "", de$cond2))
+de$objRatio = as.numeric(de$cond1)/as.numeric(de$cond2)
+de$l.objRatio <- log(de$objRatio)
+
+de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
+```
+
+### *plot complexity ratios vs. condition*
+
+```r
+# set graphical params
+fs = 25
+rs = 8
+
+# complexity plot
+obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
+  geom_pointrange(aes(ymax = cill, ymin=ciul),position="dodge")+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  #geom_text(aes(c.Mratio+.03, effect_size, label=objCondition2), position="dodge") +
+  #geom_text(aes(c.Mratio+.04, effect_size, label=objCondition2), position="dodge") +
+  ylab("effect size (Cohen's d)") +
+  xlab("complexity rating ratio") + 
+  #ggtitle("complexity ratio vs. effect size") +
+  scale_x_continuous(limits = c(.25, 1.29)) +
+  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
+  annotate("text", x=1.15, y=.5, col = "red",label=paste(
+    "r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)), size = rs) +
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) +
+  scale_y_continuous(limits = c(-.33, .66))
+
+# RT ratio plot
+obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
+  geom_pointrange( aes(ymax = cill, ymin=ciul))+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  #geom_text(aes(rt.Mratio+.0008, effect_size, label=objCondition2)) +
+  #geom_text(aes(rt.Mratio+.002, effect_size, label=objCondition2)) +
+  ylab("effect size (Cohen's d)") +
+  xlab("reaction time ratio") +
+  scale_x_continuous(limits = c(.949, 1.005)) +
+  #ggtitle("RT ratio vs. effect size") +
+  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
+  annotate("text", x=.997, y=.5, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)), size = rs) +  
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) +
+  scale_y_continuous(limits = c(-.33, .66))
+
+if (savePlots) {
+  pdf("figure/realobjs.pdf", height = 6, width = 12)
+  multiplot(obj_c_plot, obj_rt_plot, cols = 2)
+  dev.off()
+} else {
+  multiplot(obj_c_plot, cols = 1)
+  multiplot(obj_rt_plot, cols = 1)
+}
+```
+
+![plot of chunk unnamed-chunk-16](figure/unnamed-chunk-161.png) ![plot of chunk unnamed-chunk-16](figure/unnamed-chunk-162.png) 
+
+### *correlations between effect size and complexity conditions*
+
+```r
+cor.test(de$objRatio, de$effect_size)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  de$objRatio and de$effect_size
+## t = -3.051, df = 13, p-value = 0.009273
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  -0.8703 -0.1999
+## sample estimates:
+##    cor 
+## -0.646
 ```
 
 ```r
-ms2$cil <- aggregate(complexity ~ nchars,  data=ms, ci.low)$complexity
+cor.test(de$c.Mratio, de$effect_size)
 ```
 
 ```
-## Error: object 'ms' not found
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  de$c.Mratio and de$effect_size
+## t = -3.494, df = 13, p-value = 0.00396
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  -0.8907 -0.2854
+## sample estimates:
+##     cor 
+## -0.6959
 ```
 
 ```r
+cor.test(de$rt.Mratio, de$effect_size)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  de$rt.Mratio and de$effect_size
+## t = -3.659, df = 13, p-value = 0.002887
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  -0.8972 -0.3149
+## sample estimates:
+##     cor 
+## -0.7123
+```
+
+<a name="2c"/>
+
+### (\(C\)) Production task (labels + descriptions) 
+### (1) Labels [(Task)][task27]
+### *get data into long form*
+
+```r
+d <- read.csv("data/RefComplex27.results",sep="\t",header=TRUE)
+
+if (whichSubjRemove == 'repeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
+n <- names(d)
+d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
+d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
+d$Answer.pic_3 = as.factor(as.character(d$Answer.pic_3))
+d$Answer.pic_4 = as.factor(as.character(d$Answer.pic_4))
+d$Answer.pic_5 = as.factor(as.character(d$Answer.pic_5))
+d$Answer.pic_6 = as.factor(as.character(d$Answer.pic_6))
+d$Answer.pic_7 = as.factor(as.character(d$Answer.pic_7))
+d$Answer.pic_8 = as.factor(as.character(d$Answer.pic_8))
+d$Answer.pic_9 = as.factor(as.character(d$Answer.pic_9))
+d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
+
+cols = c( n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("pic",n)],na.rm=TRUE)
+md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+names(md1)[3]= "picture"
+md1 = md1[,-2]
+
+md2 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("desc_",n)],na.rm=TRUE)
+md2$trial <-as.numeric(matrix(lapply(str_split(md2$variable,"_"),function(x) {x[2]})))
+names(md2)[3]= "description"
+md2 = md2[,-2]
+
+md3 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("descLength",n)],na.rm=TRUE)
+md3$trial <-as.numeric(matrix(lapply(str_split(md3$variable,"_"),function(x) {x[2]})))
+names(md3)[3] = "length"
+md3 = md3[,-2]
+
+md4 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("cond",n)],na.rm=TRUE)
+md4$trial <-as.numeric(matrix(lapply(str_split(md4$variable,"_"),function(x) {x[2]})))
+names(md4)[3] = "condition"
+md4 = md4[,-2]
+
+md12<- join(md1, md2,type = "inner")
+md123<- join(md12, md3,type = "inner")
+md<- join(md123, md4,type = "inner")
+
+# add columns
+md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
+md$log.length <- log(md$length) 
+md$log.trial <- log(md$trial)
+md <- md[md$numWords == 1,]  #remove multi word responses
+```
+
+### *relationship between condition and label length*
+
+```r
+t.test(md[md$condition == '"complex"',"log.length"],md[md$condition == '"simple"',"log.length"],paired = TRUE)
+```
+
+```
+## 
+## 	Paired t-test
+## 
+## data:  md[md$condition == "\"complex\"", "log.length"] and md[md$condition == "\"simple\"", "log.length"]
+## t = 3.735, df = 286, p-value = 0.0002269
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  0.03846 0.12417
+## sample estimates:
+## mean of the differences 
+##                 0.08131
+```
+
+```r
+summary(lmer(log.length~condition + (1+trial|workerid), md))
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: log.length ~ condition + (1 + trial | workerid)
+##    Data: md
+## 
+## REML criterion at convergence: -0.4
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -4.009 -0.626  0.061  0.633  2.773 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev. Corr
+##  workerid (Intercept) 1.53e-02 0.12358      
+##           trial       3.40e-06 0.00184  1.00
+##  Residual             4.92e-02 0.22189      
+## Number of obs: 574, groups:  workerid, 59
+## 
+## Fixed effects:
+##                   Estimate Std. Error t value
+## (Intercept)         1.9350     0.0218    88.7
+## condition"simple"  -0.0797     0.0185    -4.3
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## cndtn"smpl" -0.427
+```
+
+### *relationship between complicated norms and label length*
+
+```r
+index <- match(md$picture, co_norms$ratingNum)
+md$c.norms <- co_norms$meanRating[index]
+
+ms <- aggregate(log.length ~ c.norms + picture, data=md, mean)
+ms$cih <- aggregate(log.length ~ c.norms + picture, data=md, ci.high)$log.length
+ms$cil <- aggregate(log.length ~ c.norms + picture, data=md, ci.low)$log.length
+
+#plot
+ggplot(ms, aes(c.norms,log.length)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2, colour="grey") +
+  theme_bw() +
+  xlab("Object Complexity Norms") +
+  ylab("Log Word Length (characters)") +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
+  annotate("text", x=.75, y=1.6, color = "red", size = 8,
+    label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
+    ggtitle('Label length vs. complicated norms')
+```
+
+![plot of chunk unnamed-chunk-19](figure/unnamed-chunk-19.png) 
+
+### *relationship between RT norms and label length*
+
+```r
+index <- match(md$picture, rto_norms$Answer.train_image)
+md$rt.norms <- rto_norms$log.rt[index]
+
+ms <- aggregate(log.length ~ rt.norms + picture, data=md, mean)
+ms$cih <- aggregate(log.length ~ rt.norms + picture, data=md, ci.high)$log.length
+ms$cil <- aggregate(log.length ~ rt.norms + picture, data=md, ci.low)$log.length
+
+#plot
+ggplot(ms, aes(rt.norms,log.length)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2, colour="grey") +
+  theme_bw() +
+  xlab("Object RT Norms") +
+  ylab("Log Word Length (characters)") +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+
+  annotate("text", x=7.5, y=1.6, color = "red", size = 8,
+    label=paste("r=",round(cor(md$log.length,md$rt.norms), 2)))+
+    ggtitle('Label length vs. RT norms')
+```
+
+![plot of chunk unnamed-chunk-20](figure/unnamed-chunk-20.png) 
+
+### (2) Descriptions [(Task)][task25]
+
+### *get data in long form*
+
+```r
+d <- read.csv("data/RefComplex25.results",sep="\t",header=TRUE)
+
+if (whichSubjRemove == 'repeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
+n <- names(d)
+d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
+d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
+d$Answer.pic_3 = as.factor(as.character(d$Answer.pic_3))
+d$Answer.pic_4 = as.factor(as.character(d$Answer.pic_4))
+d$Answer.pic_5 = as.factor(as.character(d$Answer.pic_5))
+d$Answer.pic_6 = as.factor(as.character(d$Answer.pic_6))
+d$Answer.pic_7 = as.factor(as.character(d$Answer.pic_7))
+d$Answer.pic_8 = as.factor(as.character(d$Answer.pic_8))
+d$Answer.pic_9 = as.factor(as.character(d$Answer.pic_9))
+d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
+
+cols = c( n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("pic",n)],na.rm=TRUE)
+md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+names(md1)[3]= "picture"
+md1 = md1[,-2]
+
+md2 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("desc_",n)],na.rm=TRUE)
+md2$trial <-as.numeric(matrix(lapply(str_split(md2$variable,"_"),function(x) {x[2]})))
+names(md2)[3]= "description"
+md2 = md2[,-2]
+
+md3 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("descLength",n)],na.rm=TRUE)
+md3$trial <-as.numeric(matrix(lapply(str_split(md3$variable,"_"),function(x) {x[2]})))
+names(md3)[3] = "length"
+md3 = md3[,-2]
+
+md4 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("cond",n)],na.rm=TRUE)
+md4$trial <-as.numeric(matrix(lapply(str_split(md4$variable,"_"),function(x) {x[2]})))
+names(md4)[3] = "condition"
+md4 = md4[,-2]
+
+md12<- join(md1, md2,type = "inner")
+```
+
+```
+## Joining by: workerid, trial
+```
+
+```r
+md123<- join(md12, md3,type = "inner")
+```
+
+```
+## Joining by: workerid, trial
+```
+
+```r
+md<- join(md123, md4,type = "inner")
+```
+
+```
+## Joining by: workerid, trial
+```
+
+```r
+# add number of words count
+md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
+md$length_r <-nchar(as.character(md$description))
+
+# add clean length var (remove punctuation and spaces)
+md$description_clean= gsub(" ", "", gsub("[[:punct:]]", "", md$description))
+md$length_c= nchar(as.character(md$description_clean))
+md$log.length_c = log(md$length_c)
+```
+
+### *relationship between condition and description length*
+
+```r
+#summary(lmer(length_c~condition + (1|workerid), md))
+#summary(lmer(length_c~condition + trial + (1+trial|workerid), md))
+
+summary(lmer(log.length_c~md$condition + (1|workerid), md))
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: log.length_c ~ md$condition + (1 | workerid)
+##    Data: md
+## 
+## REML criterion at convergence: 863.1
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -3.004 -0.616  0.071  0.599  4.269 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  workerid (Intercept) 0.476    0.690   
+##  Residual             0.175    0.418   
+## Number of obs: 600, groups:  workerid, 60
+## 
+## Fixed effects:
+##                      Estimate Std. Error t value
+## (Intercept)            3.3545     0.0922    36.4
+## md$condition"simple"  -0.1128     0.0342    -3.3
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## md$cndtn"s" -0.185
+```
+
+```r
+summary(lmer(log.length_c~condition + trial + (1+trial|workerid), md))
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: log.length_c ~ condition + trial + (1 + trial | workerid)
+##    Data: md
+## 
+## REML criterion at convergence: 823.1
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -3.185 -0.559  0.071  0.594  3.841 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev. Corr 
+##  workerid (Intercept) 0.43168  0.6570        
+##           trial       0.00177  0.0421   -0.02
+##  Residual             0.14949  0.3866        
+## Number of obs: 600, groups:  workerid, 60
+## 
+## Fixed effects:
+##                   Estimate Std. Error t value
+## (Intercept)        3.54229    0.09310    38.0
+## condition"simple" -0.12772    0.03260    -3.9
+## trial             -0.03278    0.00773    -4.2
+## 
+## Correlation of Fixed Effects:
+##             (Intr) cndt""
+## cndtn"smpl" -0.189       
+## trial       -0.252  0.031
+```
+
+```r
+## plot
+ggplot(md, aes(x=log.length_c, fill=condition)) + 
+  geom_density(alpha = 0.2)+
+  ggtitle('description length as a function of condition')
+```
+
+![plot of chunk unnamed-chunk-21](figure/unnamed-chunk-21.png) 
+
+### *relationship between complexity norms and description length*
+
+```r
+index <- match(md$picture, co_norms$ratingNum)
+md$c.norms <- co_norms$meanRating[index]
+
+summary(lmer(log.length_c~c.norms + (1+trial|workerid), md))
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: log.length_c ~ c.norms + (1 + trial | workerid)
+##    Data: md
+## 
+## REML criterion at convergence: 826.8
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -3.272 -0.551  0.069  0.587  3.893 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev. Corr 
+##  workerid (Intercept) 0.44295  0.6655        
+##           trial       0.00275  0.0524   -0.11
+##  Residual             0.14874  0.3857        
+## Number of obs: 600, groups:  workerid, 60
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)   3.2392     0.0944    34.3
+## c.norms       0.2921     0.0691     4.2
+## 
+## Correlation of Fixed Effects:
+##         (Intr)
+## c.norms -0.346
+```
+
+```r
+summary(lmer(log.length_c~c.norms + trial + (1|workerid), md)) # complexity norms predict length
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: log.length_c ~ c.norms + trial + (1 | workerid)
+##    Data: md
+## 
+## REML criterion at convergence: 836
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -3.062 -0.625  0.060  0.597  4.042 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  workerid (Intercept) 0.477    0.690   
+##  Residual             0.165    0.406   
+## Number of obs: 600, groups:  workerid, 60
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)  3.34180    0.10143    32.9
+## c.norms      0.28220    0.07006     4.0
+## trial       -0.03248    0.00577    -5.6
+## 
+## Correlation of Fixed Effects:
+##         (Intr) c.nrms
+## c.norms -0.322       
+## trial   -0.304 -0.027
+```
+
+```r
+cor.test(md$log.length_c,md$c.norms)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  md$log.length_c and md$c.norms
+## t = 1.965, df = 598, p-value = 0.04993
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  3.457e-05 1.591e-01
+## sample estimates:
+##     cor 
+## 0.08008
+```
+
+```r
+ms <- aggregate(log.length_c ~ c.norms + picture, data=md, mean)
+ms$cih <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.high)$log.length_c
+ms$cil <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.low)$log.length_c
+
+ggplot(ms, aes(c.norms,log.length_c)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
+  theme_bw() +
+  xlab("Object Complexity Norms") +
+  ylab("Log Description Length (characters)") +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+ 
+  ggtitle('Description length vs. complexity norms')
+```
+
+![plot of chunk unnamed-chunk-22](figure/unnamed-chunk-22.png) 
+
+### *relationship between RT norms and description length*
+
+```r
+index <- match(md$picture, rto_norms$Answer.train_image)
+md$rt.norms <- rto_norms$log.rt[index]
+
+summary(lmer(log.length_c~rt.norms + (1+trial|workerid), md))
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: log.length_c ~ rt.norms + (1 + trial | workerid)
+##    Data: md
+## 
+## REML criterion at convergence: 825.6
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -3.306 -0.589  0.083  0.590  3.705 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev. Corr 
+##  workerid (Intercept) 0.43683  0.6609        
+##           trial       0.00277  0.0527   -0.08
+##  Residual             0.14889  0.3859        
+## Number of obs: 600, groups:  workerid, 60
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)   -2.262      1.373   -1.65
+## rt.norms       0.770      0.187    4.12
+## 
+## Correlation of Fixed Effects:
+##          (Intr)
+## rt.norms -0.998
+```
+
+```r
+summary(lmer(log.length_c~rt.norms + trial + (1|workerid), md)) #rt norms predict length
+```
+
+```
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: log.length_c ~ rt.norms + trial + (1 | workerid)
+##    Data: md
+## 
+## REML criterion at convergence: 836.3
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -3.119 -0.587  0.079  0.615  3.803 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  workerid (Intercept) 0.481    0.693   
+##  Residual             0.165    0.406   
+## Number of obs: 600, groups:  workerid, 60
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept) -1.71467    1.39726   -1.23
+## rt.norms     0.70745    0.19008    3.72
+## trial       -0.03215    0.00578   -5.57
+## 
+## Correlation of Fixed Effects:
+##          (Intr) rt.nrm
+## rt.norms -0.998       
+## trial    -0.009 -0.014
+```
+
+```r
+cor.test(md$log.length_c,md$rt.norms)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  md$log.length_c and md$rt.norms
+## t = 0.848, df = 598, p-value = 0.3968
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  -0.04551  0.11438
+## sample estimates:
+##     cor 
+## 0.03466
+```
+
+```r
+ms <- aggregate(log.length_c ~ rt.norms + picture, data=md, mean)
+ms$cil <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.low)$log.length_c
+ms$cih <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.high)$log.length_c
+
+ggplot(ms, aes(rt.norms,log.length_c)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
+  theme_bw() +
+  xlab("Object RT Norms") +
+  ylab("Log Description Length (characters)") +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+
+  ggtitle('Description length vs. rt norms')
+```
+
+![plot of chunk unnamed-chunk-23](figure/unnamed-chunk-23.png) 
+
+***
+***
+
+<a name="xling"/>
+
+## (3) Natural language 
+
+<a name="3a"/>
+
+###  (A) English Norms [(Complexity norms task)][task26]
+
+### *preprocess and merge in stuff*
+
+```r
+if (processNorms) {
+  d1 <- read.csv("data/RefComplex26.results1",sep="\t",header=TRUE)
+  d2 <- read.csv("data/RefComplex26.results",sep="\t",header=TRUE)
+  d <- rbind(d1,d2)
+  
+  if (whichSubjRemove == 'repeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+  }
+  
+  # take out people who missed check question
+  d = d[d$Answer.value_18 == 7, ] 
+  
+  # melt into word and values into two data frames, then rejoin based on workerid+trial id
+  # (tricky because variable is string and number)
+  n <- names(d)
+  colsV =  n[grepl("value",n)] 
+  colsW =  n[grepl("word_",n)] 
+  mdW <- melt(d,id.vars=c("workerid"), measure.vars=colsW,na.rm=TRUE)
+  mdW$trial <- as.numeric(matrix(lapply(str_split(mdW$variable,"_"),function(x) {x[2]})))
+  mdW$index <- paste(mdW$workerid, mdW$trial, sep="_")
+  mdV <- melt(d,id.vars=c("workerid"), measure.vars=colsV,na.rm=TRUE)
+  mdV$trial <- as.numeric(matrix(lapply(str_split(mdV$variable,"_"),function(x) {x[2]})))
+  mdV$index <- paste(mdV$workerid, mdV$trial, sep="_")
+  
+  # merge together
+  index <- match(mdW$index, mdV$index)
+  mdW$complexity <- mdV$value[index]
+ 
+  # delete variables
+  mdW$index <- NULL; mdW$variable <- NULL; names(mdW)[2] <- "word"; md <- mdW
+  
+  # remove quotes from words
+  md$word= gsub(" ", "", gsub("[[:punct:]]", "", md$word))
+  md$word = as.factor(md$word)
+  
+  # remove non-words
+  md = md[md$word != "ball",] # anchor
+  md = md[md$word != "motherboard",] # anchor
+  md = md[md$word != "43",] # take out check question
+  md = md[md$word != "peso",] # take out bad word
+  
+  # add length in characters
+  md$nchars = nchar(as.character(md$word))
+  
+  # merge in word info
+  # -- add mrc data --
+  mrc = read.csv("data/MRC_corpus.csv")
+  mrc = mrc[mrc$mrc.syl != "NA",]
+  index <- match(md$word, mrc$word)
+  md$mrc.fam <- mrc$mrc.fam[index]
+  md$mrc.conc <- mrc$mrc.conc[index]
+  md$mrc.imag <- mrc$mrc.imag[index]
+  md$mrc.syl <- mrc$mrc.syl[index]
+ 
+  # -- add phonemes from MRC --
+  mrc = mrc[mrc$mrc.wtype != " ",]
+  index <- match(md$word, mrc$word)
+  md$mrc.phon <- mrc$mrc.phon[index]
+
+  # -- add class --
+  class = read.csv("data/english_class_codes.csv")
+  index <- match(md$word, class$ENGLISH)
+  md$class <- class$class_MLL[index]
+  
+  # -- add morphemes --
+  morph = read.csv("data/numMorph_celex2.csv")
+  index <- match(md$word, morph$ENGLISH)
+  md$clx.morph <- morph$clx.numMorph[index]
+  
+  # -- add frequency --
+  freqs = read.table("data/SUBTLEXusDataBase.txt",header=TRUE)
+  index <- match(md$word, freqs$Word)
+  md$subt.log.freq <- freqs$Lg10WF[index]
+  
+  # -- add brysbaert concreteness --
+  b <- read.csv("data/brysbaert_corpus.csv",header=TRUE)
+  b <- b[b$Word != "",] # get rid of empty rows
+  b <- b[b$Bigram == 0,]# get rid of two word lemmas
+  index <- match(md$word, b$Word)
+  md$b.conc <- b$Conc.M[index]
+  
+  write.csv(md, "data/englishComplexityNorms.csv")
+ }
+
+eng = read.csv("data/englishComplexityNorms.csv")
+```
+
+### *aggregate across words of the same length*
+
+```r
+ms2 <- aggregate(complexity ~ nchars, data=eng, mean)
+ms2$cih <- aggregate(complexity ~ nchars,  data=eng, ci.high)$complexity
+ms2$cil <- aggregate(complexity ~ nchars,  data=eng, ci.low)$complexity
+
 ggplot(ms2, aes(complexity, nchars)) +
   geom_point() + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
   geom_errorbarh(aes(xmax=complexity+cih,xmin=complexity-cil), size=.15, colour="black") +
-  annotate("text", x=2, y=10, size = 10, label=paste("r=",round(cor(ms$complexity, ms$nchars), 2)))+
+  annotate("text", x=2, y=10, size = 10, label=paste("r=",round(cor(eng$complexity, eng$nchars), 2)), col="red")+
   scale_y_continuous(limits = c(0, 15), breaks = 1:14, labels = 1:14) +
   scale_x_continuous(limits = c(0, 7), breaks = 1:7, labels = 1:7)  +
   theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
@@ -93,11 +1598,9 @@ ggplot(ms2, aes(complexity, nchars)) +
   ggtitle("Number of characters vs. complexity rating")
 ```
 
-```
-## Error: object 'ms2' not found
-```
+![plot of chunk unnamed-chunk-24](figure/unnamed-chunk-24.png) 
 
-* aggregate across participants 
+### *aggregate across participants*
 
 ```r
   # have to do this separately for each length variable because drops words for which there are NAs *for any of the length vars*
@@ -106,7 +1609,7 @@ ggplot(ms2, aes(complexity, nchars)) +
   ms.morph <- aggregate(complexity ~ word + clx.morph, data=eng, mean)
 ```
 
-* Correlations
+### *correlations*
 
 ```r
 cor.test(ms.syl$complexity, ms.syl$mrc.syl)
@@ -164,8 +1667,8 @@ cor.test(ms.morph$complexity, ms.morph$clx.morph)
 
 ```r
 # mono-morphemic
-ms_mono.syl = aggregate(complexity ~ word + mrc.syl, data=md[md$clx.morph == 1,], mean)
-ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=md[md$clx.morph == 1,], mean)
+ms_mono.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$clx.morph == 1,], mean)
+ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph == 1,], mean)
 
 cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
 ```
@@ -204,24 +1707,10 @@ cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
 
 ```r
 # open class
-ms_open.syl = aggregate(complexity ~ word + mrc.syl, data=md[md$class != 0,], mean)
-ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=md[md$class != 0,], mean)
-ms_open.morph = aggregate(complexity ~ word + clx.morph, data=md[md$class != 0,], mean)
-summary(ms_open.syl)
-```
+ms_open.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$class != 0,], mean)
+ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$class != 0,], mean)
+ms_open.morph = aggregate(complexity ~ word + clx.morph, data=eng[eng$class != 0,], mean)
 
-```
-##           word        mrc.syl       complexity  
-##  ache       :  1   Min.   :1.00   Min.   :1.25  
-##  affirmation:  1   1st Qu.:1.00   1st Qu.:2.57  
-##  after      :  1   Median :2.00   Median :3.40  
-##  age        :  1   Mean   :1.79   Mean   :3.44  
-##  aid        :  1   3rd Qu.:2.00   3rd Qu.:4.22  
-##  all        :  1   Max.   :5.00   Max.   :6.33  
-##  (Other)    :447
-```
-
-```r
 cor.test(ms_open.syl$complexity, ms_open.syl$mrc.syl)
 ```
 
@@ -275,7 +1764,7 @@ cor.test(ms_open.morph$complexity, ms_open.morph$clx.morph)
 ## 0.4269
 ```
 
-* relationship beween length and complexity, control for everything
+### *relationship beween length and complexity, control for everything*
 
 ```r
 # all
@@ -536,7 +2025,7 @@ summary(m_morph_o)
 ## F-statistic:  357 on 5 and 6350 DF,  p-value: <2e-16
 ```
 
-* create english word data frame with relevant variables for xling analysis
+### *create english word data frame with relevant variables for xling analysis*
 
 ```r
   xling.eng <- aggregate(complexity ~ word + class, data=eng, mean)
@@ -555,14 +2044,41 @@ summary(m_morph_o)
   xling.eng$clx.morph = as.factor(xling.eng$clx.morph)
 ```
 
-* read in xling data and merge with English complexity norms
+<a name="3b"/>
 
+###  (B) Xling translation accuracy
 
-* look at accuracy for translations checks
+```r
+checksR = read.csv("data/translation_accuracy.csv")[1:500,]
+checksR = checksR[checksR$ENGLISH != "peso",]
 
+accuracy = colSums(checksR[,2:13], dims = 1)/ dim(checksR[,])[1]
+print(paste("total accuracy:", round(mean(accuracy),2)))
+```
 
-<a name="1b"/>
-###  (B) Correlation between complextity and length
+```
+## [1] "total accuracy: 0.92"
+```
+
+<a name="3c"/>
+
+###  (\(C\)) Xling correlation between lengths and complexity
+### *read in xling data and merge with English complexity norms*
+
+```r
+xling = read.csv("data/xling_csv.csv") 
+index <- match(xling$ENGLISH, xling.eng$word)
+
+xling$complexity <- xling.eng$complexity[index]
+xling$class <- xling.eng$class[index]
+xling$clx.morph <- xling.eng$clx.morph[index]
+xling$subt.log.freq  <- xling.eng$subt.log.freq [index]
+xling$X <- NULL
+
+xling = xling[xling$ENGLISH != "peso",]
+```
+
+### *get correlations*
 
 ```r
 lens = c(which(grepl("LEN",names(xling)))) # get length column indices
@@ -584,60 +2100,19 @@ if (doSlow) {
 c_l = read.csv("data/complexity_length_corrs.csv")
 
 # now do correlations, partialling out frequency
-cmat.p = partial.r(xlingCORR,c(1:80, which(names(xlingCORR) == "complexity")), which(names(xlingCORR) == "subt.log.freq") )
-```
-
-```
-## Error: 'x' must be numeric
-```
-
-```r
+cmat.p = partial.r(xlingCORR[,1:82],c(1:80, which(names(xlingCORR) == "complexity")), which(names(xlingCORR) == "subt.log.freq"))
 cxl = as.data.frame(cmat.p[which(row.names(cmat.p) == "complexity"),1:80])
-```
-
-```
-## Error: object 'cmat.p' not found
-```
-
-```r
 cxl$lang = row.names(cxl)
-```
-
-```
-## Error: object 'cxl' not found
-```
-
-```r
 names(cxl) = c("corr", "lang")
-```
 
-```
-## Error: object 'cxl' not found
-```
-
-```r
 # merge in partials
 index <- match(c_l$language, cxl$lang)
-```
-
-```
-## Error: object 'cxl' not found
-```
-
-```r
 c_l$p.corr<- cxl$corr[index]
-```
 
-```
-## Error: object 'cxl' not found
-```
-
-```r
 # get correlations for mono only
 mono_cor = data.frame (language = character(), mono.cor = numeric(0))
 complexity_i = which(names(xlingCORR)== "complexity")
 levels(mono_cor$language) = names(xlingCORR)
-
 
 for (i in 1:length(lens)){
   mono_cor[i, "mono.cor"] = cor(xlingCORR[xlingCORR$clx.morph == 1, i], 
@@ -675,7 +2150,7 @@ coded_languages = c("english", "spanish", "welsh", "vietnamese", "russian", "por
 c_l$checked = as.factor(ifelse( is.element(c_l$language, coded_languages), "yes", "no"))
 ```
 
-* plot
+### *plot correlations*
 
 ```r
 if (savePlots) {pdf("figure/xling.pdf", height = 6, width = 12)}
@@ -703,20 +2178,13 @@ ggplot(c_l, aes(language, corr, fill = checked)) +
   scale_y_continuous(limits = c(-.07, .75)) 
 ```
 
-```
-## Error: object 'p.corr' not found
-```
+![plot of chunk unnamed-chunk-30](figure/unnamed-chunk-30.png) 
 
 ```r
 if(savePlots){dev.off()}
 ```
 
-```
-## pdf 
-##   2
-```
-
-* Grand means
+### *grand means*
 
 ```r
 mean(c_l$corr)
@@ -747,795 +2215,11 @@ mean(c_l$p.corr)
 ```
 
 ```
-## Warning: argument is not numeric or logical: returning NA
-```
-
-```
-## [1] NA
+## [1] 0.216
 ```
 
 ***
 ***
-
-## (3) Novel real objects
-
-<a name="3a"/>
-### (A) Norms [Complexity norming task][task30] [RT task][task9]
-
-#### Complexity Norms
-
-
-* Get reliability between two samples
-
-```r
-  cor.test(co_norms$rating_1, co_norms$rating_2)
-```
-
-```
-## 
-## 	Pearson's product-moment correlation
-## 
-## data:  co_norms$rating_1 and co_norms$rating_2
-## t = 18.91, df = 58, p-value < 2.2e-16
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  0.8812 0.9563
-## sample estimates:
-##    cor 
-## 0.9276
-```
-
-* There is one participant who was in both samples. Look at correlation between samples without this participant in Sample #2.
-
-```r
-  ## Sample #2 
-  # melt
-  mdb <- melt(db[db$workerid != 'A1BQEX75BE1AYE',],id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
-  names(mdb) <- c("workerid", "rating", "value")
-  msb = aggregate(value ~ rating, mdb, mean)
-  
-  co_norms_unique_sample = merge( ms, msb, by="rating")
-  co_norms_unique_sample$ratingNum <- as.numeric(matrix(sapply(str_split(matrix(sapply(str_split(co_norms_unique_sample$rating,"rating")
-                                                                                       ,function(x) {x[2]})),"_"),function(x){x[1]})))
-```
-
-```
-## Warning: NAs introduced by coercion
-```
-
-```r
-  co_norms_unique_sample = co_norms_unique_sample[!is.na(co_norms_unique_sample$ratingNum),] # get rid of ball and motherboard
-
-  co_norms_unique_sample$rating <- NULL
-  names(co_norms_unique_sample) = c( "rating_1", "rating_2", "ratingNum")
-  cor(co_norms_unique_sample$rating_1, co_norms_unique_sample$rating_2) # nearly identical to original sample
-```
-
-```
-## [1] 0.9274
-```
-
-#### RT Norms
-
-
-* correlation between norms
-
-```r
-index <- match(co_norms$ratingNum, rto_norms$Answer.train_image)
-co_norms$log.rt <- rto_norms$log.rt[index]
-cor.test(co_norms$meanRating, co_norms$log.rt)
-```
-
-```
-## 
-## 	Pearson's product-moment correlation
-## 
-## data:  co_norms$meanRating and co_norms$log.rt
-## t = 4.865, df = 58, p-value = 9.152e-06
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  0.3294 0.6970
-## sample estimates:
-##    cor 
-## 0.5383
-```
-
-<a name="3b"/>
-### (B) Mapping task (adults) [(Task)][task34]
-
-* read in data and format
-
-
-* make everything factors
-
-
-* merge in norms
-
-
-* get effect sizes
-
-
-* get obj conds
-
-
-* plot
-
-```r
-# set graphical params
-fs = 25
-rs = 8
-
-# complexity plot
-obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
-  geom_pointrange(aes(ymax = cill, ymin=ciul),position="dodge")+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  #geom_text(aes(c.Mratio+.03, effect_size, label=objCondition2), position="dodge") +
-  #geom_text(aes(c.Mratio+.04, effect_size, label=objCondition2), position="dodge") +
-  ylab("effect size (Cohen's d)") +
-  xlab("complexity rating ratio") + 
-  #ggtitle("complexity ratio vs. effect size") +
-  scale_x_continuous(limits = c(.25, 1.29)) +
-  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
-  annotate("text", x=1.15, y=.5, col = "red",label=paste(
-    "r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)), size = rs) +
-  theme(plot.background = element_blank(),
-  panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) +
-  scale_y_continuous(limits = c(-.33, .66))
-
-# RT ratio plot
-obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
-  geom_pointrange( aes(ymax = cill, ymin=ciul))+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  #geom_text(aes(rt.Mratio+.0008, effect_size, label=objCondition2)) +
-  #geom_text(aes(rt.Mratio+.002, effect_size, label=objCondition2)) +
-  ylab("effect size (Cohen's d)") +
-  xlab("reaction time ratio") +
-  scale_x_continuous(limits = c(.949, 1.005)) +
-  #ggtitle("RT ratio vs. effect size") +
-  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
-  annotate("text", x=.997, y=.5, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)), size = rs) +  
-  theme(plot.background = element_blank(),
-  panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) +
-  scale_y_continuous(limits = c(-.33, .66))
-
-if (savePlots) {pdf("figure/realobjs.pdf", height = 6, width = 12)}
-multiplot(obj_c_plot, obj_rt_plot, cols = 2)
-if (savePlots) {dev.off()}
-```
-
-```
-## pdf 
-##   2
-```
-
-* correlations between effect size at complexity conditions
-
-```r
-cor.test(de$objRatio, de$effect_size)
-```
-
-```
-## 
-## 	Pearson's product-moment correlation
-## 
-## data:  de$objRatio and de$effect_size
-## t = -3.051, df = 13, p-value = 0.009273
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  -0.8703 -0.1999
-## sample estimates:
-##    cor 
-## -0.646
-```
-
-```r
-cor.test(de$c.Mratio, de$effect_size)
-```
-
-```
-## 
-## 	Pearson's product-moment correlation
-## 
-## data:  de$c.Mratio and de$effect_size
-## t = -3.494, df = 13, p-value = 0.00396
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  -0.8907 -0.2854
-## sample estimates:
-##     cor 
-## -0.6959
-```
-
-```r
-cor.test(de$rt.Mratio, de$effect_size)
-```
-
-```
-## 
-## 	Pearson's product-moment correlation
-## 
-## data:  de$rt.Mratio and de$effect_size
-## t = -3.659, df = 13, p-value = 0.002887
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  -0.8972 -0.3149
-## sample estimates:
-##     cor 
-## -0.7123
-```
-
-<a name="3d"/>
-### (D) Production task (labels + desecriptions) 
-#### (1) Labels [(Task)][task27]
-##### read in data and prep data frame
-
-
-* relationship between condition and description length
-
-```r
-t.test(md[md$condition == '"complex"',"log.length"],md[md$condition == '"simple"',"log.length"],paired = TRUE)
-```
-
-```
-## 
-## 	Paired t-test
-## 
-## data:  md[md$condition == "\"complex\"", "log.length"] and md[md$condition == "\"simple\"", "log.length"]
-## t = 3.735, df = 286, p-value = 0.0002269
-## alternative hypothesis: true difference in means is not equal to 0
-## 95 percent confidence interval:
-##  0.03846 0.12417
-## sample estimates:
-## mean of the differences 
-##                 0.08131
-```
-
-```r
-summary(lmer(log.length~condition + (1+trial|workerid), md))
-```
-
-```
-## Linear mixed model fit by REML ['lmerMod']
-## Formula: log.length ~ condition + (1 + trial | workerid)
-##    Data: md
-## 
-## REML criterion at convergence: -0.4
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -4.009 -0.626  0.061  0.633  2.773 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr
-##  workerid (Intercept) 1.53e-02 0.12358      
-##           trial       3.40e-06 0.00184  1.00
-##  Residual             4.92e-02 0.22189      
-## Number of obs: 574, groups: workerid, 59
-## 
-## Fixed effects:
-##                   Estimate Std. Error t value
-## (Intercept)         1.9350     0.0218    88.7
-## condition"simple"  -0.0797     0.0185    -4.3
-## 
-## Correlation of Fixed Effects:
-##             (Intr)
-## cndtn"smpl" -0.427
-```
-
-* relationship with complicated norms
-
-```r
-index <- match(md$picture, co_norms$ratingNum)
-md$c.norms <- co_norms$meanRating[index]
-
-ms <- aggregate(log.length ~ c.norms + picture, data=md, mean)
-ms$cih <- aggregate(log.length ~ c.norms + picture, data=md, ci.high)$log.length
-ms$cil <- aggregate(log.length ~ c.norms + picture, data=md, ci.low)$log.length
-
-#plot
-ggplot(ms, aes(c.norms,log.length)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object Complexity Norms") +
-  ylab("Log Word Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
-  annotate("text", x=.75, y=1.6, color = "red", size = 8,
-    label=paste("r=",round(cor(md$log.length,md$c.norms), 2)))
-```
-
-![plot of chunk unnamed-chunk-23](figure/unnamed-chunk-23.png) 
-
-* relationship with RT norms
-
-```r
-index <- match(md$picture, rto_norms$Answer.train_image)
-md$rt.norms <- rto_norms$log.rt[index]
-
-ms <- aggregate(log.length ~ rt.norms + picture, data=md, mean)
-ms$cih <- aggregate(log.length ~ rt.norms + picture, data=md, ci.high)$log.length
-ms$cil <- aggregate(log.length ~ rt.norms + picture, data=md, ci.low)$log.length
-
-#plot
-ggplot(ms, aes(rt.norms,log.length)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object Complexity Norms") +
-  ylab("Log Word Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+
-  annotate("text", x=.75, y=1.6, color = "red", size = 8,
-    label=paste("r=",round(cor(md$log.length,md$rt.norms), 2)))
-```
-
-![plot of chunk unnamed-chunk-24](figure/unnamed-chunk-24.png) 
-
-#### (2) Descriptions [(Task)][task25]
-
-* read in data and prep data frame
-
-
-* relationship between condition and description length
-
-```r
-#summary(lmer(length_c~condition + (1|workerid), md))
-#summary(lmer(length_c~condition + trial + (1+trial|workerid), md))
-
-summary(lmer(log.length_c~md$condition + (1|workerid), md))
-```
-
-```
-## Linear mixed model fit by REML ['lmerMod']
-## Formula: log.length_c ~ md$condition + (1 | workerid)
-##    Data: md
-## 
-## REML criterion at convergence: 863.1
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -3.004 -0.616  0.071  0.599  4.269 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  workerid (Intercept) 0.476    0.690   
-##  Residual             0.175    0.418   
-## Number of obs: 600, groups: workerid, 60
-## 
-## Fixed effects:
-##                      Estimate Std. Error t value
-## (Intercept)            3.3545     0.0922    36.4
-## md$condition"simple"  -0.1128     0.0342    -3.3
-## 
-## Correlation of Fixed Effects:
-##             (Intr)
-## md$cndtn"s" -0.185
-```
-
-```r
-summary(lmer(log.length_c~condition + trial + (1+trial|workerid), md))
-```
-
-```
-## Linear mixed model fit by REML ['lmerMod']
-## Formula: log.length_c ~ condition + trial + (1 + trial | workerid)
-##    Data: md
-## 
-## REML criterion at convergence: 823.1
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -3.185 -0.559  0.071  0.594  3.841 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr 
-##  workerid (Intercept) 0.43168  0.6570        
-##           trial       0.00177  0.0421   -0.02
-##  Residual             0.14949  0.3866        
-## Number of obs: 600, groups: workerid, 60
-## 
-## Fixed effects:
-##                   Estimate Std. Error t value
-## (Intercept)        3.54229    0.09310    38.0
-## condition"simple" -0.12772    0.03260    -3.9
-## trial             -0.03278    0.00773    -4.2
-## 
-## Correlation of Fixed Effects:
-##             (Intr) cndt""
-## cndtn"smpl" -0.189       
-## trial       -0.252  0.031
-```
-
-```r
-## plot
-ggplot(md, aes(x=log.length_c, fill=condition)) + geom_density(alpha = 0.2)
-```
-
-![plot of chunk unnamed-chunk-26](figure/unnamed-chunk-26.png) 
-
-* correlations with complexity norms
-
-```r
-index <- match(md$picture, co_norms$ratingNum)
-md$c.norms <- co_norms$meanRating[index]
-
-summary(lmer(log.length_c~c.norms + (1+trial|workerid), md))
-```
-
-```
-## Linear mixed model fit by REML ['lmerMod']
-## Formula: log.length_c ~ c.norms + (1 + trial | workerid)
-##    Data: md
-## 
-## REML criterion at convergence: 826.8
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -3.272 -0.551  0.069  0.587  3.893 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr 
-##  workerid (Intercept) 0.44295  0.6655        
-##           trial       0.00275  0.0524   -0.11
-##  Residual             0.14874  0.3857        
-## Number of obs: 600, groups: workerid, 60
-## 
-## Fixed effects:
-##             Estimate Std. Error t value
-## (Intercept)   3.2392     0.0944    34.3
-## c.norms       0.2921     0.0691     4.2
-## 
-## Correlation of Fixed Effects:
-##         (Intr)
-## c.norms -0.346
-```
-
-```r
-summary(lmer(log.length_c~c.norms + trial + (1|workerid), md))
-```
-
-```
-## Linear mixed model fit by REML ['lmerMod']
-## Formula: log.length_c ~ c.norms + trial + (1 | workerid)
-##    Data: md
-## 
-## REML criterion at convergence: 836
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -3.062 -0.625  0.060  0.597  4.042 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  workerid (Intercept) 0.477    0.690   
-##  Residual             0.165    0.406   
-## Number of obs: 600, groups: workerid, 60
-## 
-## Fixed effects:
-##             Estimate Std. Error t value
-## (Intercept)  3.34180    0.10143    32.9
-## c.norms      0.28220    0.07006     4.0
-## trial       -0.03248    0.00577    -5.6
-## 
-## Correlation of Fixed Effects:
-##         (Intr) c.nrms
-## c.norms -0.322       
-## trial   -0.304 -0.027
-```
-
-```r
-# complexity norms predict length
-
-cor.test(md$log.length_c,md$c.norms)
-```
-
-```
-## 
-## 	Pearson's product-moment correlation
-## 
-## data:  md$log.length_c and md$c.norms
-## t = 1.965, df = 598, p-value = 0.04993
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  3.457e-05 1.591e-01
-## sample estimates:
-##     cor 
-## 0.08008
-```
-
-* complexity norms plot
-
-```r
-ms <- aggregate(log.length_c ~ c.norms + picture, data=md, mean)
-ms$cih <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.high)$log.length_c
-ms$cil <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.low)$log.length_c
-
-ggplot(ms, aes(c.norms,log.length_c)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object Complexity Norms") +
-  ylab("Log Description Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) 
-```
-
-![plot of chunk unnamed-chunk-28](figure/unnamed-chunk-28.png) 
-
-* correlations with RT norms
-
-```r
-index <- match(md$picture, rto_norms$Answer.train_image)
-md$rt.norms <- rto_norms$log.rt[index]
-
-summary(lmer(log.length_c~rt.norms + (1+trial|workerid), md))
-```
-
-```
-## Linear mixed model fit by REML ['lmerMod']
-## Formula: log.length_c ~ rt.norms + (1 + trial | workerid)
-##    Data: md
-## 
-## REML criterion at convergence: 825.6
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -3.306 -0.589  0.083  0.590  3.705 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr 
-##  workerid (Intercept) 0.43683  0.6609        
-##           trial       0.00277  0.0527   -0.08
-##  Residual             0.14889  0.3859        
-## Number of obs: 600, groups: workerid, 60
-## 
-## Fixed effects:
-##             Estimate Std. Error t value
-## (Intercept)   -2.262      1.373   -1.65
-## rt.norms       0.770      0.187    4.12
-## 
-## Correlation of Fixed Effects:
-##          (Intr)
-## rt.norms -0.998
-```
-
-```r
-summary(lmer(log.length_c~rt.norms + trial + (1|workerid), md))
-```
-
-```
-## Linear mixed model fit by REML ['lmerMod']
-## Formula: log.length_c ~ rt.norms + trial + (1 | workerid)
-##    Data: md
-## 
-## REML criterion at convergence: 836.3
-## 
-## Scaled residuals: 
-##    Min     1Q Median     3Q    Max 
-## -3.119 -0.587  0.079  0.615  3.803 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  workerid (Intercept) 0.481    0.693   
-##  Residual             0.165    0.406   
-## Number of obs: 600, groups: workerid, 60
-## 
-## Fixed effects:
-##             Estimate Std. Error t value
-## (Intercept) -1.71467    1.39726   -1.23
-## rt.norms     0.70745    0.19008    3.72
-## trial       -0.03215    0.00578   -5.57
-## 
-## Correlation of Fixed Effects:
-##          (Intr) rt.nrm
-## rt.norms -0.998       
-## trial    -0.009 -0.014
-```
-
-```r
-#rt norms predict length
-
-cor.test(md$log.length_c,md$rt.norms)
-```
-
-```
-## 
-## 	Pearson's product-moment correlation
-## 
-## data:  md$log.length_c and md$rt.norms
-## t = 0.848, df = 598, p-value = 0.3968
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  -0.04551  0.11438
-## sample estimates:
-##     cor 
-## 0.03466
-```
-
-* rt norms plot
-
-```r
-ms <- aggregate(log.length_c ~ rt.norms + picture, data=md, mean)
-ms$cil <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.low)$log.length_c
-ms$cih <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.high)$log.length_c
-
-ggplot(ms, aes(rt.norms,log.length_c)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object RT Norms") +
-  ylab("Log Description Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) 
-```
-
-![plot of chunk unnamed-chunk-30](figure/unnamed-chunk-30.png) 
-
-```r
-# reliable when control for random effects
-```
-
-***
-***
-<a name="geons"/>
-
-## (4) Geons
-
-<a name="4a"/>
-### (A) Norms [(Complexity Task)][task34] [(RT task)][task35]
-#### (1) Complexity Norms 
-
-
-#### (2) RT Norms 
-
-
-* Get correlation between between # geons and complexity rating, and RT and complexity rating
-
-```r
-# remove quotes from norms
-cg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
-cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
-cg_norms$obj_item = as.numeric(substr(cg_norms$obj, 2, 2))
-
-rg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", rg_norms$obj)))
-rg_norms$obj_class = substr(rg_norms$obj, 1, 1)
-rg_norms$obj_item = substr(rg_norms$obj, 2, 2)
-
-index <- match(cg_norms$obj, rg_norms$obj)
-cg_norms$rt_meanRating <- rg_norms$log.rt[index]
-
-# correlation between num geons and complexity
-cor.test(cg_norms$obj_class, cg_norms$meanRating)
-```
-
-```
-## 
-## 	Pearson's product-moment correlation
-## 
-## data:  cg_norms$obj_class and cg_norms$meanRating
-## t = 15.39, df = 38, p-value < 2.2e-16
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  0.8677 0.9617
-## sample estimates:
-##    cor 
-## 0.9283
-```
-
-```r
-# correlation between RT and complexity
-cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
-```
-
-```
-## 
-## 	Pearson's product-moment correlation
-## 
-## data:  cg_norms$rt_meanRating and cg_norms$meanRating
-## t = 12.14, df = 38, p-value = 1.199e-14
-## alternative hypothesis: true correlation is not equal to 0
-## 95 percent confidence interval:
-##  0.8033 0.9416
-## sample estimates:
-##    cor 
-## 0.8917
-```
-
-<a name="4b"/> 
-### (B) Mapping task  [(Task)][task37] 
-
-
-* get effect sizes
-
-
-* get obj conds
-
-
-* plot
-
-```r
-# set graphical params
-fs = 25
-rs = 8
-
-# complexity ratio
-geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
-  geom_pointrange( aes(ymax = cill, ymin=ciul))+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  #geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
-  ylab("effect size (Cohen's d)") +
-  xlab("complexity rating ratio") + 
-  theme(text = element_text(size=fs))  +
-  scale_y_continuous(limits = c(-.33, .66)) +
-  scale_x_continuous(limits = c(.25, 1.29)) +
-  annotate("text", x=1.15, y=.5, color = "red", size = rs,
-           label=paste("r=",round(cor(de$effect_size, de$c.Mratio), 2))) +
-  theme(plot.background = element_blank(),
-  panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) 
-
-# rt ratio
-geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
-  geom_pointrange( aes(ymax = cill, ymin=ciul))+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  #geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
-  ylab("effect size (Cohen's d)") +
-  xlab("reaction time ratio") + 
-  theme(text = element_text(size=fs)) +  
-  scale_y_continuous(limits = c(-.33, .66)) +
-  scale_x_continuous(limits = c(.949, 1.005)) +
-  annotate("text", x=.997, y=.5, color = "red", size = rs,
-           label=paste("r=",round(cor(de$effect_size, de$rt.Mratio), 2))) +
-  theme(plot.background = element_blank(),
-  panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) 
-
-if (savePlots) {pdf("figure/geon.pdf", height = 6, width = 12)}
-multiplot(geon_c_plot, geon_rt_plot, cols = 2)
-```
-
-```
-## Warning: Removed 15 rows containing missing values (stat_smooth).
-## Warning: Removed 15 rows containing missing values (geom_segment).
-## Warning: Removed 15 rows containing missing values (geom_point).
-## Warning: Removed 15 rows containing missing values (stat_smooth).
-## Warning: Removed 15 rows containing missing values (geom_segment).
-## Warning: Removed 15 rows containing missing values (geom_point).
-```
-
-```r
-if (savePlots) {dev.off()}
-```
-
-```
-## pdf 
-##   2
-```
-
-* correlations between norms and effect sizes
-
-```r
-cor.test(de$rt.Mratio, de$effect_size)
-```
-
-```
-## Error: not enough finite observations
-```
-
-```r
-cor.test(de$c.Mratio, de$effect_size)
-```
-
-```
-## Error: not enough finite observations
-```
 
 [task30]: http://tinyurl.com/qz59yuh
 [task32]: http://tinyurl.com/keznp7v

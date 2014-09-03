@@ -1,52 +1,48 @@
 Referential Complexity Analyses
-================================
+====
 M. Lewis 
-
+====
 `r as.character(format(Sys.Date(), format="%B %d, %Y"))`
+====
 
 ***
 ***
 
 <h2> Analyses:<h2>
 
-1. [Cross-linguistic analyses](#google) <br/> 
-  (A) [Complexity Norms](#1a) <br/>
-  (B) [Correlation between all lengths](#1b) <br/> 
-  (C) [Correlation between all lengths, controling for frequency, open class only](#1c) <br/> 
-  (D) [Correlation between all lengths and complexity, controling for frequency](#1d) <br/> 
-  (E) [Translation check data](#1e) <br/> 
+1. [Geons](#geons) <br/> 
+  (A) [Norms](#1a) <br/> 
+  (B) [Mappping task](#1b)<br/>
   
-3. [Novel real objects](#novelRealObjs)<br/> 
-  (A) [Norms](#3a)<br/> 
-  (B) [Mappping task (adults)](#3b) <br/> 
-  (C) [Mapping task (children)](#3c) TO DO <br/> 
-  (D) [Production task (labels + descriptions)](#3d) <br/> 
+2. [Novel real objects](#novelRealObjs)<br/> 
+  (A) [Norms](#2a)<br/> 
+  (B) [Mappping task (adults)](#2b) <br/> 
+  (\(C\)) [Production task (labels + descriptions)](#2c) <br/> 
 
-4. [Geons](#geons) <br/> 
-  (A) [Norms](#4a) <br/> 
-  (B) [Mappping task](#4b)<br/>
+3. [Natural language](#xling) <br/> 
+  (A) [English norms](#3a) <br/>
+  (B) [Xling translation accuracy](#3b) <br/> 
+  (\(C\)) [Xling correlation between lengths and complexity](#3c) <br/> 
+  
+***
+***
 
 #### SET GLOBAL VARIABLES
-```{r global_vars}
+```{r global_vars, include=FALSE}
 rm(list=ls())
 
-whichSubjRemove = 'keepAll' #remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
-processNorms = TRUE # process norms or load norms? 
-savePlots = TRUE # save plots to pdf?
+whichSubjRemove = 'keepAll' # remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
+processNorms = FALSE # process norms or load norms? 
+savePlots = FALSE # save plots to pdf?
 doSlow = FALSE # do time-consuming pre-processing steps?
 ```
 
 #### LOAD PACKAGES, FUNCTIONS, AND REPEAT SUBJ DATA FILE
-```{r include = FALSE}
-# load libraries
-library(corrplot)
-library(stringr)
-library(psych)
-library(ggplot2)
-library(boot)
+```{r load_stuff, include = FALSE}
 
-# load functions
+# load functions and libraries
 source("/Documents/GRADUATE_SCHOOL/Ranalysis/useful.R")
+library('psych')
 
 cor.mtest <- function(mat, conf.level = 0.95) {
   mat <- as.matrix(mat)
@@ -132,15 +128,981 @@ dups = read.csv("data/all_workerids.csv")
 ***
 ***
 
-<a name="google"/>
+<a name="geons"/>
 
-## (1) Cross-linguistic analyses [(Complexity norms task)][task26]
+## (1) Geons
 
 <a name="1a"/>
-###  (A) Norms
 
-* preprocess
-```{r xling_preprocess, include = FALSE}
+### (A) Norms [(Complexity Task)][task34] [(RT task)][task35]
+### (1) Complexity Norms
+### *get data into long form*
+```{r geon_complexity_norms, warning = FALSE}
+if (processNorms) {
+  # read in data
+  d <- read.csv("data/RefComplex34.results",sep="\t",header=TRUE)
+  
+  # melt
+  md <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("obj",names(d))])
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$obj <- unlist(matrix(lapply(str_split(md$value,"j"),function(x) {x[2]})))
+  md$obj <- unlist(matrix(lapply(str_split(md$obj,".p"),function(x) {x[1]})))
+  md$complexityLevel <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[1]})))
+  md$objID <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[2]})))
+  md$value <- NULL; md$variable <- NULL
+  md = md[(md$trial != 0 & md$trial != 1),] # remove ball and circuit
+  
+  # get rating info
+  mdr <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("rating",names(d))])
+  mdr$trial <- matrix(lapply(str_split(mdr$variable,"_"),function(x) {x[2]}))
+  mdr$variable <- NULL
+  
+  # merge together based on trial and workerid
+  m = merge(md,mdr,by=c("workerid","trial"))
+  m$value <- as.numeric(as.character(m$value))
+  
+  # get norms by objects
+  ms_all <- aggregate(value ~ obj, data=m, mean)
+  ms_all$cih <- aggregate(value ~ obj, data=m, ci.high)$value
+  ms_all$cil <- aggregate(value ~ obj, data=m, ci.low)$value
+  
+  names(ms_all)[2] = "meanRating"
+  ms_all <- ms_all[order(ms_all$meanRating),]
+
+  # save complexity by item
+  write.csv(ms_all, "data/complicatedNormsGeons_BYITEM.csv")
+  } 
+
+cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")
+```
+
+### *plot complexity norm by condition*
+```{r}
+  # remove quotes from norms
+  cg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
+  cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
+  cg_norms$obj_item = as.numeric(substr(cg_norms$obj, 2, 2))
+
+  ms <- aggregate(meanRating  ~ obj_class, data=cg_norms, mean)
+  ms$cih <- aggregate(meanRating  ~ obj_class, data=cg_norms, ci.high)$meanRating
+  ms$cil <- aggregate(meanRating  ~ obj_class, data=cg_norms, ci.low)$meanRating
+    
+  # plot
+  ggplot(ms, aes(y=meanRating, x=as.numeric(obj_class))) +
+    geom_errorbar(data=ms, mapping=aes(x=obj_class, ymax = meanRating+cih, 
+                                       ymin=meanRating-cil), width=0.2, size=1, color="black") + 
+    geom_point(data=ms, mapping=aes(x=obj_class, y=meanRating), size=6)  +
+    geom_line() +
+    xlab("Object Condition") +
+    ylab("Complexity rating") +
+    ggtitle("complexity norm vs. number of geons")
+```
+
+### *get complexity norm and condition correlation*
+```{r}
+# make object class numeric
+cg_norms$obj_class = as.numeric(cg_norms$obj_class) 
+
+# correlation between num geons and complexity
+cor.test(cg_norms$obj_class, cg_norms$meanRating)
+```
+
+
+### (2) RT Norms 
+### *get data into long form (accuracy and RT df) and do exclusions*
+```{r geon_rt_norms, warning= FALSE}
+if (processNorms) {
+  # read in data
+  raw <- read.csv("data/RefComplex37.results",sep="\t",header=TRUE)
+  
+  # remove repeat subjects?
+  if (whichSubjRemove == 'removeRepeatSubj') {
+    raw = merge(raw, dups, by=c("hitid","workerid"))
+    raw = raw[!raw$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      raw = merge(raw, dups, by=c("hitid","workerid"))
+      raw = raw[!raw$withinRepeatSubj,]
+      }
+  
+  # look at accuracy, and exclude those below chance
+  boxplot(raw$Answer.correct)
+  raw = raw[raw$Answer.correct > 20, ]
+  
+  # prep accuracy and RT dataframes
+  # accuracy data frame
+  # melt
+  n <- names(raw)
+  cols = c( n[grepl("test",n)])
+  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  mda$trial <-as.numeric(matrix(lapply(str_split(mda$variable,"_"),function(x) {x[3]})))
+  mda$var1 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[1]}))
+  mda$var2 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[2]}))
+  mda$var <- paste(mda$var1, mda$var2, sep = "_")
+  mda$variable <- NULL; mda$var1 <- NULL; mda$var2 <- NULL
+  
+  mda$seq <- with(mda, ave(value, workerid, var, FUN = seq_along))
+  da = dcast(workerid + seq + trial ~ var, data = mda, value.var = "value")
+  da$seq <- NULL
+  
+  da=da[!is.na(da$trial),]
+  
+  da$Answer.test_answer = as.factor(da$Answer.test_answer)
+  da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
+  da$Answer.test_image  = as.factor(da$Answer.test_image)
+  
+  # look at memory performance (correct: CR or hit)
+  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
+  numH = length(which(da$Answer.test_answerEval == "\"H\""))
+
+  correct = (numCR + numH)/ dim(da)[1]
+  print(paste("percent correct:" , round(correct)))
+
+  # get obj condition variable
+  da$test_image2 <- as.character(matrix(lapply(str_split(da$Answer.test_image,"j"), function(x) {x[2]})))
+  da$objCondition <- as.factor(as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[1]}))))
+  da$objItem <- as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[2]})))
+  da$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", da$objItem)))
+  
+  # RT dataframe
+  # melt
+  n <- names(raw)
+  cols = c(n[grepl("train", n)])
+  cols = cols[1:40]
+  md <- melt(raw, id.vars=c("workerid"), measure.vars=cols)
+  md$trial <- as.numeric(matrix(lapply(str_split(md$variable,"_"),function(x) {x[3]})))
+  md$var1 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]}))
+  md$var2 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$var <- paste(md$var1, md$var2, sep = "_")
+  md$variable <- NULL; md$var1 <- NULL; md$var2 <- NULL
+  
+  md$seq <- with(md, ave(value, workerid, var, FUN = seq_along))
+  d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
+  d$Answer.train_NA <- NULL; d$seq <- NULL
+  
+  d=d[!is.na(d$trial),]
+  d=d[!is.na(d$Answer.train_image),]
+  d=d[!is.na(d$Answer.train_rt),]
+  d=d[d$Answer.train_image != "undefined",]
+  d=d[d$Answer.train_image != "",]
+  
+  d$Answer.train_rt = as.numeric(d$Answer.train_rt)
+  
+  # exclude outlier 2 standard deviations above and below mean (in log space)
+  d$log.rt = log(d$Answer.train_rt)
+  total = dim(d)[1]
+  sd2 = 2*sd(d$log.rt)
+  d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
+  print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
+  hist(d$log.rt)
+  
+  # get obj condition
+  d = d[d$trial > 1,] # exclude anchors (not interesting because order not randomized)
+  d$train_image2 <- as.character(matrix(lapply(str_split(d$Answer.train_image,"j"), function(x) {x[2]})))
+  d$objCondition <- as.factor(as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[1]}))))
+  d$objItem <- as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[2]})))
+  d$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", d$objItem)))
+  d$obj <- paste("\"", d$objCondition, "-" ,d$objItem,"\"", sep = "" )
+  
+  # rt by item
+  ms_all <- aggregate(log.rt  ~ obj, data=d, mean)
+  ms_all$cih <- aggregate(log.rt ~ obj, data=d, ci.high)$log.rt
+  ms_all$cil <- aggregate(log.rt ~ obj, data=d, ci.low)$log.rt
+  
+  # save RT by item
+  write.csv(ms_all, "data/rtNormsGeons_BYITEM.csv")
+  } 
+
+rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv")
+```
+
+###  *plot RT by condition*
+```{r}
+  rg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", rg_norms$obj)))
+  rg_norms$obj_class = substr(rg_norms$obj, 1, 1)
+  rg_norms$obj_item = substr(rg_norms$obj, 2, 2)
+
+  ms <- aggregate(log.rt  ~ obj_class, data=rg_norms, mean)
+  ms$cih <- aggregate(log.rt  ~ obj_class, data=rg_norms, ci.high)$log.rt
+  ms$cil <- aggregate(log.rt  ~ obj_class, data=rg_norms, ci.low)$log.rt
+    
+  # plot
+  ggplot(ms, aes(y=log.rt, x=as.numeric(obj_class))) +
+    geom_errorbar(data=ms, mapping=aes(x=obj_class, ymax = log.rt+cih, 
+                                       ymin=log.rt-cil), width=0.2, size=1, color="black") + 
+    geom_point(data=ms, mapping=aes(x=obj_class, y=log.rt), size=6)  +
+    geom_line() +
+    xlab("Object Condition") +
+    ylab("Log RT (ms)") + 
+    ggtitle("RT vs. number of geons")
+```
+
+### *get RT correlation with condition*
+```{r}
+# make object class numeric
+rg_norms$obj_class = as.numeric(rg_norms$obj_class) 
+
+# correlation between num geons and complexity
+cor.test(rg_norms$obj_class, rg_norms$log.rt)
+```
+
+### *get correlation between between complexity rating and RT*
+```{r}
+index <- match(cg_norms$obj, rg_norms$obj)
+cg_norms$rt_meanRating <- rg_norms$log.rt[index]
+
+cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
+```
+
+<a name="1b"/>
+
+### (B) Mapping task [(Task)][task37] 
+### *get data into long form*
+```{r geon_mapping, warning = FALSE}
+if (doSlow){
+  # read in data
+  d <- read.csv("data/RefComplex38.results",sep="\t",header=TRUE)
+  
+  # remove repeat subjects?
+  if (whichSubjRemove == 'removeRepeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
+  # melt
+  md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+  md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
+  
+  md$variable <- as.factor(as.character(md$variable))
+  md$trial <- as.factor(as.character(md$trial))
+  md$value <- as.factor(as.character(md$value))
+  md$workerid <- as.factor(as.character(md$workerid))
+  
+  md$seq <- with(md, ave(value, workerid, variable, trial, FUN = seq_along))
+  dc <- dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
+  dc$seq <- NULL
+  
+  # make everything factors
+  dc$criticalComplicated  <- as.factor(as.numeric(gsub("[[:punct:]]", "", dc$criticalComplicated))) #strip punctuations
+  dc$criticalSimple  <- as.factor(as.numeric(gsub("[[:punct:]]", "", dc$criticalSimple))) #strip punctuations
+  dc$langCondition <- as.factor(dc$langCondition)
+  dc$objCondition <- as.factor(dc$objCondition)
+  dc$response <- as.factor(dc$response)
+  dc$responseSide <- as.factor(dc$responseSide)
+  dc$responseValue  <- as.factor(dc$responseValue)
+  dc$word <- as.factor(dc$word)
+  
+  # merge in norms
+  # complicated
+  index <- match(dc$criticalSimple, cg_norms$obj)
+  dc$criticalSimple_c.norms <- cg_norms$meanRating[index]
+  index <- match(dc$criticalComplicated,cg_norms$obj)
+  dc$criticalComplicated_c.norms <- cg_norms$meanRating[index]
+  
+  # rt
+  index <- match(dc$criticalSimple, rg_norms$obj)
+  dc$criticalSimple_rt.norms <- rg_norms$log.rt [index]
+  index <- match(dc$criticalComplicated, rg_norms$obj)
+  dc$criticalComplicated_rt.norms <- rg_norms$log.rt [index]
+  
+  dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
+  dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
+  
+  write.csv(dc, "data/RC38_long.csv")
+  }
+
+dc <- read.csv('data/RC38_long.csv')
+```
+
+### *get effect sizes*
+```{r}
+de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
+```
+
+### *get obj conditions*
+```{r}
+de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
+de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
+de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
+de$cond2<- as.numeric(gsub("[[:punct:]]", "", de$cond2))
+de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
+```
+
+### *plot complexity ratios as a function of condition*
+```{r, warning = FALSE}
+# set graphical params
+fs = 25
+rs = 8
+
+# complexity ratio
+geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
+  geom_pointrange( aes(ymax = cill, ymin=ciul))+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  #geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
+  ylab("effect size (Cohen's d)") +
+  xlab("complexity rating ratio") + 
+  theme(text = element_text(size=fs))  +
+  scale_y_continuous(limits = c(-.33, .66)) +
+  scale_x_continuous(limits = c(.25, 1.29)) +
+  annotate("text", x=1.15, y=.5, color = "red", size = rs,
+           label=paste("r=",round(cor(de$effect_size, de$c.Mratio), 2))) +
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) 
+
+# rt ratio
+geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
+  geom_pointrange( aes(ymax = cill, ymin=ciul))+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  #geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
+  ylab("effect size (Cohen's d)") +
+  xlab("reaction time ratio") + 
+  theme(text = element_text(size=fs)) +  
+  scale_y_continuous(limits = c(-.33, .66)) +
+  scale_x_continuous(limits = c(.949, 1.005)) +
+  annotate("text", x=.997, y=.5, color = "red", size = rs,
+           label=paste("r=",round(cor(de$effect_size, de$rt.Mratio), 2))) +
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) 
+
+if (savePlots){ 
+  pdf("figure/geon.pdf", height = 6, width = 12)
+  multiplot(geon_c_plot, geon_rt_plot, cols = 2)
+  dev.off()
+}else {
+  multiplot(geon_c_plot, cols = 1)
+  multiplot(geon_rt_plot, cols = 1)
+}
+```
+
+###  *correlations between norms and effect sizes*
+```{r}
+cor.test(de$rt.Mratio, de$effect_size)
+cor.test(de$c.Mratio, de$effect_size)
+```
+
+***
+***
+
+<a name="novelRealObjs"/>
+
+## (2) Novel real objects
+
+<a name="2a"/>
+
+### (A) Norms [Complexity norming task][task30] [RT task][task9]
+
+### (1) Complexity Norms
+### *get data into long form, compute correlations between 2 samples, figure out quintiles, remove dupliate subjects*
+```{r objects_complexity_norms, warning = FALSE}
+if (processNorms){
+  ## Sample #1
+  da <- read.csv("data/RefComplex9a.results",sep="\t",header=TRUE)
+  da[,31:92] <- lapply(da[,31:92],as.character)
+  da[,31:92] <- lapply(da[,31:92],as.numeric)
+  
+  # melt
+  md <- melt(da,id.vars=c("workerid"),measure.vars=names(da)[grepl("rating",names(da))])
+  names(md) <- c("workerid", "rating", "value")
+  ms = aggregate(value ~ rating, md, mean)
+
+  ## Sample #2
+  db <- read.csv("data/RefComplex9b.results",sep="\t",header=TRUE)
+  db[,30:92] <- lapply(db[,30:92],as.character)
+  db[,30:92] <- lapply(db[,30:92],as.numeric)
+  
+  # melt
+  mdb <- melt(db,id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
+  names(mdb) <- c("workerid", "rating", "value")
+  msb = aggregate(value ~ rating, mdb, mean)
+  
+  # merge two samples together to get lists for experiments 
+  all_ratings = rbind(md, mdb)
+  all_ms = aggregate(value ~ rating, all_ratings, mean)
+  all_ms$ratingNum <- matrix(sapply(str_split(matrix(sapply(str_split(all_ms$rating,"rating"),
+                                                            function(x) {x[2]})),"_"),function(x){x[1]}))
+  all_ms$ratingNum<- as.numeric(str_replace_all(as.character(all_ms$ratingNum),"\\\"",""))
+  all_ms$cil = aggregate(value ~ rating, all_ratings, ci.low)$value
+  all_ms$cih = aggregate(value ~ rating, all_ratings, ci.high)$value
+  
+  all_ms = all_ms[!is.na(all_ms$ratingNum),] # get rid of ball and motherboard
+  
+  # add back in ratings for each samples
+  all_ms = merge(all_ms, ms, by="rating")
+  all_ms = merge(all_ms, msb, by="rating")
+  
+  all_ms$rating <- NULL
+  names(all_ms) = c("meanRating" , "ratingNum", "cil", "cih" ,"rating_1","rating_2" )
+  all_ms <- all_ms[c(2,1,3:6)]
+  
+  # get quintiles
+  q = quantile(all_ms$meanRating, seq(0,1, by=.2))
+  one = all_ms[which(all_ms$meanRating<q[2]), "ratingNum"]
+  two = all_ms[which(all_ms$meanRating>q[2] & all_ms$meanRating<q[3]), "ratingNum"]
+  three = all_ms[which(all_ms$meanRating>q[3] & all_ms$meanRating<q[4]), "ratingNum"]
+  four = all_ms[which(all_ms$meanRating>q[4] & all_ms$meanRating<q[5]), "ratingNum"]
+  five = all_ms[which(all_ms$meanRating>q[5]), "ratingNum"]
+  
+  one # 13 15 19 20 28 29  3 44 46 54 57 59
+  two # 10 17  2 22 34 37  4 49  5 55  6  9
+  three # 12 50 7 8 48 16 1 39 40 56 24 60
+  four # 26 18 11 47 42 30 23 31 51 58 41 45
+  five # 14 21 25 27 32 33 35 36 38 43 52 53
+  
+  all_ms$quintile = ifelse(is.element(all_ms$ratingNum, one), 1, 
+                           ifelse(is.element(all_ms$ratingNum, two), 2,
+                                  ifelse(is.element(all_ms$ratingNum, three), 3,
+                                         ifelse(is.element(all_ms$ratingNum, four), 4,
+                                                ifelse(is.element(all_ms$ratingNum, five), 5,
+                                                       "error")))))
+  all_ms$quintile = as.numeric(all_ms$quintile)
+  all_ms <- all_ms[order(all_ms$meanRating),]
+  
+  # there is one participant who was in both samples. Look at correlation between samples without this participant in Sample #2 
+  # Sample #2 
+  # melt
+  mdb <- melt(db[db$workerid != 'A1BQEX75BE1AYE',],id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
+  names(mdb) <- c("workerid", "rating", "value")
+  msb = aggregate(value ~ rating, mdb, mean)
+  
+  co_norms_unique_sample = merge(ms, msb, by="rating")
+  co_norms_unique_sample$ratingNum <- as.numeric(matrix(sapply(str_split(matrix(sapply(str_split(co_norms_unique_sample$rating,"rating")
+                                                                                       ,function(x) {x[2]})),"_"),function(x){x[1]})))
+  co_norms_unique_sample = co_norms_unique_sample[!is.na(co_norms_unique_sample$ratingNum),] # get rid of ball and motherboard
+
+  co_norms_unique_sample$rating <- NULL
+  names(co_norms_unique_sample) = c( "rating_1", "rating_2", "ratingNum")
+  print('reliability, removing duplicate subj:',round(cor(co_norms_unique_sample$rating_1, co_norms_unique_sample$rating_2),2)) # nearly identical to original sample
+  
+  # write to csv (use write.table to can exclude headers, so matlab can read for figure)
+  write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
+            row.names=FALSE, col.names=FALSE, sep=",")
+  
+  # write to csv
+  write.csv(all_ms, "data/complicatedNormsObjs_BYITEM.csv")
+  }
+
+co_norms = read.csv("data/complicatedNormsObjs_BYITEM.csv")
+```
+
+### *get reliability between two samples*
+```{r}
+cor.test(co_norms$rating_1, co_norms$rating_2)
+```
+
+### (2) RT Norms
+### *get data into long form (accuracy and RT df) and do exclusions*
+```{r objects_rt_norms, warning = FALSE}
+if (processNorms){
+  raw <- read.csv("data/RefComplex30.results",sep="\t",header=TRUE)
+  
+  if (whichSubjRemove == 'repeatSubj') {
+    raw = merge(raw, dups, by=c("hitid","workerid"))
+    raw = raw[!raw$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      raw = merge(raw, dups, by=c("hitid","workerid"))
+      raw = raw[!raw$withinRepeatSubj,]
+      }
+    
+  # look at accuracy, and exclude those below chance
+  boxplot(raw$Answer.correct)
+  raw = raw[raw$Answer.correct > 30, ]
+  
+  # accuracy dataframe
+  n <- names(raw)
+  cols = c( n[grepl("test",n)])
+  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  mda$trial <-as.numeric(matrix(lapply(str_split(mda$variable,"_"),function(x) {x[3]})))
+  mda$var1 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[1]}))
+  mda$var2 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[2]}))
+  mda$var <- paste(mda$var1, mda$var2, sep = "_")
+  mda$variable <- NULL; mda$var1 <- NULL; mda$var2 <- NULL
+  
+  mda$seq <- with(mda, ave(value, workerid, var, FUN = seq_along))
+  da = dcast(workerid + seq + trial ~ var, data = mda, value.var = "value")
+  da$seq <- NULL
+  
+  da=da[!is.na(da$trial),]
+  
+  da$Answer.test_answer = as.factor(da$Answer.test_answer)
+  da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
+  da$Answer.test_image  = as.factor(da$Answer.test_image)
+  
+  # look at memory performance (correct: CR or hit)
+  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
+  numH = length(which(da$Answer.test_answerEval == "\"H\""))
+
+  correct = (numCR + numH)/ dim(da)[1]
+  print(paste("percent correct:" , round(correct)))
+  
+  # RT dataframe
+  n <- names(raw)
+  cols = c(  n[grepl("train",n)], n["correct"])
+  cols = cols[1:154]
+  md <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  md$trial <-as.numeric(matrix(lapply(str_split(md$variable,"_"),function(x) {x[3]})))
+  md$var1 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]}))
+  md$var2 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$var <- paste(md$var1, md$var2, sep = "_")
+  md$variable <- NULL; md$var1 <- NULL; md$var2 <- NULL
+  
+  md$seq <- with(md, ave(value, workerid, var, FUN = seq_along))
+  d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
+  d$Answer.train_NA <- NULL; d$seq <- NULL
+  
+  d=d[!is.na(d$trial),]
+  d=d[!is.na(d$Answer.train_image),]
+  d=d[!is.na(d$Answer.train_rt),]
+  d=d[d$Answer.train_image != "undefined",]
+  d=d[d$Answer.train_image != "",]
+  
+  d$Answer.train_image = as.factor(d$Answer.train_image)
+  d$Answer.train_rt = as.numeric(d$Answer.train_rt)
+  
+  #exclude outlier 2 standard deviations above and below mean (in log space)
+  d$log.rt = log(d$Answer.train_rt)
+  total = dim(d)[1]
+  sd2 = 2*sd(d$log.rt)
+  d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
+  print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
+  hist(d$log.rt)
+  
+  # aggregate
+  ms <- aggregate(log.rt  ~ Answer.train_image, data=d, mean)
+  ms$rt_cil <- aggregate(log.rt ~ Answer.train_image, data=d, ci.low)$log.rt 
+  ms$rt_cih <- aggregate(log.rt ~ Answer.train_image, data=d, ci.high)$log.rt 
+  
+  ms = ms[ms$Answer.train_image != 61,] # get rid of ball and motherboard
+  ms = ms[ms$Answer.train_image != 62,] 
+
+  write.csv(ms,"data/rtNormsObjs_BYITEM.csv")
+  }
+
+rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv")
+```
+
+### *correlation between norms*
+```{r}
+index <- match(co_norms$ratingNum, rto_norms$Answer.train_image)
+co_norms$log.rt <- rto_norms$log.rt[index]
+cor.test(co_norms$meanRating, co_norms$log.rt)
+```
+
+<a name="2b"/>
+
+### (B) Mapping task (adults) [(Task)][task34]
+
+### *get data into long form*
+```{r objects_mapping, warning = FALSE}
+if (doSlow) {
+  d <- read.csv("data/RefComplex35.results",sep="\t",header=TRUE)
+  
+  if (whichSubjRemove == 'removeRepeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
+  # get in long form
+  # get trial info
+  md <- melt(d,id.vars=c("workerid"),
+             measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+  md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
+  
+  md$variable <- as.factor(as.character(md$variable))
+  md$trial <- as.factor(as.character(md$trial))
+  md$value <- as.factor(as.character(md$value))
+  md$workerid <- as.factor(as.character(md$workerid))
+  
+  md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
+  dc = dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
+  dc$seq <- NULL
+  
+  write.csv(dc, "data/RC35_long.csv")
+  }
+
+dc <-  read.csv("data/RC35_long.csv")
+```
+
+### *make everything factors*
+```{r}
+dc$criticalComplicated= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalComplicated))
+dc$criticalSimple= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalSimple))
+
+dc$criticalComplicated <- as.factor(dc$criticalComplicated)
+dc$criticalSimple <- as.factor(dc$criticalSimple)
+dc$langCondition <- as.factor(dc$langCondition)
+dc$objCondition <- as.factor(dc$objCondition)
+dc$response <- as.factor(dc$response)
+dc$responseSide <- as.factor(dc$responseSide)
+dc$responseValue<- as.factor(dc$responseValue)
+dc$word <- as.factor(dc$word)
+dc$trial <- as.numeric(dc$trial)
+```
+
+### *merge in norms*
+```{r}
+index <- match(dc$criticalSimple, co_norms$ratingNum)
+dc$criticalSimple_c.norms <- co_norms$meanRating[index]
+index <- match(dc$criticalComplicated, co_norms$ratingNum)
+dc$criticalComplicated_c.norms <- co_norms$meanRating[index]
+
+index <- match(dc$criticalSimple, rto_norms$Answer.train_image)
+dc$criticalSimple_rt.norms <- rto_norms$log.rt [index]
+index <- match(dc$criticalComplicated, rto_norms$Answer.train_image)
+dc$criticalComplicated_rt.norms <- rto_norms$log.rt [index]
+
+dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
+dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
+```
+
+### *get effect sizes*
+```{r}
+de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
+```
+
+### *get obj conditions*
+```{r}
+de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
+de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
+de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
+de$cond2<- as.factor(gsub("[[:punct:]]", "", de$cond2))
+de$objRatio = as.numeric(de$cond1)/as.numeric(de$cond2)
+de$l.objRatio <- log(de$objRatio)
+
+de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
+```
+
+### *plot complexity ratios vs. condition*
+```{r}
+# set graphical params
+fs = 25
+rs = 8
+
+# complexity plot
+obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
+  geom_pointrange(aes(ymax = cill, ymin=ciul),position="dodge")+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  #geom_text(aes(c.Mratio+.03, effect_size, label=objCondition2), position="dodge") +
+  #geom_text(aes(c.Mratio+.04, effect_size, label=objCondition2), position="dodge") +
+  ylab("effect size (Cohen's d)") +
+  xlab("complexity rating ratio") + 
+  #ggtitle("complexity ratio vs. effect size") +
+  scale_x_continuous(limits = c(.25, 1.29)) +
+  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
+  annotate("text", x=1.15, y=.5, col = "red",label=paste(
+    "r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)), size = rs) +
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) +
+  scale_y_continuous(limits = c(-.33, .66))
+
+# RT ratio plot
+obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
+  geom_pointrange( aes(ymax = cill, ymin=ciul))+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  #geom_text(aes(rt.Mratio+.0008, effect_size, label=objCondition2)) +
+  #geom_text(aes(rt.Mratio+.002, effect_size, label=objCondition2)) +
+  ylab("effect size (Cohen's d)") +
+  xlab("reaction time ratio") +
+  scale_x_continuous(limits = c(.949, 1.005)) +
+  #ggtitle("RT ratio vs. effect size") +
+  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
+  annotate("text", x=.997, y=.5, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)), size = rs) +  
+  theme(plot.background = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()) +
+  scale_y_continuous(limits = c(-.33, .66))
+
+if (savePlots) {
+  pdf("figure/realobjs.pdf", height = 6, width = 12)
+  multiplot(obj_c_plot, obj_rt_plot, cols = 2)
+  dev.off()
+} else {
+  multiplot(obj_c_plot, cols = 1)
+  multiplot(obj_rt_plot, cols = 1)
+}
+```
+
+### *correlations between effect size and complexity conditions*
+```{r}
+cor.test(de$objRatio, de$effect_size)
+cor.test(de$c.Mratio, de$effect_size)
+cor.test(de$rt.Mratio, de$effect_size)
+```
+
+<a name="2c"/>
+
+### (\(C\)) Production task (labels + descriptions) 
+### (1) Labels [(Task)][task27]
+### *get data into long form*
+```{r objects_production_labels, warning = FALSE, message = FALSE, output = FALSE}
+d <- read.csv("data/RefComplex27.results",sep="\t",header=TRUE)
+
+if (whichSubjRemove == 'repeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
+n <- names(d)
+d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
+d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
+d$Answer.pic_3 = as.factor(as.character(d$Answer.pic_3))
+d$Answer.pic_4 = as.factor(as.character(d$Answer.pic_4))
+d$Answer.pic_5 = as.factor(as.character(d$Answer.pic_5))
+d$Answer.pic_6 = as.factor(as.character(d$Answer.pic_6))
+d$Answer.pic_7 = as.factor(as.character(d$Answer.pic_7))
+d$Answer.pic_8 = as.factor(as.character(d$Answer.pic_8))
+d$Answer.pic_9 = as.factor(as.character(d$Answer.pic_9))
+d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
+
+cols = c( n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("pic",n)],na.rm=TRUE)
+md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+names(md1)[3]= "picture"
+md1 = md1[,-2]
+
+md2 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("desc_",n)],na.rm=TRUE)
+md2$trial <-as.numeric(matrix(lapply(str_split(md2$variable,"_"),function(x) {x[2]})))
+names(md2)[3]= "description"
+md2 = md2[,-2]
+
+md3 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("descLength",n)],na.rm=TRUE)
+md3$trial <-as.numeric(matrix(lapply(str_split(md3$variable,"_"),function(x) {x[2]})))
+names(md3)[3] = "length"
+md3 = md3[,-2]
+
+md4 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("cond",n)],na.rm=TRUE)
+md4$trial <-as.numeric(matrix(lapply(str_split(md4$variable,"_"),function(x) {x[2]})))
+names(md4)[3] = "condition"
+md4 = md4[,-2]
+
+md12<- join(md1, md2,type = "inner")
+md123<- join(md12, md3,type = "inner")
+md<- join(md123, md4,type = "inner")
+
+# add columns
+md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
+md$log.length <- log(md$length) 
+md$log.trial <- log(md$trial)
+md <- md[md$numWords == 1,]  #remove multi word responses
+```
+
+### *relationship between condition and label length*
+```{r}
+t.test(md[md$condition == '"complex"',"log.length"],md[md$condition == '"simple"',"log.length"],paired = TRUE)
+summary(lmer(log.length~condition + (1+trial|workerid), md))
+```
+
+### *relationship between complicated norms and label length*
+```{r}
+index <- match(md$picture, co_norms$ratingNum)
+md$c.norms <- co_norms$meanRating[index]
+
+ms <- aggregate(log.length ~ c.norms + picture, data=md, mean)
+ms$cih <- aggregate(log.length ~ c.norms + picture, data=md, ci.high)$log.length
+ms$cil <- aggregate(log.length ~ c.norms + picture, data=md, ci.low)$log.length
+
+#plot
+ggplot(ms, aes(c.norms,log.length)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2, colour="grey") +
+  theme_bw() +
+  xlab("Object Complexity Norms") +
+  ylab("Log Word Length (characters)") +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
+  annotate("text", x=.75, y=1.6, color = "red", size = 8,
+    label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
+    ggtitle('Label length vs. complicated norms')
+
+```
+
+### *relationship between RT norms and label length*
+```{r}
+index <- match(md$picture, rto_norms$Answer.train_image)
+md$rt.norms <- rto_norms$log.rt[index]
+
+ms <- aggregate(log.length ~ rt.norms + picture, data=md, mean)
+ms$cih <- aggregate(log.length ~ rt.norms + picture, data=md, ci.high)$log.length
+ms$cil <- aggregate(log.length ~ rt.norms + picture, data=md, ci.low)$log.length
+
+#plot
+ggplot(ms, aes(rt.norms,log.length)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2, colour="grey") +
+  theme_bw() +
+  xlab("Object RT Norms") +
+  ylab("Log Word Length (characters)") +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+
+  annotate("text", x=7.5, y=1.6, color = "red", size = 8,
+    label=paste("r=",round(cor(md$log.length,md$rt.norms), 2)))+
+    ggtitle('Label length vs. RT norms')
+
+
+```
+
+### (2) Descriptions [(Task)][task25]
+
+### *get data in long form*
+```{r objects_production_descriptions, warning = FALSE}
+d <- read.csv("data/RefComplex25.results",sep="\t",header=TRUE)
+
+if (whichSubjRemove == 'repeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$repeatSubj,]
+    } else if (whichSubjRemove == 'withinRepeatSubj') {
+      d = merge(d, dups, by=c("hitid","workerid"))
+      d = d[!d$withinRepeatSubj,]
+      }
+  
+n <- names(d)
+d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
+d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
+d$Answer.pic_3 = as.factor(as.character(d$Answer.pic_3))
+d$Answer.pic_4 = as.factor(as.character(d$Answer.pic_4))
+d$Answer.pic_5 = as.factor(as.character(d$Answer.pic_5))
+d$Answer.pic_6 = as.factor(as.character(d$Answer.pic_6))
+d$Answer.pic_7 = as.factor(as.character(d$Answer.pic_7))
+d$Answer.pic_8 = as.factor(as.character(d$Answer.pic_8))
+d$Answer.pic_9 = as.factor(as.character(d$Answer.pic_9))
+d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
+
+cols = c( n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("pic",n)],na.rm=TRUE)
+md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+names(md1)[3]= "picture"
+md1 = md1[,-2]
+
+md2 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("desc_",n)],na.rm=TRUE)
+md2$trial <-as.numeric(matrix(lapply(str_split(md2$variable,"_"),function(x) {x[2]})))
+names(md2)[3]= "description"
+md2 = md2[,-2]
+
+md3 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("descLength",n)],na.rm=TRUE)
+md3$trial <-as.numeric(matrix(lapply(str_split(md3$variable,"_"),function(x) {x[2]})))
+names(md3)[3] = "length"
+md3 = md3[,-2]
+
+md4 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("cond",n)],na.rm=TRUE)
+md4$trial <-as.numeric(matrix(lapply(str_split(md4$variable,"_"),function(x) {x[2]})))
+names(md4)[3] = "condition"
+md4 = md4[,-2]
+
+md12<- join(md1, md2,type = "inner")
+md123<- join(md12, md3,type = "inner")
+md<- join(md123, md4,type = "inner")
+
+# add number of words count
+md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
+md$length_r <-nchar(as.character(md$description))
+
+# add clean length var (remove punctuation and spaces)
+md$description_clean= gsub(" ", "", gsub("[[:punct:]]", "", md$description))
+md$length_c= nchar(as.character(md$description_clean))
+md$log.length_c = log(md$length_c)
+```
+
+### *relationship between condition and description length*
+```{r}
+#summary(lmer(length_c~condition + (1|workerid), md))
+#summary(lmer(length_c~condition + trial + (1+trial|workerid), md))
+
+summary(lmer(log.length_c~md$condition + (1|workerid), md))
+summary(lmer(log.length_c~condition + trial + (1+trial|workerid), md))
+
+## plot
+ggplot(md, aes(x=log.length_c, fill=condition)) + 
+  geom_density(alpha = 0.2)+
+  ggtitle('description length as a function of condition')
+```
+
+### *relationship between complexity norms and description length*
+```{r}
+index <- match(md$picture, co_norms$ratingNum)
+md$c.norms <- co_norms$meanRating[index]
+
+summary(lmer(log.length_c~c.norms + (1+trial|workerid), md))
+summary(lmer(log.length_c~c.norms + trial + (1|workerid), md)) # complexity norms predict length
+
+cor.test(md$log.length_c,md$c.norms)
+
+ms <- aggregate(log.length_c ~ c.norms + picture, data=md, mean)
+ms$cih <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.high)$log.length_c
+ms$cil <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.low)$log.length_c
+
+ggplot(ms, aes(c.norms,log.length_c)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
+  theme_bw() +
+  xlab("Object Complexity Norms") +
+  ylab("Log Description Length (characters)") +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+ 
+  ggtitle('Description length vs. complexity norms')
+```
+
+### *relationship between RT norms and description length*
+```{r}
+index <- match(md$picture, rto_norms$Answer.train_image)
+md$rt.norms <- rto_norms$log.rt[index]
+
+summary(lmer(log.length_c~rt.norms + (1+trial|workerid), md))
+summary(lmer(log.length_c~rt.norms + trial + (1|workerid), md)) #rt norms predict length
+
+cor.test(md$log.length_c,md$rt.norms)
+
+ms <- aggregate(log.length_c ~ rt.norms + picture, data=md, mean)
+ms$cil <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.low)$log.length_c
+ms$cih <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.high)$log.length_c
+
+ggplot(ms, aes(rt.norms,log.length_c)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
+  theme_bw() +
+  xlab("Object RT Norms") +
+  ylab("Log Description Length (characters)") +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+
+  ggtitle('Description length vs. rt norms')
+```
+
+***
+***
+
+<a name="xling"/>
+
+## (3) Natural language 
+
+<a name="3a"/>
+
+###  (A) English Norms [(Complexity norms task)][task26]
+
+### *preprocess and merge in stuff*
+```{r english_norms, warning= FALSE}
 if (processNorms) {
   d1 <- read.csv("data/RefComplex26.results1",sep="\t",header=TRUE)
   d2 <- read.csv("data/RefComplex26.results",sep="\t",header=TRUE)
@@ -229,17 +1191,17 @@ if (processNorms) {
 eng = read.csv("data/englishComplexityNorms.csv")
 ```
 
-* aggregate across words of the same length
+### *aggregate across words of the same length*
 ```{r}
-ms2 <- aggregate(complexity ~ nchars, data=ms, mean)
-ms2$cih <- aggregate(complexity ~ nchars,  data=ms, ci.high)$complexity
-ms2$cil <- aggregate(complexity ~ nchars,  data=ms, ci.low)$complexity
+ms2 <- aggregate(complexity ~ nchars, data=eng, mean)
+ms2$cih <- aggregate(complexity ~ nchars,  data=eng, ci.high)$complexity
+ms2$cil <- aggregate(complexity ~ nchars,  data=eng, ci.low)$complexity
 
 ggplot(ms2, aes(complexity, nchars)) +
   geom_point() + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
   geom_errorbarh(aes(xmax=complexity+cih,xmin=complexity-cil), size=.15, colour="black") +
-  annotate("text", x=2, y=10, size = 10, label=paste("r=",round(cor(ms$complexity, ms$nchars), 2)))+
+  annotate("text", x=2, y=10, size = 10, label=paste("r=",round(cor(eng$complexity, eng$nchars), 2)), col="red")+
   scale_y_continuous(limits = c(0, 15), breaks = 1:14, labels = 1:14) +
   scale_x_continuous(limits = c(0, 7), breaks = 1:7, labels = 1:7)  +
   theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
@@ -248,39 +1210,38 @@ ggplot(ms2, aes(complexity, nchars)) +
   ggtitle("Number of characters vs. complexity rating")
 ```
 
-* aggregate across participants 
-``` {r}
+### *aggregate across participants*
+```{r}
   # have to do this separately for each length variable because drops words for which there are NAs *for any of the length vars*
   ms.syl <- aggregate(complexity ~ word + mrc.syl, data=eng, mean)
   ms.phon <- aggregate(complexity ~ word + mrc.phon, data=eng, mean)
   ms.morph <- aggregate(complexity ~ word + clx.morph, data=eng, mean)
 ```
 
-* Correlations
-``` {r}
+### *correlations*
+```{r}
 cor.test(ms.syl$complexity, ms.syl$mrc.syl)
 cor.test(ms.phon$complexity, ms.phon$mrc.phon)
 cor.test(ms.morph$complexity, ms.morph$clx.morph)
 
 # mono-morphemic
-ms_mono.syl = aggregate(complexity ~ word + mrc.syl, data=md[md$clx.morph == 1,], mean)
-ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=md[md$clx.morph == 1,], mean)
+ms_mono.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$clx.morph == 1,], mean)
+ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph == 1,], mean)
 
 cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
 cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
 
 # open class
-ms_open.syl = aggregate(complexity ~ word + mrc.syl, data=md[md$class != 0,], mean)
-ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=md[md$class != 0,], mean)
-ms_open.morph = aggregate(complexity ~ word + clx.morph, data=md[md$class != 0,], mean)
-summary(ms_open.syl)
+ms_open.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$class != 0,], mean)
+ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$class != 0,], mean)
+ms_open.morph = aggregate(complexity ~ word + clx.morph, data=eng[eng$class != 0,], mean)
 
 cor.test(ms_open.syl$complexity, ms_open.syl$mrc.syl)
 cor.test(ms_open.phon$complexity, ms_open.phon$mrc.phon)
 cor.test(ms_open.morph$complexity, ms_open.morph$clx.morph)
 ```
 
-* relationship beween length and complexity, control for everything
+### *relationship beween length and complexity, control for everything*
 ```{r}
 # all
 m_syl = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
@@ -305,7 +1266,7 @@ summary(m_phon_o)
 summary(m_morph_o)
 ```
 
-* create english word data frame with relevant variables for xling analysis
+### *create english word data frame with relevant variables for xling analysis*
 ```{r}
   xling.eng <- aggregate(complexity ~ word + class, data=eng, mean)
 
@@ -323,8 +1284,22 @@ summary(m_morph_o)
   xling.eng$clx.morph = as.factor(xling.eng$clx.morph)
 ```
 
-* read in xling data and merge with English complexity norms
-```{r xling_read, include = FALSE}
+<a name="3b"/>
+
+###  (B) Xling translation accuracy
+```{r xling_accuracy}
+checksR = read.csv("data/translation_accuracy.csv")[1:500,]
+checksR = checksR[checksR$ENGLISH != "peso",]
+
+accuracy = colSums(checksR[,2:13], dims = 1)/ dim(checksR[,])[1]
+print(paste("total accuracy:", round(mean(accuracy),2)))
+```
+
+<a name="3c"/>
+
+###  (\(C\)) Xling correlation between lengths and complexity
+### *read in xling data and merge with English complexity norms*
+```{r xling_corrs }
 xling = read.csv("data/xling_csv.csv") 
 index <- match(xling$ENGLISH, xling.eng$word)
 
@@ -337,18 +1312,8 @@ xling$X <- NULL
 xling = xling[xling$ENGLISH != "peso",]
 ```
 
-* look at accuracy for translations checks
-```{r xling_trans_preprocess, include = FALSE}
-checksR = read.csv("data/translation_accuracy.csv")[1:500,]
-checksR = checksR[checksR$ENGLISH != "peso",]
-
-accuracy = colSums(checksR[,2:13], dims = 1)/ dim(checksR[,])[1]
-print(paste("total accuracy:", round(mean(accuracy),2)))
-```
-
-<a name="1b"/>
-###  (B) Correlation between complextity and length
-```{r xling_len_corrs}
+### *get correlations by language*
+```{r}
 lens = c(which(grepl("LEN",names(xling)))) # get length column indices
 xlingCORR = xling[c(lens, which(names(xling)== "subt.log.freq"), which(names(xling)== "complexity"), which(names(xling)== "clx.morph"), which(names(xling)== "class"))] 
 
@@ -368,7 +1333,7 @@ if (doSlow) {
 c_l = read.csv("data/complexity_length_corrs.csv")
 
 # now do correlations, partialling out frequency
-cmat.p = partial.r(xlingCORR,c(1:80, which(names(xlingCORR) == "complexity")), which(names(xlingCORR) == "subt.log.freq") )
+cmat.p = partial.r(xlingCORR[,1:82],c(1:80, which(names(xlingCORR) == "complexity")), which(names(xlingCORR) == "subt.log.freq"))
 cxl = as.data.frame(cmat.p[which(row.names(cmat.p) == "complexity"),1:80])
 cxl$lang = row.names(cxl)
 names(cxl) = c("corr", "lang")
@@ -381,7 +1346,6 @@ c_l$p.corr<- cxl$corr[index]
 mono_cor = data.frame (language = character(), mono.cor = numeric(0))
 complexity_i = which(names(xlingCORR)== "complexity")
 levels(mono_cor$language) = names(xlingCORR)
-
 
 for (i in 1:length(lens)){
   mono_cor[i, "mono.cor"] = cor(xlingCORR[xlingCORR$clx.morph == 1, i], 
@@ -413,14 +1377,13 @@ c_l = c_l[order(c_l$corr),] # sort by correlation
 c_l$language=  as.character(tolower(lapply(str_split(c_l$language,"_"),function(x) {x[1]}))) # clean up names
 c_l$language <- factor(c_l$language, levels =  rev(as.character(c_l$language)))
 
-
 # add check information
 coded_languages = c("english", "spanish", "welsh", "vietnamese", "russian", "portuguese", "persian", "bosnian", "french", "hebrew", "italian", "korean", "polish" )
 c_l$checked = as.factor(ifelse( is.element(c_l$language, coded_languages), "yes", "no"))
 ```
 
-* plot
-```{r}
+### *plot correlations*
+```{r, fig.width = 15}
 if (savePlots) {pdf("figure/xling.pdf", height = 6, width = 12)}
 
 ggplot(c_l, aes(language, corr, fill = checked)) + 
@@ -447,7 +1410,7 @@ ggplot(c_l, aes(language, corr, fill = checked)) +
 if(savePlots){dev.off()}
 ```
 
-* Grand means
+### *grand means*
 ```{r}
 mean(c_l$corr)
 mean(c_l$mono.cor)
@@ -457,912 +1420,6 @@ mean(c_l$p.corr)
 
 ***
 ***
-
-## (3) Novel real objects
-
-<a name="3a"/>
-### (A) Norms [Complexity norming task][task30] [RT task][task9]
-
-#### Complexity Norms
-```{r , include = FALSE}
-if (processNorms){
-  ## Sample #1
-  da <- read.csv("data/RefComplex9a.results",sep="\t",header=TRUE)
-  da[,31:92] <- lapply(da[,31:92],as.character)
-  da[,31:92] <- lapply(da[,31:92],as.numeric)
-  
-  # melt
-  md <- melt(da,id.vars=c("workerid"),measure.vars=names(da)[grepl("rating",names(da))])
-  names(md) <- c("workerid", "rating", "value")
-  ms = aggregate(value ~ rating, md, mean)
-
-  ## Sample #2
-  db <- read.csv("data/RefComplex9b.results",sep="\t",header=TRUE)
-  db[,30:92] <- lapply(db[,30:92],as.character)
-  db[,30:92] <- lapply(db[,30:92],as.numeric)
-  
-  # melt
-  mdb <- melt(db,id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
-  names(mdb) <- c("workerid", "rating", "value")
-  msb = aggregate(value ~ rating, mdb, mean)
-  
-  # merge two samples together to get lists for experiments 
-  all_ratings = rbind(md, mdb)
-  all_ms = aggregate(value ~ rating, all_ratings, mean)
-  all_ms$ratingNum <- matrix(sapply(str_split(matrix(sapply(str_split(all_ms$rating,"rating"),
-                                                            function(x) {x[2]})),"_"),function(x){x[1]}))
-  all_ms$ratingNum<- as.numeric(str_replace_all(as.character(all_ms$ratingNum),"\\\"",""))
-  all_ms$cil = aggregate(value ~ rating, all_ratings, ci.low)$value
-  all_ms$cih = aggregate(value ~ rating, all_ratings, ci.high)$value
-  
-  all_ms = all_ms[!is.na(all_ms$ratingNum),] # get rid of ball and motherboard
-  
-  # add back in ratings for each samples
-  all_ms = merge(all_ms, ms, by="rating")
-  all_ms = merge(all_ms, msb, by="rating")
-  
-  all_ms$rating <- NULL
-  names(all_ms) = c("meanRating" , "ratingNum", "cil", "cih" ,"rating_1","rating_2" )
-  all_ms <- all_ms[c(2,1,3:6)]
-  
-  # get quintiles
-  q = quantile(all_ms$meanRating, seq(0,1, by=.2))
-  one = all_ms[which(all_ms$meanRating<q[2]), "ratingNum"]
-  two = all_ms[which(all_ms$meanRating>q[2] & all_ms$meanRating<q[3]), "ratingNum"]
-  three = all_ms[which(all_ms$meanRating>q[3] & all_ms$meanRating<q[4]), "ratingNum"]
-  four = all_ms[which(all_ms$meanRating>q[4] & all_ms$meanRating<q[5]), "ratingNum"]
-  five = all_ms[which(all_ms$meanRating>q[5]), "ratingNum"]
-  
-  one # 13 15 19 20 28 29  3 44 46 54 57 59
-  two # 10 17  2 22 34 37  4 49  5 55  6  9
-  three # 12 50 7 8 48 16 1 39 40 56 24 60
-  four # 26 18 11 47 42 30 23 31 51 58 41 45
-  five # 14 21 25 27 32 33 35 36 38 43 52 53
-  
-  all_ms$quintile = ifelse(is.element(all_ms$ratingNum, one), 1, 
-                           ifelse(is.element(all_ms$ratingNum, two), 2,
-                                  ifelse(is.element(all_ms$ratingNum, three), 3,
-                                         ifelse(is.element(all_ms$ratingNum, four), 4,
-                                                ifelse(is.element(all_ms$ratingNum, five), 5,
-                                                       "error")))))
-  all_ms$quintile = as.numeric(all_ms$quintile)
-  all_ms <- all_ms[order(all_ms$meanRating),]
-  
-  # write to csv (use write.table to can exclude headers, so matlab can read for figure)
-  write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
-            row.names=FALSE, col.names=FALSE, sep=",")
-  
-  # write to csv
-  write.csv(all_ms, "data/complicatedNormsObjs_BYITEM.csv")
-  }
-
-co_norms = read.csv("data/complicatedNormsObjs_BYITEM.csv")
-```
-
-* Get reliability between two samples
-```{r}
-  cor.test(co_norms$rating_1, co_norms$rating_2)
-```
-
-* There is one participant who was in both samples. Look at correlation between samples without this participant in Sample #2.
-```{r}
-  ## Sample #2 
-  # melt
-  mdb <- melt(db[db$workerid != 'A1BQEX75BE1AYE',],id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
-  names(mdb) <- c("workerid", "rating", "value")
-  msb = aggregate(value ~ rating, mdb, mean)
-  
-  co_norms_unique_sample = merge( ms, msb, by="rating")
-  co_norms_unique_sample$ratingNum <- as.numeric(matrix(sapply(str_split(matrix(sapply(str_split(co_norms_unique_sample$rating,"rating")
-                                                                                       ,function(x) {x[2]})),"_"),function(x){x[1]})))
-  co_norms_unique_sample = co_norms_unique_sample[!is.na(co_norms_unique_sample$ratingNum),] # get rid of ball and motherboard
-
-  co_norms_unique_sample$rating <- NULL
-  names(co_norms_unique_sample) = c( "rating_1", "rating_2", "ratingNum")
-  cor(co_norms_unique_sample$rating_1, co_norms_unique_sample$rating_2) # nearly identical to original sample
-```
-
-#### RT Norms
-```{r, include = FALSE}
-if (processNorms){
-  raw <- read.csv("data/RefComplex30.results",sep="\t",header=TRUE)
-  
-  if (whichSubjRemove == 'repeatSubj') {
-    raw = merge(raw, dups, by=c("hitid","workerid"))
-    raw = raw[!raw$repeatSubj,]
-    } else if (whichSubjRemove == 'withinRepeatSubj') {
-      raw = merge(raw, dups, by=c("hitid","workerid"))
-      raw = raw[!raw$withinRepeatSubj,]
-      }
-    
-  # look at accuracy, and exclude those below chance
-  boxplot(raw$Answer.correct)
-  raw = raw[raw$Answer.correct > 30, ]
-  
-  # accuracy dataframe
-  n <- names(raw)
-  cols = c( n[grepl("test",n)])
-  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
-  mda$trial <-as.numeric(matrix(lapply(str_split(mda$variable,"_"),function(x) {x[3]})))
-  mda$var1 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[1]}))
-  mda$var2 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[2]}))
-  mda$var <- paste(mda$var1, mda$var2, sep = "_")
-  mda$variable <- NULL; mda$var1 <- NULL; mda$var2 <- NULL
-  
-  mda$seq <- with(mda, ave(value, workerid, var, FUN = seq_along))
-  da = dcast(workerid + seq + trial ~ var, data = mda, value.var = "value")
-  da$seq <- NULL
-  
-  da=da[!is.na(da$trial),]
-  
-  da$Answer.test_answer = as.factor(da$Answer.test_answer)
-  da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
-  da$Answer.test_image  = as.factor(da$Answer.test_image)
-  
-  # look at memory performance (correct: CR or hit)
-  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
-  numH = length(which(da$Answer.test_answerEval == "\"H\""))
-
-  correct = (numCR + numH)/ dim(da)[1]
-  correct
-  
-  # RT dataframe
-  n <- names(raw)
-  cols = c(  n[grepl("train",n)], n["correct"])
-  cols = cols[1:154]
-  md <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
-  md$trial <-as.numeric(matrix(lapply(str_split(md$variable,"_"),function(x) {x[3]})))
-  md$var1 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]}))
-  md$var2 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
-  md$var <- paste(md$var1, md$var2, sep = "_")
-  md$variable <- NULL; md$var1 <- NULL; md$var2 <- NULL
-  
-  md$seq <- with(md, ave(value, workerid, var, FUN = seq_along))
-  d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
-  d$Answer.train_NA <- NULL; d$seq <- NULL
-  
-  d=d[!is.na(d$trial),]
-  d=d[!is.na(d$Answer.train_image),]
-  d=d[!is.na(d$Answer.train_rt),]
-  d=d[d$Answer.train_image != "undefined",]
-  d=d[d$Answer.train_image != "",]
-  
-  d$Answer.train_image = as.factor(d$Answer.train_image)
-  d$Answer.train_rt = as.numeric(d$Answer.train_rt)
-  
-  #exclude outlier 2 standard deviations above and below mean (in log space)
-  d$log.rt = log(d$Answer.train_rt)
-  total = dim(d)[1]
-  sd2 = 2*sd(d$log.rt)
-  d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
-  print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
-  hist(d$log.rt)
-  
-  # aggregate
-  ms <- aggregate(log.rt  ~ Answer.train_image, data=d, mean)
-  ms$rt_cil <- aggregate(log.rt ~ Answer.train_image, data=d, ci.low)$log.rt 
-  ms$rt_cih <- aggregate(log.rt ~ Answer.train_image, data=d, ci.high)$log.rt 
-  
-  ms = ms[ms$Answer.train_image != 61,] # get rid of ball and motherboard
-  ms = ms[ms$Answer.train_image != 62,] 
-
-  write.csv(ms,"data/rtNormsObjs_BYITEM.csv")
-  }
-
-rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv")
-```
-
-* correlation between norms
-```{r}
-index <- match(co_norms$ratingNum, rto_norms$Answer.train_image)
-co_norms$log.rt <- rto_norms$log.rt[index]
-cor.test(co_norms$meanRating, co_norms$log.rt)
-```
-
-<a name="3b"/>
-### (B) Mapping task (adults) [(Task)][task34]
-
-* read in data and format
-```{r include = FALSE}
-if (doSlow) {
-  d <- read.csv("data/RefComplex35.results",sep="\t",header=TRUE)
-  
-  if (whichSubjRemove == 'removeRepeatSubj') {
-    d = merge(d, dups, by=c("hitid","workerid"))
-    d = d[!d$repeatSubj,]
-    } else if (whichSubjRemove == 'withinRepeatSubj') {
-      d = merge(d, dups, by=c("hitid","workerid"))
-      d = d[!d$withinRepeatSubj,]
-      }
-  
-  # get in long form
-  # get trial info
-  md <- melt(d,id.vars=c("workerid"),
-             measure.vars=c(names(d)[c(grepl("_",names(d)))]))
-  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
-  md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
-  md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
-  
-  md$variable <- as.factor(as.character(md$variable))
-  md$trial <- as.factor(as.character(md$trial))
-  md$value <- as.factor(as.character(md$value))
-  md$workerid <- as.factor(as.character(md$workerid))
-  
-  md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
-  dc = dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
-  dc$seq <- NULL
-  
-  write.csv(dc, "data/RC35_long.csv")
-  }
-
-dc <-  read.csv("data/RC35_long.csv")
-```
-
-* make everything factors
-```{r include = FALSE}
-dc$criticalComplicated= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalComplicated))
-dc$criticalSimple= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalSimple))
-
-dc$criticalComplicated <- as.factor(dc$criticalComplicated)
-dc$criticalSimple <- as.factor(dc$criticalSimple)
-dc$langCondition <- as.factor(dc$langCondition)
-dc$objCondition <- as.factor(dc$objCondition)
-dc$response <- as.factor(dc$response)
-dc$responseSide <- as.factor(dc$responseSide)
-dc$responseValue<- as.factor(dc$responseValue)
-dc$word <- as.factor(dc$word)
-dc$trial <- as.numeric(dc$trial)
-```
-
-* merge in norms
-```{r include = FALSE}
-index <- match(dc$criticalSimple, co_norms$ratingNum)
-dc$criticalSimple_c.norms <- co_norms$meanRating[index]
-index <- match(dc$criticalComplicated, co_norms$ratingNum)
-dc$criticalComplicated_c.norms <- co_norms$meanRating[index]
-
-index <- match(dc$criticalSimple, rto_norms$Answer.train_image)
-dc$criticalSimple_rt.norms <- rto_norms$log.rt [index]
-index <- match(dc$criticalComplicated, rto_norms$Answer.train_image)
-dc$criticalComplicated_rt.norms <- rto_norms$log.rt [index]
-
-dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
-dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
-```
-
-* get effect sizes
-```{r include = FALSE}
-de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
-```
-
-* get obj conds
-```{r include = FALSE}
-de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
-de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
-de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
-de$cond2<- as.factor(gsub("[[:punct:]]", "", de$cond2))
-de$objRatio = as.numeric(de$cond1)/as.numeric(de$cond2)
-de$l.objRatio <- log(de$objRatio)
-
-de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
-```
-
-* plot
-```{r}
-# set graphical params
-fs = 25
-rs = 8
-
-# complexity plot
-obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
-  geom_pointrange(aes(ymax = cill, ymin=ciul),position="dodge")+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  #geom_text(aes(c.Mratio+.03, effect_size, label=objCondition2), position="dodge") +
-  #geom_text(aes(c.Mratio+.04, effect_size, label=objCondition2), position="dodge") +
-  ylab("effect size (Cohen's d)") +
-  xlab("complexity rating ratio") + 
-  #ggtitle("complexity ratio vs. effect size") +
-  scale_x_continuous(limits = c(.25, 1.29)) +
-  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
-  annotate("text", x=1.15, y=.5, col = "red",label=paste(
-    "r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)), size = rs) +
-  theme(plot.background = element_blank(),
-  panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) +
-  scale_y_continuous(limits = c(-.33, .66))
-
-# RT ratio plot
-obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
-  geom_pointrange( aes(ymax = cill, ymin=ciul))+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  #geom_text(aes(rt.Mratio+.0008, effect_size, label=objCondition2)) +
-  #geom_text(aes(rt.Mratio+.002, effect_size, label=objCondition2)) +
-  ylab("effect size (Cohen's d)") +
-  xlab("reaction time ratio") +
-  scale_x_continuous(limits = c(.949, 1.005)) +
-  #ggtitle("RT ratio vs. effect size") +
-  theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
-  annotate("text", x=.997, y=.5, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)), size = rs) +  
-  theme(plot.background = element_blank(),
-  panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) +
-  scale_y_continuous(limits = c(-.33, .66))
-
-if (savePlots) {pdf("figure/realobjs.pdf", height = 6, width = 12)}
-multiplot(obj_c_plot, obj_rt_plot, cols = 2)
-if (savePlots) {dev.off()}
-```
-
-* correlations between effect size at complexity conditions
-```{r}
-cor.test(de$objRatio, de$effect_size)
-cor.test(de$c.Mratio, de$effect_size)
-cor.test(de$rt.Mratio, de$effect_size)
-```
-
-<a name="3d"/>
-### (D) Production task (labels + desecriptions) 
-#### (1) Labels [(Task)][task27]
-##### read in data and prep data frame
-```{r include = FALSE}
-d <- read.csv("data/RefComplex27.results",sep="\t",header=TRUE)
-
-if (whichSubjRemove == 'repeatSubj') {
-    d = merge(d, dups, by=c("hitid","workerid"))
-    d = d[!d$repeatSubj,]
-    } else if (whichSubjRemove == 'withinRepeatSubj') {
-      d = merge(d, dups, by=c("hitid","workerid"))
-      d = d[!d$withinRepeatSubj,]
-      }
-  
-n <- names(d)
-d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
-d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
-d$Answer.pic_3 = as.factor(as.character(d$Answer.pic_3))
-d$Answer.pic_4 = as.factor(as.character(d$Answer.pic_4))
-d$Answer.pic_5 = as.factor(as.character(d$Answer.pic_5))
-d$Answer.pic_6 = as.factor(as.character(d$Answer.pic_6))
-d$Answer.pic_7 = as.factor(as.character(d$Answer.pic_7))
-d$Answer.pic_8 = as.factor(as.character(d$Answer.pic_8))
-d$Answer.pic_9 = as.factor(as.character(d$Answer.pic_9))
-d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
-
-cols = c( n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
-md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
-md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
-
-md1 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("pic",n)],na.rm=TRUE)
-md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
-names(md1)[3]= "picture"
-md1 = md1[,-2]
-
-md2 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("desc_",n)],na.rm=TRUE)
-md2$trial <-as.numeric(matrix(lapply(str_split(md2$variable,"_"),function(x) {x[2]})))
-names(md2)[3]= "description"
-md2 = md2[,-2]
-
-md3 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("descLength",n)],na.rm=TRUE)
-md3$trial <-as.numeric(matrix(lapply(str_split(md3$variable,"_"),function(x) {x[2]})))
-names(md3)[3] = "length"
-md3 = md3[,-2]
-
-md4 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("cond",n)],na.rm=TRUE)
-md4$trial <-as.numeric(matrix(lapply(str_split(md4$variable,"_"),function(x) {x[2]})))
-names(md4)[3] = "condition"
-md4 = md4[,-2]
-
-md12<- join(md1, md2,type = "inner")
-md123<- join(md12, md3,type = "inner")
-md<- join(md123, md4,type = "inner")
-
-# add columns
-md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
-md$log.length <- log(md$length) 
-md$log.trial <- log(md$trial)
-md <- md[md$numWords == 1,]  #remove multi word responses
-```
-
-* relationship between condition and description length
-```{r}
-t.test(md[md$condition == '"complex"',"log.length"],md[md$condition == '"simple"',"log.length"],paired = TRUE)
-summary(lmer(log.length~condition + (1+trial|workerid), md))
-```
-
-* relationship with complicated norms
-```{r}
-index <- match(md$picture, co_norms$ratingNum)
-md$c.norms <- co_norms$meanRating[index]
-
-ms <- aggregate(log.length ~ c.norms + picture, data=md, mean)
-ms$cih <- aggregate(log.length ~ c.norms + picture, data=md, ci.high)$log.length
-ms$cil <- aggregate(log.length ~ c.norms + picture, data=md, ci.low)$log.length
-
-#plot
-ggplot(ms, aes(c.norms,log.length)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object Complexity Norms") +
-  ylab("Log Word Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) +
-  annotate("text", x=.75, y=1.6, color = "red", size = 8,
-    label=paste("r=",round(cor(md$log.length,md$c.norms), 2)))
-```
-
-* relationship with RT norms
-```{r}
-index <- match(md$picture, rto_norms$Answer.train_image)
-md$rt.norms <- rto_norms$log.rt[index]
-
-ms <- aggregate(log.length ~ rt.norms + picture, data=md, mean)
-ms$cih <- aggregate(log.length ~ rt.norms + picture, data=md, ci.high)$log.length
-ms$cil <- aggregate(log.length ~ rt.norms + picture, data=md, ci.low)$log.length
-
-#plot
-ggplot(ms, aes(rt.norms,log.length)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object Complexity Norms") +
-  ylab("Log Word Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+
-  annotate("text", x=.75, y=1.6, color = "red", size = 8,
-    label=paste("r=",round(cor(md$log.length,md$rt.norms), 2)))
-```
-
-#### (2) Descriptions [(Task)][task25]
-
-* read in data and prep data frame
-```{r include = FALSE}
-d <- read.csv("data/RefComplex25.results",sep="\t",header=TRUE)
-
-if (whichSubjRemove == 'repeatSubj') {
-    d = merge(d, dups, by=c("hitid","workerid"))
-    d = d[!d$repeatSubj,]
-    } else if (whichSubjRemove == 'withinRepeatSubj') {
-      d = merge(d, dups, by=c("hitid","workerid"))
-      d = d[!d$withinRepeatSubj,]
-      }
-  
-n <- names(d)
-#d[,n[grepl("pic",n)]] = as.factor(as.character(d[,n[grepl("pic",n)]])
-d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
-d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
-d$Answer.pic_3 = as.factor(as.character(d$Answer.pic_3))
-d$Answer.pic_4 = as.factor(as.character(d$Answer.pic_4))
-d$Answer.pic_5 = as.factor(as.character(d$Answer.pic_5))
-d$Answer.pic_6 = as.factor(as.character(d$Answer.pic_6))
-d$Answer.pic_7 = as.factor(as.character(d$Answer.pic_7))
-d$Answer.pic_8 = as.factor(as.character(d$Answer.pic_8))
-d$Answer.pic_9 = as.factor(as.character(d$Answer.pic_9))
-d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
-
-cols = c( n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
-md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
-md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
-
-md1 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("pic",n)],na.rm=TRUE)
-md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
-names(md1)[3]= "picture"
-md1 = md1[,-2]
-
-md2 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("desc_",n)],na.rm=TRUE)
-md2$trial <-as.numeric(matrix(lapply(str_split(md2$variable,"_"),function(x) {x[2]})))
-names(md2)[3]= "description"
-md2 = md2[,-2]
-
-md3 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("descLength",n)],na.rm=TRUE)
-md3$trial <-as.numeric(matrix(lapply(str_split(md3$variable,"_"),function(x) {x[2]})))
-names(md3)[3] = "length"
-md3 = md3[,-2]
-
-md4 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("cond",n)],na.rm=TRUE)
-md4$trial <-as.numeric(matrix(lapply(str_split(md4$variable,"_"),function(x) {x[2]})))
-names(md4)[3] = "condition"
-md4 = md4[,-2]
-
-md12<- join(md1, md2,type = "inner")
-md123<- join(md12, md3,type = "inner")
-md<- join(md123, md4,type = "inner")
-
-# add number of words count
-md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
-md$length_r <-nchar(as.character(md$description))
-
-# add clean length var (remove punctuation and spaces)
-md$description_clean= gsub(" ", "", gsub("[[:punct:]]", "", md$description))
-md$length_c= nchar(as.character(md$description_clean))
-md$log.length_c = log(md$length_c)
-```
-
-* relationship between condition and description length
-```{r}
-#summary(lmer(length_c~condition + (1|workerid), md))
-#summary(lmer(length_c~condition + trial + (1+trial|workerid), md))
-
-summary(lmer(log.length_c~md$condition + (1|workerid), md))
-summary(lmer(log.length_c~condition + trial + (1+trial|workerid), md))
-
-## plot
-ggplot(md, aes(x=log.length_c, fill=condition)) + geom_density(alpha = 0.2)
-```
-
-* correlations with complexity norms
-```{r}
-index <- match(md$picture, co_norms$ratingNum)
-md$c.norms <- co_norms$meanRating[index]
-
-summary(lmer(log.length_c~c.norms + (1+trial|workerid), md))
-summary(lmer(log.length_c~c.norms + trial + (1|workerid), md))
-# complexity norms predict length
-
-cor.test(md$log.length_c,md$c.norms)
-```
-
-* complexity norms plot
-```{r}
-ms <- aggregate(log.length_c ~ c.norms + picture, data=md, mean)
-ms$cih <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.high)$log.length_c
-ms$cil <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.low)$log.length_c
-
-ggplot(ms, aes(c.norms,log.length_c)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object Complexity Norms") +
-  ylab("Log Description Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) 
-```
-
-* correlations with RT norms
-```{r}
-index <- match(md$picture, rto_norms$Answer.train_image)
-md$rt.norms <- rto_norms$log.rt[index]
-
-summary(lmer(log.length_c~rt.norms + (1+trial|workerid), md))
-summary(lmer(log.length_c~rt.norms + trial + (1|workerid), md))
-#rt norms predict length
-
-cor.test(md$log.length_c,md$rt.norms)
-
-```
-
-* rt norms plot
-```{r}
-ms <- aggregate(log.length_c ~ rt.norms + picture, data=md, mean)
-ms$cil <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.low)$log.length_c
-ms$cih <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.high)$log.length_c
-
-ggplot(ms, aes(rt.norms,log.length_c)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object RT Norms") +
-  ylab("Log Description Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15)) 
-
-# reliable when control for random effects
-```
-
-***
-***
-<a name="geons"/>
-
-## (4) Geons
-
-<a name="4a"/>
-### (A) Norms [(Complexity Task)][task34] [(RT task)][task35]
-#### (1) Complexity Norms 
-```{r, include = FALSE}
-if (processNorms) {
-  # read in data
-  d <- read.csv("data/RefComplex34.results",sep="\t",header=TRUE)
-  
-  # melt
-  md <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("obj",names(d))])
-  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
-  md$obj <- unlist(matrix(lapply(str_split(md$value,"j"),function(x) {x[2]})))
-  md$obj <- unlist(matrix(lapply(str_split(md$obj,".p"),function(x) {x[1]})))
-  md$complexityLevel <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[1]})))
-  md$objID <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[2]})))
-  md$value <- NULL; md$variable <- NULL
-  md = md[(md$trial != 0 & md$trial != 1),] # get rid of ball and circuit
-  
-  # get rating info
-  mdr <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("rating",names(d))])
-  mdr$trial <- matrix(lapply(str_split(mdr$variable,"_"),function(x) {x[2]}))
-  mdr$variable <- NULL
-  
-  # merge together based on trial and workerid
-  m = merge(md,mdr,by=c("workerid","trial"))
-  m$value <- as.numeric(as.character(m$value))
-  
-  # get norms by objects
-  ms_all <- aggregate(value ~ obj, data=m, mean)
-  ms_all$cih <- aggregate(value ~ obj, data=m, ci.high)$value
-  ms_all$cil <- aggregate(value ~ obj, data=m, ci.low)$value
-  
-  names(ms_all)[2] = "meanRating"
-  ms_all <- ms_all[order(ms_all$meanRating),]
-
-  # save complexity by item
-  write.csv(ms_all, "data/complicatedNormsGeons_BYITEM.csv")
-  } 
-
-cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")
-```
-
-#### (2) RT Norms 
-```{r, include = FALSE}
-if (processNorms) {
-  # read in data
-  raw <- read.csv("data/RefComplex37.results",sep="\t",header=TRUE)
-  
-  # remove repeat subjects?
-  if (whichSubjRemove == 'removeRepeatSubj') {
-    raw = merge(raw, dups, by=c("hitid","workerid"))
-    raw = raw[!raw$repeatSubj,]
-    } else if (whichSubjRemove == 'withinRepeatSubj') {
-      raw = merge(raw, dups, by=c("hitid","workerid"))
-      raw = raw[!raw$withinRepeatSubj,]
-      }
-  
-  # look at accuracy, and exclude those below chance
-  boxplot(raw$Answer.correct)
-  raw = raw[raw$Answer.correct > 20, ]
-  
-  # prep data frame
-  # accuracy data frame
-  # melt
-  n <- names(raw)
-  cols = c( n[grepl("test",n)])
-  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
-  mda$trial <-as.numeric(matrix(lapply(str_split(mda$variable,"_"),function(x) {x[3]})))
-  mda$var1 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[1]}))
-  mda$var2 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[2]}))
-  mda$var <- paste(mda$var1, mda$var2, sep = "_")
-  mda$variable <- NULL; mda$var1 <- NULL; mda$var2 <- NULL
-  
-  mda$seq <- with(mda, ave(value, workerid, var, FUN = seq_along))
-  da = dcast(workerid + seq + trial ~ var, data = mda, value.var = "value")
-  da$seq <- NULL
-  
-  da=da[!is.na(da$trial),]
-  
-  da$Answer.test_answer = as.factor(da$Answer.test_answer)
-  da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
-  da$Answer.test_image  = as.factor(da$Answer.test_image)
-  
-  # look at memory performance (correct: CR or hit)
-  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
-  numH = length(which(da$Answer.test_answerEval == "\"H\""))
-
-  correct = (numCR + numH)/ dim(da)[1]
-  correct
-  
-  # get obj condition variable
-  da$test_image2 <- as.character(matrix(lapply(str_split(da$Answer.test_image,"j"), function(x) {x[2]})))
-  da$objCondition <- as.factor(as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[1]}))))
-  da$objItem <- as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[2]})))
-  da$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", da$objItem)))
-  
-  # RT dataframe
-  # melt
-  n <- names(raw)
-  cols = c(n[grepl("train", n)])
-  cols = cols[1:40]
-  md <- melt(raw, id.vars=c("workerid"), measure.vars=cols)
-  md$trial <- as.numeric(matrix(lapply(str_split(md$variable,"_"),function(x) {x[3]})))
-  md$var1 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]}))
-  md$var2 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
-  md$var <- paste(md$var1, md$var2, sep = "_")
-  md$variable <- NULL; md$var1 <- NULL; md$var2 <- NULL
-  
-  md$seq <- with(md, ave(value, workerid, var, FUN = seq_along))
-  d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
-  d$Answer.train_NA <- NULL; d$seq <- NULL
-  
-  d=d[!is.na(d$trial),]
-  d=d[!is.na(d$Answer.train_image),]
-  d=d[!is.na(d$Answer.train_rt),]
-  d=d[d$Answer.train_image != "undefined",]
-  d=d[d$Answer.train_image != "",]
-  
-  d$Answer.train_rt = as.numeric(d$Answer.train_rt)
-  
-  # exclude outlier 2 standard deviations above and below mean (in log space)
-  d$log.rt = log(d$Answer.train_rt)
-  total = dim(d)[1]
-  sd2 = 2*sd(d$log.rt)
-  d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
-  print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
-  hist(d$log.rt)
-  
-  # get obj condition
-  d = d[d$trial > 1,] # exclude anchors (not interesting because order not randomized)
-  d$train_image2 <- as.character(matrix(lapply(str_split(d$Answer.train_image,"j"), function(x) {x[2]})))
-  d$objCondition <- as.factor(as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[1]}))))
-  d$objItem <- as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[2]})))
-  d$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", d$objItem)))
-  d$obj <- paste("\"", d$objCondition, "-" ,d$objItem,"\"", sep = "" )
-  
-  # RT by condition
-  ms <- aggregate(log.rt  ~ objCondition, data=d, mean)
-  ms$n <- aggregate(log.rt  ~ objCondition, data=d, n.unique)$workerid
-  ms$cih <- aggregate(log.rt  ~ objCondition, data=d, ci.high)$log.rt
-  ms$cil <- aggregate(log.rt  ~ objCondition, data=d, ci.low)$log.rt
-  
-  ms$objCondition  = as.numeric(ms$objCondition)
-  
-  # plot
-  ggplot(ms, aes(y=log.rt, x=as.numeric(objCondition))) +
-    geom_errorbar(data=ms, mapping=aes(x=objCondition, ymax = log.rt+cih, 
-                                       ymin=log.rt-cil), width=0.2, size=1, color="black") + 
-    geom_point(data=ms, mapping=aes(x=objCondition, y=log.rt), size=6)  +
-    geom_line() +
-    xlab("Object Condition") +
-    ylab("Log RT (ms)") 
-  
-  # rt by item
-  ms_all <- aggregate(log.rt  ~ obj, data=d, mean)
-  ms_all$cih <- aggregate(log.rt ~ obj, data=d, ci.high)$log.rt
-  ms_all$cil <- aggregate(log.rt ~ obj, data=d, ci.low)$log.rt
-  
-  # save RT by item
-  write.csv(ms_all, "data/rtNormsGeons_BYITEM.csv")
-  } 
-
-rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv")
-```
-
-* Get correlation between between # geons and complexity rating, and RT and complexity rating
-```{r}
-# remove quotes from norms
-cg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
-cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
-cg_norms$obj_item = as.numeric(substr(cg_norms$obj, 2, 2))
-
-rg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", rg_norms$obj)))
-rg_norms$obj_class = substr(rg_norms$obj, 1, 1)
-rg_norms$obj_item = substr(rg_norms$obj, 2, 2)
-
-index <- match(cg_norms$obj, rg_norms$obj)
-cg_norms$rt_meanRating <- rg_norms$log.rt[index]
-
-# correlation between num geons and complexity
-cor.test(cg_norms$obj_class, cg_norms$meanRating)
-
-# correlation between RT and complexity
-cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
-```
-
-<a name="4b"/> 
-### (B) Mapping task  [(Task)][task37] 
-```{r, include = FALSE}
-# read in data
-d <- read.csv("data/RefComplex38.results",sep="\t",header=TRUE)
-
-# remove repeat subjects?
-if (whichSubjRemove == 'removeRepeatSubj') {
-  d = merge(d, dups, by=c("hitid","workerid"))
-  d = d[!d$repeatSubj,]
-  } else if (whichSubjRemove == 'withinRepeatSubj') {
-    d = merge(d, dups, by=c("hitid","workerid"))
-    d = d[!d$withinRepeatSubj,]
-    }
-
-# melt
-md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
-md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
-md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
-md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
-
-md$variable <- as.factor(as.character(md$variable))
-md$trial <- as.factor(as.character(md$trial))
-md$value <- as.factor(as.character(md$value))
-md$workerid <- as.factor(as.character(md$workerid))
-
-md$seq <- with(md, ave(value, workerid, variable, trial, FUN = seq_along))
-dc <- dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
-dc$seq <- NULL
-
-# make everything factors
-dc$criticalComplicated <- as.factor(dc$criticalComplicated)
-dc$criticalSimple <- as.factor(dc$criticalSimple)
-dc$langCondition <- as.factor(dc$langCondition)
-dc$objCondition <- as.factor(dc$objCondition)
-dc$response <- as.factor(dc$response)
-dc$responseSide <- as.factor(dc$responseSide)
-dc$responseValue  <- as.factor(dc$responseValue)
-dc$word <- as.factor(dc$word)
-
-# merge in norms
-# complicated
-index <- match(dc$criticalSimple, cg_norms$obj)
-dc$criticalSimple_c.norms <- cg_norms$meanRating[index]
-index <- match(dc$criticalComplicated,cg_norms$obj)
-dc$criticalComplicated_c.norms <- cg_norms$meanRating[index]
-
-# rt
-index <- match(dc$criticalSimple, rg_norms$obj)
-dc$criticalSimple_rt.norms <- rg_norms$log.rt [index]
-index <- match(dc$criticalComplicated, rg_norms$obj)
-dc$criticalComplicated_rt.norms <- rg_norms$log.rt [index]
-
-dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
-dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
-```
-
-* get effect sizes
-```{r include = FALSE}
-de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
-```
-
-* get obj conds
-```{r  include = FALSE}
-de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
-de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
-de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
-de$cond2<- as.numeric(gsub("[[:punct:]]", "", de$cond2))
-de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
-```
-
-* plot
-```{r}
-# set graphical params
-fs = 25
-rs = 8
-
-# complexity ratio
-geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
-  geom_pointrange( aes(ymax = cill, ymin=ciul))+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  #geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
-  ylab("effect size (Cohen's d)") +
-  xlab("complexity rating ratio") + 
-  theme(text = element_text(size=fs))  +
-  scale_y_continuous(limits = c(-.33, .66)) +
-  scale_x_continuous(limits = c(.25, 1.29)) +
-  annotate("text", x=1.15, y=.5, color = "red", size = rs,
-           label=paste("r=",round(cor(de$effect_size, de$c.Mratio), 2))) +
-  theme(plot.background = element_blank(),
-  panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) 
-
-# rt ratio
-geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
-  geom_pointrange( aes(ymax = cill, ymin=ciul))+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
-  #geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
-  ylab("effect size (Cohen's d)") +
-  xlab("reaction time ratio") + 
-  theme(text = element_text(size=fs)) +  
-  scale_y_continuous(limits = c(-.33, .66)) +
-  scale_x_continuous(limits = c(.949, 1.005)) +
-  annotate("text", x=.997, y=.5, color = "red", size = rs,
-           label=paste("r=",round(cor(de$effect_size, de$rt.Mratio), 2))) +
-  theme(plot.background = element_blank(),
-  panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) 
-
-if (savePlots) {pdf("figure/geon.pdf", height = 6, width = 12)}
-multiplot(geon_c_plot, geon_rt_plot, cols = 2)
-if (savePlots) {dev.off()}
-```
-
-* correlations between norms and effect sizes
-```{r}
-cor.test(de$rt.Mratio, de$effect_size)
-cor.test(de$c.Mratio, de$effect_size)
-```
 
 [task30]: http://tinyurl.com/qz59yuh
 [task32]: http://tinyurl.com/keznp7v
