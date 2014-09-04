@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{saussure}
 F.~Saussure, {\it London: Peter Owen\/}  (1916).
@@ -21,8 +21,18 @@ M.~H. Christiansen, N.~Chater, {\it Behavioral and {B}rain {S}ciences\/} {\bf
 E.~Lieberman, J.-B. Michel, J.~Jackson, T.~Tang, M.~A. Nowak, {\it Nature\/}
   {\bf 449}, 713 (2007).
 
-\bibitem{alvarez2004capacity}
+\bibitem{biederman1987}
+I.~Biederman, {\it Psychological review\/} {\bf 94}, 115 (1987).
+
+\bibitem{alvarez2004}
 G.~A. Alvarez, P.~Cavanagh, {\it Psychological {S}cience\/} {\bf 15}, 106
   (2004).
+
+\bibitem{zipf1936}
+G.~Zipf, {\it The Psychobiology of Language\/} (Routledge, London, 1936).
+
+\bibitem{piantadosi2011a}
+S.~Piantadosi, H.~Tily, E.~Gibson, {\it Proceedings of the National Academy of
+  Sciences\/} {\bf 108}, 3526 (2011).
 
 \end{thebibliography}
