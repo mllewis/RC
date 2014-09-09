@@ -435,7 +435,7 @@ de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
 ### *plot complexity ratios as a function of condition*
 ```{r, warning = FALSE}
 # set graphical params
-fs = 25
+fs = 15
 rs = 8
 
 # complexity ratio
@@ -443,8 +443,8 @@ geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   geom_pointrange( aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  ylab("effect size (Cohen's d)") +
-  xlab("complexity rating ratio") + 
+  ylab("Effect Size (Cohen's d)") +
+  xlab("Complexity Rating Ratio") + 
   theme(text = element_text(size=fs))  +
   scale_y_continuous(limits = c(-.33, .66)) +
   scale_x_continuous(limits = c(.25, 1.29)) +
@@ -452,15 +452,17 @@ geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
            label=paste("r=",round(cor(de$effect_size, de$c.Mratio), 2))) +
   theme(plot.background = element_blank(),
   panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) 
+  panel.grid.minor = element_blank(),
+  panel.border = element_blank(),
+  axis.line = element_line(color = 'black')) 
 
 # rt ratio
 geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   geom_pointrange( aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  ylab("effect size (Cohen's d)") +
-  xlab("reaction time ratio") + 
+  ylab("Effect Size (Cohen's d)") +
+  xlab("Reaction Time Ratio") + 
   theme(text = element_text(size=fs)) +  
   scale_y_continuous(limits = c(-.33, .66)) +
   scale_x_continuous(limits = c(.949, 1.005)) +
@@ -468,7 +470,9 @@ geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
            label=paste("r=",round(cor(de$effect_size, de$rt.Mratio), 2))) +
   theme(plot.background = element_blank(),
   panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) 
+  panel.grid.minor = element_blank(), 
+  panel.border = element_blank(),
+  axis.line = element_line(color = 'black')) 
 
 if (savePlots){ 
   pdf("figure/geon.pdf", height = 6, width = 12)
@@ -785,7 +789,7 @@ de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
 ### *plot complexity ratios vs. condition*
 ```{r}
 # set graphical params
-fs = 25
+fs = 15
 rs = 8
 
 # complexity plot
@@ -793,36 +797,44 @@ obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   geom_pointrange(aes(ymax = cill, ymin=ciul),position="dodge")+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  ylab("effect size (Cohen's d)") +
-  xlab("complexity rating ratio") + 
-  scale_x_continuous(limits = c(.25, 1.29)) +
+  ylab("Effect Size (Cohen's d)") +
+  xlab("Complexity Rating Ratio") + 
+  #scale_x_continuous(limits = c(.25, 1.29)) +
   theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
-  annotate("text", x=1.15, y=.5, col = "red",label=paste(
+  annotate("text", x=1, y=.5, col = "red",label=paste(
     "r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)), size = rs) +
   theme(plot.background = element_blank(),
   panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) +
-  scale_y_continuous(limits = c(-.33, .66))
+  panel.grid.minor = element_blank(),
+  panel.border = element_blank(),
+  axis.line = element_line(color = 'black')) +
+  scale_y_continuous(limits = c(-.33, .66)) 
 
 # RT ratio plot
 obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   geom_pointrange( aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-   ylab("effect size (Cohen's d)") +
-  xlab("reaction time ratio") +
-  scale_x_continuous(limits = c(.949, 1.005)) +
+   ylab("Effect Size (Cohen's d)") +
+  xlab("Reaction Time Ratio") +
+  #scale_x_continuous(limits = c(.949, 1.005)) +
   theme(text = element_text(size=fs), plot.title = element_text(size=20)) +
-  annotate("text", x=.997, y=.5, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)), size = rs) +  
+  annotate("text", x=1, y=.5, col = "red",label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)), size = rs) +  
   theme(plot.background = element_blank(),
   panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank()) +
+  panel.grid.minor = element_blank(),
+  panel.border = element_blank(),
+  axis.line = element_line(color = 'black')) +
   scale_y_continuous(limits = c(-.33, .66))
 
 if (savePlots) {
-  pdf("figure/realobjs.pdf", height = 6, width = 12)
-  multiplot(obj_c_plot, obj_rt_plot, cols = 2)
+  #png("figure/realobjs.png", height = 6, width = 12, res=500)
+  setEPS()
+  postscript("figure/realobjs.eps")
+  m = multiplot(obj_c_plot, obj_rt_plot, cols = 2)
   dev.off()
+  #dev.copy(png,"myfile.png",width=8,height=6,units="in",res=2000)
+  #dev.off()
 } else {
   multiplot(obj_c_plot, cols = 1)
   multiplot(obj_rt_plot, cols = 1)
@@ -955,125 +967,6 @@ summary(lmer(scale(log.length)~scale(rt.norms) + (1+trial|workerid), md))
 
 ```
 
-### (2) Descriptions [(Task)][task25]
-
-### *get data in long form*
-```{r objects_production_descriptions, warning = FALSE}
-d <- read.csv("data/RefComplex25.results",sep="\t",header=TRUE)
-
-if (whichSubjRemove == 'repeatSubj') {
-    d = merge(d, dups, by=c("hitid","workerid"))
-    d = d[!d$repeatSubj,]
-    } else if (whichSubjRemove == 'withinRepeatSubj') {
-      d = merge(d, dups, by=c("hitid","workerid"))
-      d = d[!d$withinRepeatSubj,]
-      }
-  
-n <- names(d)
-d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
-d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
-d$Answer.pic_3 = as.factor(as.character(d$Answer.pic_3))
-d$Answer.pic_4 = as.factor(as.character(d$Answer.pic_4))
-d$Answer.pic_5 = as.factor(as.character(d$Answer.pic_5))
-d$Answer.pic_6 = as.factor(as.character(d$Answer.pic_6))
-d$Answer.pic_7 = as.factor(as.character(d$Answer.pic_7))
-d$Answer.pic_8 = as.factor(as.character(d$Answer.pic_8))
-d$Answer.pic_9 = as.factor(as.character(d$Answer.pic_9))
-d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
-
-cols = c( n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
-md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
-md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
-
-md1 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("pic",n)],na.rm=TRUE)
-md1$trial <-as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
-names(md1)[3]= "picture"
-md1 = md1[,-2]
-
-md2 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("desc_",n)],na.rm=TRUE)
-md2$trial <-as.numeric(matrix(lapply(str_split(md2$variable,"_"),function(x) {x[2]})))
-names(md2)[3]= "description"
-md2 = md2[,-2]
-
-md3 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("descLength",n)],na.rm=TRUE)
-md3$trial <-as.numeric(matrix(lapply(str_split(md3$variable,"_"),function(x) {x[2]})))
-names(md3)[3] = "length"
-md3 = md3[,-2]
-
-md4 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("cond",n)],na.rm=TRUE)
-md4$trial <-as.numeric(matrix(lapply(str_split(md4$variable,"_"),function(x) {x[2]})))
-names(md4)[3] = "condition"
-md4 = md4[,-2]
-
-md12<- join(md1, md2,type = "inner")
-md123<- join(md12, md3,type = "inner")
-md<- join(md123, md4,type = "inner")
-
-# add number of words count
-md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
-md$length_r <-nchar(as.character(md$description))
-
-# add clean length var (remove punctuation and spaces)
-md$description_clean= gsub(" ", "", gsub("[[:punct:]]", "", md$description))
-md$length_c= nchar(as.character(md$description_clean))
-md$log.length_c = log(md$length_c)
-```
-
-### *relationship between condition and description length*
-```{r}
-ggplot(md, aes(x=log.length_c, fill=condition)) + 
-  geom_density(alpha = 0.2)+
-  ggtitle('description length as a function of condition')
-
-summary(lmer(log.length_c~condition + (1|workerid), md))
-```
-
-### *relationship between complexity norms and description length*
-```{r}
-index <- match(md$picture, co_norms$ratingNum)
-md$c.norms <- co_norms$meanRating[index]
-
-ms <- aggregate(log.length_c ~ c.norms + picture, data=md, mean)
-ms$cih <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.high)$log.length_c
-ms$cil <- aggregate(log.length_c ~ c.norms + picture, data=md, ci.low)$log.length_c
-
-ggplot(ms, aes(c.norms,log.length_c)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object Complexity Norms") +
-  ylab("Log Description Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+ 
-  ggtitle('Description length vs. complexity norms')
-
-summary(lmer(scale(log.length_c)~scale(c.norms) + (1+trial|workerid), md))
-cor.test(md$log.length_c,md$c.norms)
-```
-
-### *relationship between RT norms and description length*
-```{r}
-index <- match(md$picture, rto_norms$Answer.train_image)
-md$rt.norms <- rto_norms$log.rt[index]
-
-ms <- aggregate(log.length_c ~ rt.norms + picture, data=md, mean)
-ms$cil <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.low)$log.length_c
-ms$cih <- aggregate(log.length_c ~ rt.norms + picture, data=md, ci.high)$log.length_c
-
-ggplot(ms, aes(rt.norms,log.length_c)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length_c+cih,ymin=log.length_c-cil), size=0.2, colour="grey") +
-  theme_bw() +
-  xlab("Object RT Norms") +
-  ylab("Log Description Length (characters)") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=15))+
-  ggtitle('Description length vs. rt norms')
-
-summary(lmer(scale(log.length_c)~scale(rt.norms) + (1+trial|workerid), md))
-cor.test(md$log.length_c,md$rt.norms)
-```
-
 ***
 ***
 
@@ -1200,6 +1093,8 @@ ggplot(ms2, aes(complexity, nchars)) +
   ms.syl <- aggregate(complexity ~ word + mrc.syl, data=eng, mean)
   ms.phon <- aggregate(complexity ~ word + mrc.phon, data=eng, mean)
   ms.morph <- aggregate(complexity ~ word + clx.morph, data=eng, mean)
+  ms.chars <- aggregate(complexity ~ word + nchars +subt.log.freq + mrc.conc, data=eng, mean)
+
 ```
 
 ### *correlations between length and complexity in English*
@@ -1236,6 +1131,21 @@ cor.test(ms_open.phon$complexity, ms_open.phon$mrc.phon)
 
 # correlation between morphemes and complexity [open class only]
 cor.test(ms_open.morph$complexity, ms_open.morph$clx.morph)
+
+# paritialing out frequency
+pcor.test(ms.chars$complexity,ms.chars$nchars,ms.chars$subt.log.freq)
+
+# concreteness split
+ms.chars <- aggregate(complexity ~ word + nchars + mrc.conc, data=eng, mean) # do this again without freq because drops missing words
+ms.chars$conc.split = ifelse(ms.chars$mrc.conc < median(ms.chars$mrc.conc), 1, 2)
+ms.charsL$conc.split=as.factor(ms.charsL$conc.split)
+ms.charsL = ms.chars[ms.chars$conc.split == 1,]
+cor.test(ms.charsL$nchars, ms.charsL$complexity)
+
+ms.chars <- aggregate(complexity ~ word + nchars + mrc.conc + subt.log.freq, data=eng, mean) # do this again without freq because drops missing words
+ms.chars$conc.split = ifelse(ms.chars$mrc.conc < median(ms.chars$mrc.conc), 1, 2)
+ms.charsL = ms.chars[ms.chars$conc.split == 1,]
+pcor.test(ms.charsL$complexity,ms.charsL$nchars,ms.charsL$subt.log.freq)
 ```
 
 ### *are the correlations between length and complexity reliable, controlling for everything? [yes]*
@@ -1380,29 +1290,31 @@ c_l$checked = as.factor(ifelse( is.element(c_l$language, coded_languages), "yes"
 
 ### *plot correlations by language*
 ```{r, fig.width = 15}
+
+# fix one label 
+levels(c_l$language)[levels(c_l$language)=="haitian.creole"] <- "haitian creole"
+
 if (savePlots) {pdf("figure/xling.pdf", height = 6, width = 12)}
 
 ggplot(c_l, aes(language, corr, fill = checked)) + 
   geom_bar(stat = "identity") + 
   geom_linerange(aes(ymax=upper.ci, ymin=lower.ci)) +
   geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
-  geom_point(data=c_l, mapping=aes(x=language, y=mono.cor), size=2, shape = 16) +
-  geom_point(data=c_l, mapping=aes(x=language, y=open.cor), size=2, shape = 15) +
+  #geom_point(data=c_l, mapping=aes(x=language, y=mono.cor), size=2, shape = 16) +
+  #geom_point(data=c_l, mapping=aes(x=language, y=open.cor), size=2, shape = 15) +
   geom_hline(y=mean(c_l$corr), lty=2) +
   ylab("Pearson's r") +
   xlab("Language") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(plot.background = element_blank(),
    panel.grid.major = element_blank(),
    panel.grid.minor = element_blank(),
    panel.border = element_blank())  +
-  theme(axis.title.x = element_text(size=25), axis.text.x  = element_text(size=10),
-        axis.title.y = element_text(size=25), axis.text.y  = element_text(size=10)) +
-  theme(legend.text = element_text(size = 10), legend.title = element_text(size = 10)) +
+  theme(axis.text.x= element_text(angle=90,hjust=1,vjust=0.5, size = 11)) +
+  theme(axis.title = element_text(size=15)) +
   theme(axis.line = element_line(color = 'black'))+
-  scale_fill_manual(values=c("pink", "red")) +
+  scale_fill_manual(values=c("pink","red")) +
   theme(legend.position="none") +
-  scale_y_continuous(limits = c(-.07, .75)) 
+  scale_y_continuous(limits = c(-.07, .75), expand = c(0,.007)) 
 if(savePlots){dev.off()}
 ```
 

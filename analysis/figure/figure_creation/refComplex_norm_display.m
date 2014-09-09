@@ -4,7 +4,7 @@
 
 
 
-%%%%% REAL OBJECTS
+%%%%% REAL OBJECTS %%%%%
 
 % set grid dimenensions
 num_x_pics = 5;
@@ -27,7 +27,7 @@ set(ax, 'Visible','off')
 
 
 
-%%%%% GEONS
+%%%%% GEONS %%%%%
 
 % set grid dimenensions
 num_x_pics = 5;
@@ -48,4 +48,3 @@ end
 linkaxes(ax,'xy')
 axis(ax,'image')
 set(ax, 'Visible','off')
-
