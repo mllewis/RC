@@ -16,8 +16,9 @@ M. Lewis
   
 2. [Novel real objects](#novelRealObjs)<br/> 
   (A) [Norms](#2a)<br/> 
-  (B) [Mappping task (adults)](#2b) <br/> 
-  (\(C\)) [Production task (labels + descriptions)](#2c) <br/> 
+  (B) [Mappping task](#2b) <br/> 
+  (\(C\)) [Mapping task control (random syllables)](#2c) <br/> 
+  (D) [Production task](#2d) <br/> 
 
 3. [Natural language](#xling) <br/> 
   (A) [English norms](#3a) <br/>
@@ -31,7 +32,7 @@ M. Lewis
 ```{r global_vars, include=TRUE}
 rm(list=ls())
 
-whichSubjRemove = 'keepAll' # remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
+whichSubjRemove = 'withinRepeatSubj' # remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
 processNorms = TRUE # process norms or load norms? 
 savePlots = FALSE # save plots to pdf?
 doSlow = TRUE # do time-consuming pre-processing steps?
@@ -699,7 +700,7 @@ cor.test(co_norms$meanRating, co_norms$log.rt)
 
 <a name="2b"/>
 
-### (B) Mapping task (adults) [(Task)][task34]
+### (B) Mapping task [(Task)][task34]
 
 ### *get data into long form*
 ```{r objects_mapping, warning = FALSE}
@@ -849,8 +850,53 @@ cor.test(de$rt.Mratio, de$effect_size)
 
 <a name="2c"/>
 
-### (\(C\)) Production task (labels + descriptions) 
-### (1) Labels [(Task)][task27]
+### (\(C\)) Mapping task control (random syllables)[(Task)][task23]
+### *read data and get bets as numeric*
+```{r objects_random_syllables, warning = FALSE, message = FALSE, output = FALSE}
+d <- read.csv("RefComplex23.results",sep="\t",header=TRUE)
+
+if (whichSubjRemove == 'removeRepeatSubj') { # FIX THIS 
+  d = merge(d, dups, by=c("hitid","workerid"))
+  d = d[!d$repeatSubj,]
+  } else if (whichSubjRemove == 'withinRepeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$withinRepeatSubj,]
+    }
+
+d$Answer.bet_complex <- as.numeric(str_replace_all(as.character(d$Answer.bet_complex),"\\\"",""))
+d$Answer.bet_simple<- as.numeric(str_replace_all(as.character(d$Answer.bet_simple),"\\\"",""))
+```
+
+### *plot by condition*
+```{r, warning = FALSE, message = FALSE, output = FALSE}
+ms <- aggregate(Answer.bet_complex ~ Answer.condition, d, mean)
+ci95 <- function(x) {sem(x)*1.96}
+ms$err <- aggregate(Answer.bet_complex ~ Answer.condition, data=d, ci95)$Answer.bet_complex 
+ms$n <- aggregate(workerid ~ Answer.condition, data=d, function(x) {length(unique(x))})$workerid
+ms$syllables = c(2,4,6)
+
+qplot(syllables,Answer.bet_complex, ylim=c(0,100),position=position_dodge(),
+      data=ms,geom="line",ylab="Mean bet to complex object", xlab="Number of syllables")  +
+  geom_linerange(aes(ymin=Answer.bet_complex-err,ymax=Answer.bet_complex+err), position=position_dodge(.9)) +
+  geom_abline(slope=0,intercept=50,lty=2) +
+  theme_bw() +
+  theme(axis.title = element_text(size = 20, face = "bold")) +
+  theme(axis.text.x = element_text(size = 20, colour = 'black')) +
+  theme(axis.text.y = element_text(size = 15, colour = 'black')) +
+  theme(legend.position="none") 
+```
+
+### relationship between bet to complex and number of syllables
+```{r}
+d$len <- 2
+d$len[d$Answer.condition=='"4_syllables"'] <- 4
+d$len[d$Answer.condition=='"6_syllables"'] <- 6
+
+summary(lm(Answer.bet_complex~ len, data=d))
+```
+
+<a name="2d"/>
+### (\(D\)) Production task [(Task)][task27]
 ### *get data into long form*
 ```{r objects_production_labels, warning = FALSE, message = FALSE, output = FALSE}
 d <- read.csv("data/RefComplex27.results",sep="\t",header=TRUE)
@@ -964,7 +1010,6 @@ ggplot(ms, aes(rt.norms,log.length)) +
     ggtitle('Label length vs. RT norms')
 
 summary(lmer(scale(log.length)~scale(rt.norms) + (1+trial|workerid), md))
-
 ```
 
 ***
@@ -1340,7 +1385,9 @@ mean(c_l$p.corr)
 [task9]:  http://langcog.stanford.edu/expts/MLL/refComplex/Experiment9/ref_complex_9.html
 [task26]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment26/ref_complex_26.html 
 [task34]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment34/ref_complex_34.html
-[task25]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment25/ref_complex_25.html
+[task23]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment23/ref_complex_23.html
 [task27]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment27/ref_complex_27.html
 [task35]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment35/ref_complex_35.html
 [task37]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment37/ref_complex_37.html
+[task38]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment38/ref_complex_38.html
+
