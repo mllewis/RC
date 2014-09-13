@@ -13,7 +13,8 @@ M. Lewis
 1. [Geons](#geons) <br/> 
   (A) [Norms](#1a) <br/> 
   (B) [Mappping task](#1b)<br/>
-  
+  (\(C\)) [Mapping task control (random syllables)](#1c) <br/> 
+
 2. [Novel real objects](#novelRealObjs)<br/> 
   (A) [Norms](#2a)<br/> 
   (B) [Mappping task](#2b) <br/> 
@@ -32,10 +33,10 @@ M. Lewis
 ```{r global_vars, include=TRUE}
 rm(list=ls())
 
-whichSubjRemove = 'withinRepeatSubj' # remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
-processNorms = TRUE # process norms or load norms? 
+whichSubjRemove = 'keepAll' # remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
+processNorms = FALSE # process norms or load norms? 
 savePlots = FALSE # save plots to pdf?
-doSlow = TRUE # do time-consuming pre-processing steps?
+doSlow = FALSE # do time-consuming pre-processing steps?
 ```
 
 #### LOAD PACKAGES, FUNCTIONS, AND REPEAT SUBJ DATA FILE
@@ -44,6 +45,7 @@ doSlow = TRUE # do time-consuming pre-processing steps?
 # load functions and libraries
 source("/Documents/GRADUATE_SCHOOL/Ranalysis/useful.R")
 library('psych')
+library('boot')
 
 cor.mtest <- function(mat, conf.level = 0.95) {
   mat <- as.matrix(mat)
@@ -120,6 +122,37 @@ d.fc <- function(d) {
     }
   return (es)
   }
+
+# proportions and CIs for forced choice tasks
+p.fc <- function(d){ 
+  category = "\"complex\""
+  conditions =  c("\"one\"" , "\"three\"", "\"five\"")
+  d$response = d$responseValue
+  
+  # get proportions
+  complex_proport_c = sum(d$response==category)/length(d$response)
+  
+  if (!is.na(complex_proport_c)) { 
+    # Bootstrap across subjects proportion responses for each category
+    b <- boot(d$response, function(u,i) table(u[i])[category]/length(u), R = 1000) 
+    ci <- boot.ci(b, type =  "basic")  
+    ciwl = ci$basic[4]
+    ciwu = ci$basic[5]
+    
+    es <- data.frame(p_complex = complex_proport_c,
+                     ciwl = ciwl,
+                     ciul = ciwu,
+                     n=length(d$workerid))
+    
+  } else {
+    es <- data.frame(p_c = NA,
+                     ciwl = NA,
+                     ciul = NA,
+                     n=NA)
+    
+  }
+  return (es)
+}
 
 # read in repeat subject file
 setwd('/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/analysis/')
@@ -490,6 +523,77 @@ if (savePlots){
 cor.test(de$c.Mratio, de$effect_size)
 cor.test(de$rt.Mratio, de$effect_size)
 ```
+<a name="1c"/>
+
+### (\(C\)) Mapping task control (random syllables)[(Task)][task40]
+### *read data*
+
+```{r geons_random_syllables, warning = TRUE, message = TRUE, output = TRUE}
+d <- read.csv("data/RefComplex40.results",sep="\t",header=TRUE)
+
+if (whichSubjRemove == 'removeRepeatSubj') { # FIX THIS 
+  d = merge(d, dups, by=c("hitid","workerid"))
+  d = d[!d$repeatSubj,]
+  } else if (whichSubjRemove == 'withinRepeatSubj') {
+    d = merge(d, dups, by=c("hitid","workerid"))
+    d = d[!d$withinRepeatSubj,]
+    }
+```
+
+### *get in long form and make everything factors*
+```{r, warning = FALSE, message = FALSE, output = FALSE}
+#get trial info
+md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
+
+md$variable <- as.factor(as.character(md$variable))
+md$trial <- as.factor(as.character(md$trial))
+md$value <- as.factor(as.character(md$value))
+md$workerid <- as.factor(as.character(md$workerid))
+
+md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
+dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
+dc$seq <- NULL
+
+#make everything factors
+dc$criticalComplicated <- as.factor(dc$criticalComplicated)
+dc$criticalSimple   <- as.factor(dc$criticalSimple)
+dc$langCondition   <- as.factor(dc$langCondition)
+dc$objCondition   <- as.factor(dc$objCondition)
+dc$response   <- as.factor(dc$response)
+dc$responseSide   <- as.factor(dc$responseSide)
+dc$responseValue   <- as.factor(dc$responseValue)
+dc$word <- as.factor(dc$word)
+
+# relable length to be numeric
+dc$len <- 1
+dc$len[dc$langCondition=='"three"'] <- 3
+dc$len[dc$langCondition=='"five"'] <- 5
+```
+
+###  *plot by length condition*
+```{r, warning = FALSE, message = FALSE, output = FALSE}
+# get props
+ms = ddply(dc ,.(len), function (d) {p.fc(d)}, .inform = TRUE)
+
+#plot
+qplot(len,p_complex, position=position_dodge(),
+      data=ms,geom="line",ylab="Proportion selection complex object", xlab="Number of syllables")  +
+  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+  geom_point(aes(len,p_complex), position=position_dodge(.9), size = 3) +
+  ylim(0,1)+
+  geom_abline(slope=0,intercept=50,lty=2) +
+  theme_bw() +
+  theme(axis.title = element_text( face = "bold")) +
+  theme(axis.text.x = element_text(colour = 'black')) +
+  theme(axis.text.y = element_text( colour = 'black')) +
+  theme(legend.position="none") +
+  geom_abline(intercept = .5, slope = 0, linetype = 2)  #
+
+summary(glm(responseValue ~ len, data=dc, family = "binomial"))
+```
 
 ***
 ***
@@ -850,10 +954,10 @@ cor.test(de$rt.Mratio, de$effect_size)
 
 <a name="2c"/>
 
-### (\(C\)) Mapping task control (random syllables)[(Task)][task23]
+### (\(C\)) Mapping task control (random syllables)[(Task)][task41]
 ### *read data and get bets as numeric*
-```{r objects_random_syllables, warning = FALSE, message = FALSE, output = FALSE}
-d <- read.csv("RefComplex23.results",sep="\t",header=TRUE)
+```{r, objects_random_syllables, warning = FALSE, message = FALSE, output = FALSE}
+d <- read.csv("data/RefComplex41.results",sep="\t",header=TRUE)
 
 if (whichSubjRemove == 'removeRepeatSubj') { # FIX THIS 
   d = merge(d, dups, by=c("hitid","workerid"))
@@ -862,38 +966,63 @@ if (whichSubjRemove == 'removeRepeatSubj') { # FIX THIS
     d = merge(d, dups, by=c("hitid","workerid"))
     d = d[!d$withinRepeatSubj,]
     }
-
-d$Answer.bet_complex <- as.numeric(str_replace_all(as.character(d$Answer.bet_complex),"\\\"",""))
-d$Answer.bet_simple<- as.numeric(str_replace_all(as.character(d$Answer.bet_simple),"\\\"",""))
 ```
 
-### *plot by condition*
+### *get in long form and make everything factors*
 ```{r, warning = FALSE, message = FALSE, output = FALSE}
-ms <- aggregate(Answer.bet_complex ~ Answer.condition, d, mean)
-ci95 <- function(x) {sem(x)*1.96}
-ms$err <- aggregate(Answer.bet_complex ~ Answer.condition, data=d, ci95)$Answer.bet_complex 
-ms$n <- aggregate(workerid ~ Answer.condition, data=d, function(x) {length(unique(x))})$workerid
-ms$syllables = c(2,4,6)
+#get trial info
+md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
 
-qplot(syllables,Answer.bet_complex, ylim=c(0,100),position=position_dodge(),
-      data=ms,geom="line",ylab="Mean bet to complex object", xlab="Number of syllables")  +
-  geom_linerange(aes(ymin=Answer.bet_complex-err,ymax=Answer.bet_complex+err), position=position_dodge(.9)) +
+md$variable <- as.factor(as.character(md$variable))
+md$trial <- as.factor(as.character(md$trial))
+md$value <- as.factor(as.character(md$value))
+md$workerid <- as.factor(as.character(md$workerid))
+
+md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
+dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
+dc$seq <- NULL
+
+#make everything factors
+dc$criticalComplicated <- as.factor(dc$criticalComplicated)
+dc$criticalSimple   <- as.factor(dc$criticalSimple)
+dc$langCondition   <- as.factor(dc$langCondition)
+dc$objCondition   <- as.factor(dc$objCondition)
+dc$response   <- as.factor(dc$response)
+dc$responseSide   <- as.factor(dc$responseSide)
+dc$responseValue   <- as.factor(dc$responseValue)
+dc$word <- as.factor(dc$word)
+
+# relable length to be numeric
+dc$len <- 1
+dc$len[dc$langCondition=='"three"'] <- 3
+dc$len[dc$langCondition=='"five"'] <- 5
+```
+
+### *plot by length condition*
+```{r, warning = FALSE, message = FALSE, output = FALSE}
+# get props
+ms = ddply(dc ,.(len), function (d) {p.fc(d)}, .inform = TRUE)
+
+#plot
+qplot(len,p_complex, position=position_dodge(),
+      data=ms,geom="line",ylab="Proportion selection complex object", xlab="Number of syllables")  +
+  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+  geom_point(aes(len,p_complex), position=position_dodge(.9), size = 3) +
+  ylim(0,1)+
   geom_abline(slope=0,intercept=50,lty=2) +
   theme_bw() +
-  theme(axis.title = element_text(size = 20, face = "bold")) +
-  theme(axis.text.x = element_text(size = 20, colour = 'black')) +
-  theme(axis.text.y = element_text(size = 15, colour = 'black')) +
-  theme(legend.position="none") 
+  theme(axis.title = element_text( face = "bold")) +
+  theme(axis.text.x = element_text(colour = 'black')) +
+  theme(axis.text.y = element_text( colour = 'black')) +
+  theme(legend.position="none") +
+  geom_abline(intercept = .5, slope = 0, linetype = 2)  #
+
+summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 ```
 
-### relationship between bet to complex and number of syllables
-```{r}
-d$len <- 2
-d$len[d$Answer.condition=='"4_syllables"'] <- 4
-d$len[d$Answer.condition=='"6_syllables"'] <- 6
-
-summary(lm(Answer.bet_complex~ len, data=d))
-```
 
 <a name="2d"/>
 ### (\(D\)) Production task [(Task)][task27]
@@ -1390,4 +1519,7 @@ mean(c_l$p.corr)
 [task35]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment35/ref_complex_35.html
 [task37]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment37/ref_complex_37.html
 [task38]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment38/ref_complex_38.html
+[task40]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment38/ref_complex_40.html
+[task41]: http://langcog.stanford.edu/expts/MLL/refComplex/Experiment38/ref_complex_41.html
+
 

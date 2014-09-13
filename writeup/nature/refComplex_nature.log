@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.8.22)  10 SEP 2014 15:22
+This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.8.22)  12 SEP 2014 19:04
 entering extended mode
 \write18 enabled.
  %&-line parsing enabled.
@@ -148,7 +148,7 @@ File: figs/realobjs.pdf Graphic file (type pdf)
 Package caption Warning: \label before \caption ignored on input line 129.
 See the caption package documentation for explanation.
 
-[3] [4 <./figs/realobjs.pdf>] <figs/xling.pdf, id=259, 867.24pt x 433.62pt>
+[3] [4 <./figs/realobjs.pdf>] <figs/xling.pdf, id=260, 867.24pt x 433.62pt>
 File: figs/xling.pdf Graphic file (type pdf)
 
 <use figs/xling.pdf>
@@ -191,13 +191,14 @@ Here is how much of TeX's memory you used:
 nc/dvips/base/8r.enc}</usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm
 /cmmi12.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmmi8.pf
 b></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmr12.pfb></usr/lo
-cal/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmsy8.pfb></usr/local/texliv
-e/2008/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2008/tex
-mf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2008/texmf-dist/fo
-nts/type1/urw/times/utmri8a.pfb>
-Output written on refComplex_nature.pdf (10 pages, 23784360 bytes).
+cal/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmsy10.pfb></usr/local/texli
+ve/2008/texmf-dist/fonts/type1/bluesky/cm/cmsy8.pfb></usr/local/texlive/2008/te
+xmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2008/texmf-dist/f
+onts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1
+/urw/times/utmri8a.pfb>
+Output written on refComplex_nature.pdf (10 pages, 23786012 bytes).
 PDF statistics:
- 310 PDF objects out of 1000 (max. 8388607)
+ 314 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 131072)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
