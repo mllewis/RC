@@ -2,7 +2,7 @@ Referential Complexity Analyses
 ====
 M. Lewis 
 ====
-September 12, 2014
+September 15, 2014
 ====
 
 ***
@@ -34,7 +34,7 @@ September 12, 2014
 ```r
 rm(list=ls())
 
-whichSubjRemove = 'withinRepeatSubj' # remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
+whichSubjRemove = 'keepAll' # remove repeat subjects? ('keepAll', 'repeatSubj', 'withinRepeatSubj')
 processNorms = FALSE # process norms or load norms? 
 savePlots = FALSE # save plots to pdf?
 doSlow = FALSE # do time-consuming pre-processing steps?
@@ -584,20 +584,20 @@ summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 ## 
 ## Deviance Residuals: 
 ##    Min      1Q  Median      3Q     Max  
-## -1.213  -0.867  -0.592   1.143   1.911  
+## -1.218  -0.870  -0.593   1.137   1.910  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)   0.5160     0.1277    4.04  5.3e-05 ***
-## len          -0.4335     0.0419  -10.34  < 2e-16 ***
+## (Intercept)   0.5311     0.1264     4.2  2.7e-05 ***
+## len          -0.4360     0.0415   -10.5  < 2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 1494.3  on 1175  degrees of freedom
-## Residual deviance: 1376.1  on 1174  degrees of freedom
-## AIC: 1380
+##     Null deviance: 1527.6  on 1199  degrees of freedom
+## Residual deviance: 1405.4  on 1198  degrees of freedom
+## AIC: 1409
 ## 
 ## Number of Fisher Scoring iterations: 4
 ```
@@ -1082,7 +1082,7 @@ dc$len[dc$langCondition=='"three"'] <- 3
 dc$len[dc$langCondition=='"five"'] <- 5
 ```
 
-# plot by length condition
+### *plot by length condition*
 
 ```r
 # get props
@@ -1116,20 +1116,20 @@ summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 ## 
 ## Deviance Residuals: 
 ##    Min      1Q  Median      3Q     Max  
-## -1.481  -1.182   0.901   1.173   1.471  
+## -1.487  -1.185   0.897   1.170   1.471  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)    1.031      0.129    7.97  1.6e-15 ***
-## len           -0.340      0.038   -8.95  < 2e-16 ***
+## (Intercept)   1.0465     0.1276    8.20  2.4e-16 ***
+## len          -0.3429     0.0375   -9.15  < 2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 1613.6  on 1163  degrees of freedom
-## Residual deviance: 1528.9  on 1162  degrees of freedom
-## AIC: 1533
+##     Null deviance: 1663.5  on 1199  degrees of freedom
+## Residual deviance: 1574.7  on 1198  degrees of freedom
+## AIC: 1579
 ## 
 ## Number of Fisher Scoring iterations: 4
 ```
@@ -1204,7 +1204,17 @@ t.test(md[md$condition == '"complex"',"log.length"],md[md$condition == '"simple"
 ```
 
 ```
-## Error: not all arguments have the same length
+## 
+## 	Paired t-test
+## 
+## data:  md[md$condition == "\"complex\"", "log.length"] and md[md$condition == "\"simple\"", "log.length"]
+## t = 3.735, df = 286, p-value = 0.0002269
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  0.03846 0.12417
+## sample estimates:
+## mean of the differences 
+##                 0.08131
 ```
 
 ```r
@@ -1216,27 +1226,27 @@ summary(lmer(log.length~condition + (1+trial|workerid), md))
 ## Formula: log.length ~ condition + (1 + trial | workerid)
 ##    Data: md
 ## 
-## REML criterion at convergence: 0.8
+## REML criterion at convergence: -0.4
 ## 
 ## Scaled residuals: 
 ##    Min     1Q Median     3Q    Max 
-## -4.016 -0.630  0.072  0.626  2.758 
+## -4.009 -0.626  0.061  0.633  2.773 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev. Corr
-##  workerid (Intercept) 1.64e-02 0.12804      
-##           trial       1.34e-06 0.00116  1.00
-##  Residual             4.93e-02 0.22203      
-## Number of obs: 555, groups:  workerid, 57
+##  workerid (Intercept) 1.53e-02 0.12358      
+##           trial       3.40e-06 0.00184  1.00
+##  Residual             4.92e-02 0.22189      
+## Number of obs: 574, groups:  workerid, 59
 ## 
 ## Fixed effects:
 ##                   Estimate Std. Error t value
-## (Intercept)         1.9379     0.0223    86.8
-## condition"simple"  -0.0787     0.0189    -4.2
+## (Intercept)         1.9350     0.0218    88.7
+## condition"simple"  -0.0797     0.0185    -4.3
 ## 
 ## Correlation of Fixed Effects:
 ##             (Intr)
-## cndtn"smpl" -0.426
+## cndtn"smpl" -0.427
 ```
 
 ### *relationship between complicated norms and label length*
@@ -1274,23 +1284,23 @@ summary(lmer(scale(log.length)~scale(c.norms) + (1+trial|workerid), md))
 ## Formula: scale(log.length) ~ scale(c.norms) + (1 + trial | workerid)
 ##    Data: md
 ## 
-## REML criterion at convergence: 1479
+## REML criterion at convergence: 1530
 ## 
 ## Scaled residuals: 
 ##    Min     1Q Median     3Q    Max 
-## -4.072 -0.632  0.067  0.616  2.821 
+## -4.065 -0.632  0.062  0.625  2.838 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev. Corr
-##  workerid (Intercept) 2.41e-01 0.4910       
-##           trial       1.94e-05 0.0044   1.00
-##  Residual             7.11e-01 0.8433       
-## Number of obs: 555, groups:  workerid, 57
+##  workerid (Intercept) 2.24e-01 0.47327      
+##           trial       5.28e-05 0.00727  1.00
+##  Residual             7.12e-01 0.84383      
+## Number of obs: 574, groups:  workerid, 59
 ## 
 ## Fixed effects:
 ##                Estimate Std. Error t value
-## (Intercept)     0.00326    0.07721    0.04
-## scale(c.norms)  0.16750    0.03594    4.66
+## (Intercept)     0.00628    0.07557    0.08
+## scale(c.norms)  0.16877    0.03536    4.77
 ## 
 ## Correlation of Fixed Effects:
 ##             (Intr)
@@ -1332,27 +1342,27 @@ summary(lmer(scale(log.length)~scale(rt.norms) + (1+trial|workerid), md))
 ## Formula: scale(log.length) ~ scale(rt.norms) + (1 + trial | workerid)
 ##    Data: md
 ## 
-## REML criterion at convergence: 1482
+## REML criterion at convergence: 1533
 ## 
 ## Scaled residuals: 
 ##    Min     1Q Median     3Q    Max 
-## -3.990 -0.654  0.059  0.625  2.660 
+## -3.981 -0.658  0.054  0.633  2.677 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev. Corr
-##  workerid (Intercept) 2.27e-01 0.47690      
-##           trial       4.69e-05 0.00685  1.00
-##  Residual             7.15e-01 0.84584      
-## Number of obs: 555, groups:  workerid, 57
+##  workerid (Intercept) 0.2087   0.457        
+##           trial       0.0001   0.010    1.00
+##  Residual             0.7164   0.846        
+## Number of obs: 574, groups:  workerid, 59
 ## 
 ## Fixed effects:
 ##                 Estimate Std. Error t value
-## (Intercept)      0.00548    0.07710    0.07
-## scale(rt.norms)  0.15684    0.03645    4.30
+## (Intercept)      0.00945    0.07532    0.13
+## scale(rt.norms)  0.15815    0.03587    4.41
 ## 
 ## Correlation of Fixed Effects:
 ##             (Intr)
-## scl(rt.nrm) 0.004
+## scl(rt.nrm) 0.006
 ```
 
 ***

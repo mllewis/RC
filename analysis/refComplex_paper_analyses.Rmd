@@ -956,7 +956,7 @@ cor.test(de$rt.Mratio, de$effect_size)
 
 ### (\(C\)) Mapping task control (random syllables)[(Task)][task41]
 ### *read data and get bets as numeric*
-```{r, objects_random_syllables, warning = FALSE, message = FALSE, output = FALSE}
+```{r objects_random_syllables, warning = FALSE, message = FALSE, output = FALSE}
 d <- read.csv("data/RefComplex41.results",sep="\t",header=TRUE)
 
 if (whichSubjRemove == 'removeRepeatSubj') { # FIX THIS 
@@ -1025,7 +1025,7 @@ summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 
 
 <a name="2d"/>
-### (\(D\)) Production task [(Task)][task27]
+### (D) Production task [(Task)][task27]
 ### *get data into long form*
 ```{r objects_production_labels, warning = FALSE, message = FALSE, output = FALSE}
 d <- read.csv("data/RefComplex27.results",sep="\t",header=TRUE)
@@ -1503,7 +1503,7 @@ mean(c_l$mono.cor)
 # grand mean correlation between complexity and length, open class only
 mean(c_l$open.cor)
 
-# grand mean correlation between complexity and length, partialing out frequency
+# grand mean correlation between complexity and length, partialling out frequency
 mean(c_l$p.corr)
 ```
 
