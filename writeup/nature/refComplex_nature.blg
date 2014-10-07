@@ -5,24 +5,24 @@ The style file: Science.bst
 Database file #1: biblibrary.bib
 You've used 13 entries,
             2300 wiz_defined-function locations,
-            819 strings with 7737 characters,
-and the built_in function-call counts, 2645 in all, are:
-= -- 235
+            818 strings with 7688 characters,
+and the built_in function-call counts, 2656 in all, are:
+= -- 236
 > -- 104
 < -- 1
 + -- 52
 - -- 26
-* -- 195
-:= -- 406
+* -- 196
+:= -- 407
 add.period$ -- 13
 call.type$ -- 13
 change.case$ -- 0
 chr.to.int$ -- 0
 cite$ -- 13
 duplicate$ -- 141
-empty$ -- 257
+empty$ -- 258
 format.name$ -- 33
-if$ -- 618
+if$ -- 621
 int.to.chr$ -- 0
 int.to.str$ -- 13
 missing$ -- 14
@@ -32,9 +32,9 @@ pop$ -- 55
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 87
+skip$ -- 88
 stack$ -- 0
-substring$ -- 125
+substring$ -- 128
 swap$ -- 43
 text.length$ -- 1
 text.prefix$ -- 0
