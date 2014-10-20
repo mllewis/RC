@@ -2,7 +2,7 @@ Referential Complexity Analyses
 ====
 M. Lewis 
 ====
-September 15, 2014
+October 17, 2014
 ====
 
 ***
@@ -25,6 +25,8 @@ September 15, 2014
   (A) [English norms](#3a) <br/>
   (B) [Xling translation accuracy](#3b) <br/> 
   (\(C\)) [Xling correlation between lengths and complexity](#3c) <br/> 
+  
+4. [Frequency](#freq) <br/> 
   
 ***
 ***
@@ -554,7 +556,7 @@ dc$len[dc$langCondition=='"five"'] <- 5
 
 ```r
 # get props
-ms = ddply(dc ,.(len), function (d) {p.fc(d)}, .inform = TRUE)
+ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")}, .inform = TRUE)
 
 #plot
 qplot(len,p_complex, position=position_dodge(),
@@ -939,14 +941,14 @@ de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
 
 ```r
 # set graphical params
-fs = 15
+fs = 20
 rs = 8
 
 # complexity plot
 obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
-  geom_pointrange(aes(ymax = cill, ymin=ciul),position="dodge")+
-  geom_hline(yintercept=0,lty=2) +
-  stat_smooth(method="lm") +
+  geom_pointrange(aes(ymax = cill, ymin=ciul),position="dodge", size = 1.2)+
+  #geom_hline(yintercept=0,lty=2) +
+  #stat_smooth(method="lm") +
   ylab("Effect Size (Cohen's d)") +
   xlab("Complexity Rating Ratio") + 
   #scale_x_continuous(limits = c(.25, 1.29)) +
@@ -1086,7 +1088,7 @@ dc$len[dc$langCondition=='"five"'] <- 5
 
 ```r
 # get props
-ms = ddply(dc ,.(len), function (d) {p.fc(d)}, .inform = TRUE)
+ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")}, .inform = TRUE)
 
 #plot
 qplot(len,p_complex, position=position_dodge(),
@@ -1136,7 +1138,7 @@ summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 
 
 <a name="2d"/>
-### (\(D\)) Production task [(Task)][task27]
+### (D) Production task [(Task)][task27]
 ### *get data into long form*
 
 ```r
@@ -2091,7 +2093,7 @@ c_l$open.cor<- open_cor$open.cor[index]
 # prep for plotting
 c_l = c_l[order(c_l$corr),] # sort by correlation
 c_l$language=  as.character(tolower(lapply(str_split(c_l$language,"_"),function(x) {x[1]}))) # clean up names
-c_l$language <- factor(c_l$language, levels =  rev(as.character(c_l$language)))
+#c_l$language <- factor(c_l$language, levels =  rev(as.character(c_l$language))) #orders by magnitude of correlation
 
 # add check information
 coded_languages = c("english", "spanish", "welsh", "vietnamese", "russian", "portuguese", "persian", "bosnian", "french", "hebrew", "italian", "korean", "polish" )
@@ -2104,15 +2106,21 @@ c_l$checked = as.factor(ifelse( is.element(c_l$language, coded_languages), "yes"
 # fix one label 
 levels(c_l$language)[levels(c_l$language)=="haitian.creole"] <- "haitian creole"
 
+c_lb = c_l
+c_lb$corr = 0
+
+
 if (savePlots) {pdf("figure/xling.pdf", height = 6, width = 12)}
 
-ggplot(c_l, aes(language, corr, fill = checked)) + 
+#ggplot(c_l, aes(language, corr, fill = checked)) + 
+ggplot(c_l, aes(language, corr, fill = "grey")) + 
   geom_bar(stat = "identity") + 
   geom_linerange(aes(ymax=upper.ci, ymin=lower.ci)) +
-  geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
+  #geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
   #geom_point(data=c_l, mapping=aes(x=language, y=mono.cor), size=2, shape = 16) +
   #geom_point(data=c_l, mapping=aes(x=language, y=open.cor), size=2, shape = 15) +
   geom_hline(y=mean(c_l$corr), lty=2) +
+  #geom_hline(y=0, lty=1) +
   ylab("Pearson's r") +
   xlab("Language") + 
   theme(plot.background = element_blank(),
@@ -2120,17 +2128,24 @@ ggplot(c_l, aes(language, corr, fill = checked)) +
    panel.grid.minor = element_blank(),
    panel.border = element_blank())  +
   theme(axis.text.x= element_text(angle=90,hjust=1,vjust=0.5, size = 11)) +
-  theme(axis.title = element_text(size=15)) +
+  theme(axis.title = element_text(size=20)) +
   theme(axis.line = element_line(color = 'black'))+
-  scale_fill_manual(values=c("pink","red")) +
+  scale_fill_manual(values=c("red")) +
   theme(legend.position="none") +
-  scale_y_continuous(limits = c(-.07, .75), expand = c(0,.007)) 
+  scale_y_continuous(limits = c(-.75, .75), expand = c(0,.007))+
+  #scale_y_continuous(limits = c(-.03, .75), expand = c(0,.007))+
+  scale_x_discrete( labels=c("")) 
 ```
 
 ![plot of chunk unnamed-chunk-31](figure/unnamed-chunk-31.png) 
 
 ```r
 if(savePlots){dev.off()}
+```
+
+
+```r
+c_l <- c_l[order(c_l$language),]
 ```
 
 ### *grand mean correlation between complexity and length*
@@ -2163,13 +2178,55 @@ mean(c_l$open.cor)
 ```
 
 ```r
-# grand mean correlation between complexity and length, partialing out frequency
+# grand mean correlation between complexity and length, partialling out frequency
 mean(c_l$p.corr)
 ```
 
 ```
 ## [1] 0.216
 ```
+
+<a name="freq"/>
+
+## (4) Frequency
+
+### *import data and plot simultaneous and sequential*
+
+```r
+# simultaneous
+d_simultaneous <- read.csv("data/RefComplex6_all.results", header=TRUE)
+ms_simult = ddply(d_simultaneous ,.(Answer.lang_condition), function (d, dv) {p.fc(d, "\"low_freq\"")}, .inform = TRUE)
+ms_simult$exp = "simultaneous"
+
+# sequential
+d_sequential <- read.csv("data/RefComplex16.results",sep="\t",header=TRUE)
+d_sequential <- d_sequential[d_sequential$Answer.frequency_condition == '\"uneven\"', ]
+levels(d_sequential$Answer.crit_selection) = c("\"high_freq\"", "\"low_freq\"")
+names(d_sequential)[35] = "responseValue"
+ms_seq = ddply(d_sequential,.(Answer.lang_condition), function (d, dv) {p.fc(d, "\"low_freq\"")}, .inform = TRUE)
+ms_seq$exp = "sequential"
+
+# bind together
+ms = rbind(ms_simult, ms_seq)
+ms$exp = as.factor(ms$exp)
+ms$exp = factor(ms$exp,levels(ms$exp)[c(2,1)])
+ms$Answer.lang_condition = c("long", "short")
+
+# plot
+qplot(Answer.lang_condition,p_complex, fill = Answer.lang_condition,  ylim=c(0,1), position=position_dodge(),
+      data=ms,geom="bar",ylab="Proportion selection low frequency object", xlab="Language condition", stat="identity")  +
+  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+  #annotate("text", x=2, y=1, label=paste("n=",E$total_n[1])) +
+  facet_wrap(~exp) +
+  theme_bw() +
+  theme(axis.title = element_text( face = "bold")) +
+  theme(axis.text.x = element_text(colour = 'black')) +
+  theme(axis.text.y = element_text( colour = 'black')) +
+  theme(legend.position="none") +
+  geom_abline(intercept = .5, slope = 0, linetype = 2)  #
+```
+
+![plot of chunk frequency](figure/frequency.png) 
 
 ***
 ***

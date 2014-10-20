@@ -1,0 +1,1633 @@
+<h2> The length of words reflects their conceptual complexity </h2>
+<h3>Supplementary Information </h3>
+
+***
+***
+
+**TABLE OF CONTENTS**<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 1: [Geon mapping task](#1)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 2: [Geon complexity norms](#2)**<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 3: [Geon mapping task control (random syllables)](#3)**<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 4: [Real object complexity norms](#4)** <br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 5: [Real object mappping task](#5)**<br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 6: [Real object mapping task control (random syllables)](#6)** <br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 7: [Real object production task](#7)**<br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 8: [Geon study time task](#8)**<br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 9: [Real object study time task](#9)**<br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 10: [English complexity norms](#10)**<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 11: [Cross-linguistic analysis](#11)** <br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 12: [Simultaneous frequency task](#12)**<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 13: [Sequential frequency task](#12)**<br/>
+  
+This document was created from an R Markdown file. The R Markdown file can be found here. All analyses and plots can be reproduced from the raw data with the code in this file.
+
+***
+***
+
+```{r global_vars, include=F}
+#### SET GLOBAL VARIABLES
+rm(list=ls())
+processNorms = TRUE # process norms or load norms? 
+doSlow = FALSE # do time-consuming pre-processing steps?
+fs = 15 # set graphical params
+ts = 15
+rs = 6
+
+#### LOAD LIBRARIES AND FUNCTIONS
+library('psych')
+library('boot')
+library("rmarkdown")
+source("/Documents/GRADUATE_SCHOOL/Ranalysis/useful.R")
+
+# stuff for rendering to html in R markdown (need rmarkdown library too.)
+library('RCurl')
+library('bitops')
+options(rpubs.upload.method="internal")
+options(RCurlOptions = list(verbose = F,capath=system.file("CurlSSL","cacert.pem",package="RCurl",ssl.verifypeer=F)))
+
+# bootstrap CIs on CI (http://dodonovs.com/R/002-r.htm)
+boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){ 
+  w = length(x); x.r = x; y.r = y 
+  sm = 1:w; cor.b = 1:n 
+  for (k in 1:n){ 
+    s = sample(sm, w, replace = T) 
+    for (i in 1:w) 
+      { 
+      x.r[i] = x[s[i]] 
+      y.r[i] = y[s[i]] 
+      } 
+    cor.b[k] = cor(x.r, y.r, use = "pairwise", method) 
+    } 
+  cor.b = sort(cor.b); a = round(n*(1-p)/2,0); b = round(n*(p+1)/2,0) 
+  vec = c(cor.b[a+1], cor(x, y, use = "pairwise", method), cor.b[b-1]) 
+  n.r = c("value"); n.c = c("lower_bound", "correlation", "upper_bound") 
+  matrix(vec,1,3,dimnames = list(n.r,n.c)) 
+  }
+
+# partial correlation
+bm.partial<-function(x,y,z) {
+  round((cor(x,y, use="complete.obs")-
+           cor(x,z, use="complete.obs")*
+           cor(y,z, use="complete.obs"))/
+                                     sqrt((1-cor(x,z, use="complete.obs")^2)*(1-cor(y,z, use="complete.obs")^2)),4)
+  }
+
+# effect size for forced choice tasks
+d.fc <- function(d) {
+  cond <- all(intersect(levels(d$langCondition),c("\"long\"" , "\"short\"")) == c("\"long\"" , "\"short\""))
+  
+  # http://www.meta-analysis.com/downloads/Meta-analysis%20Converting%20among%20effect%20sizes.pdf
+  if (cond) {
+    d<- d[d$langCondition == "\"long\"" | d$langCondition ==  "\"short\"",]
+    d <- droplevels(d)
+    
+    #use odds ratio to calculate d
+    ns = table(d$langCondition, d$responseValue)
+    or = (ns[1]*ns[4])/(ns[2]*ns[3]) 
+    cf = sqrt(3)/pi
+    effect_size = log(or) * cf #calculate d
+    
+    # caluclate 95 CI
+    se = sqrt((1/ns[1]) + (1/ns[2]) + (1/ns[3]) + (1/ns[4])) # calculate se of log odds ratio
+    d_se = se * (3/(pi^2)) # caclulate se of 
+    d_err = d_se*1.96
+    
+    cill = effect_size - d_err
+    ciul = effect_size + d_err
+    rt.Mratio = mean(d$rt.ratio, na.rm = TRUE)
+    c.Mratio = mean(d$c.ratio, na.rm = TRUE)
+    
+    es <- data.frame(effect_size=effect_size,
+                     cill = cill,
+                     ciul = ciul,
+                     rt.Mratio = rt.Mratio,
+                     c.Mratio = c.Mratio)
+    }
+  return (es)
+  }
+
+# proportions and CIs for forced choice tasks
+p.fc <- function(d, dv){ 
+  # get proportions
+  complex_proport_c = sum(d$responseValue==dv)/length(d$responseValue)
+  
+  # get bootstrapped 95% CIs
+  if (!is.na(complex_proport_c)) { 
+    # bootstrap across subjects proportion responses for each category
+    b <- boot(d$responseValue, function(u,i) table(u[i])[dv]/length(u), R = 1000) 
+    ci <- boot.ci(b, type =  "basic")  
+    ciwl = ci$basic[4]
+    ciwu = ci$basic[5]
+    
+    es <- data.frame(p_complex = complex_proport_c,
+                     ciwl = ciwl,
+                     ciul = ciwu,
+                     n=length(d$workerid))
+    
+  } else {
+    es <- data.frame(p_c = NA,
+                     ciwl = NA,
+                     ciul = NA,
+                     n=NA)
+    
+  }
+  return (es)
+}
+
+# set working directory
+setwd('/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/analysis/')
+```
+
+A blurb about AMT?
+
+<a name="1"/>
+<h3> Study 1: Geon mapping task</h3>
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment38/ref_complex_38.html" target="_blank"> here</a>. 
+
+The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "gronan," "ralex," "vatrus." The long word items were:  "tupabugorn," "gaburatum," "fepolopus," "pakuwugnum," "mipatorun," "kibagronan," "tiburalex," "binivatrus."
+
+Across all studies presented here, some participants completed more than one study. The results presented here include the data from all participants, but all reported results remain reliable when excluding participants who completed more than one study. Participants were counted as a repeat participant if they completed a study using the same stimuli (e.g., completed both Studies 1 and 2 with geons).
+
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative was from the first qunitile and the other was from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio. In this and all subsequent plots, errors bars reflect  bootstrapped 95% confidence intervals.
+
+```{r 1:geon_mapping, warning=F, include=F}
+### *get data into long form*
+if (doSlow){
+  # read in data
+  d <- read.csv("data/RefComplex38.results",sep="\t",header=TRUE)
+  
+  # melt
+  md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+  md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
+  
+  md$variable <- as.factor(as.character(md$variable))
+  md$trial <- as.factor(as.character(md$trial))
+  md$value <- as.factor(as.character(md$value))
+  md$workerid <- as.factor(as.character(md$workerid))
+  
+  md$seq <- with(md, ave(value, workerid, variable, trial, FUN = seq_along))
+  dc <- dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
+  dc$seq <- NULL
+  
+  # make everything factors
+  dc$criticalComplicated <- as.factor(as.numeric(gsub(
+    "[[:punct:]]", "", dc$criticalComplicated))) #strip punctuations
+  dc$criticalSimple <- as.factor(as.numeric(gsub(
+    "[[:punct:]]", "", dc$criticalSimple))) #strip punctuations
+  dc$langCondition <- as.factor(dc$langCondition)
+  dc$objCondition <- as.factor(dc$objCondition)
+  dc$response <- as.factor(dc$response)
+  dc$responseSide <- as.factor(dc$responseSide)
+  dc$responseValue <- as.factor(dc$responseValue)
+  dc$word <- as.factor(dc$word)
+  
+  # merge in norms
+  # see below for processing of these norms from raw data
+  cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")  # Study 2
+  rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv") # Study 8
+
+  # complicated
+  index <- match(dc$criticalSimple, cg_norms$obj)
+  dc$criticalSimple_c.norms <- cg_norms$meanRating[index]
+  index <- match(dc$criticalComplicated,cg_norms$obj)
+  dc$criticalComplicated_c.norms <- cg_norms$meanRating[index]
+  
+  # rt
+  index <- match(dc$criticalSimple, rg_norms$obj)
+  dc$criticalSimple_rt.norms <- rg_norms$log.rt [index]
+  index <- match(dc$criticalComplicated, rg_norms$obj)
+  dc$criticalComplicated_rt.norms <- rg_norms$log.rt [index]
+  
+  dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
+  dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
+  
+  write.csv(dc, "data/RC38_long.csv")
+  }
+
+dc <- read.csv('data/RC38_long.csv')
+```
+
+```{r, warning = F, echo = F, fig.height = 5, fig.width = 10}
+### *plot complexity ratios as a function of condition*
+### *get effect sizes*
+de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
+
+### *get obj conditions*
+de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
+de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
+de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
+de$cond2<- as.numeric(gsub("[[:punct:]]", "", de$cond2))
+de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
+
+# plot complexity ratio
+geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
+  geom_pointrange(aes(ymax = cill, ymin=ciul))+
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  ylab("Effect size") +
+  xlab("Complexity rating ratio") + 
+  ggtitle("Effect size vs. complexity ratio") +
+  theme(text = element_text(size=fs))  +
+  scale_y_continuous(limits = c(-.33, .66)) +
+  scale_x_continuous(limits = c(.25, 1.29)) +
+  geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
+  annotate("text", x=1.15, y=.5, color = "red", size = rs,
+           label=paste("r=",round(cor(de$effect_size, de$c.Mratio), 2))) +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+
+geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
+  geom_pointrange(aes(ymax = cill, ymin=ciul))+
+  geom_hline(yintercept=0, lty=2) +
+  ggtitle("Effect size vs. study time ratio") +
+  stat_smooth(method="lm") +
+  ylab("Effect size") +
+  xlab("Study time ratio") + 
+  theme(text = element_text(size=fs)) +  
+  scale_y_continuous(limits = c(-.33, .66)) +
+  scale_x_continuous(limits = c(.949, 1.005)) +
+  geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
+  annotate("text", x=.997, y=.5, color = "red", size = rs,
+           label=paste("r=",round(cor(de$effect_size, de$rt.Mratio), 2))) +
+  theme(text = element_text(size = fs),
+        plot.title = element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+
+multiplot(geon_c_plot, geon_rt_plot, cols = 2)
+
+```
+
+```{r, include = FALSE}
+###  *stats: correlations between norms and effect sizes*
+cor.test(de$c.Mratio, de$effect_size)
+cor.test(de$rt.Mratio, de$effect_size)
+```
+
+<a name="2"/>
+<h3> Study 2: Geon complexity norms</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment34/ref_complex_34.html" target="_blank"> here</a>.
+
+The relationship between number of geons and complexity rating is plotted below. Each dot corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting.
+
+```{r 2:geon_complexity_norms, warning = F, include = F}
+if (processNorms) {
+  # read in data
+  d <- read.csv("data/RefComplex34.results",sep="\t",header=TRUE)
+  
+  # melt
+  md <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("obj",names(d))])
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$obj <- unlist(matrix(lapply(str_split(md$value,"j"),function(x) {x[2]})))
+  md$obj <- unlist(matrix(lapply(str_split(md$obj,".p"),function(x) {x[1]})))
+  md$complexityLevel <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[1]})))
+  md$objID <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[2]})))
+  md$value <- NULL; md$variable <- NULL
+  md = md[(md$trial != 0 & md$trial != 1),] # remove ball and circuit
+  
+  # get rating info
+  mdr <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("rating",names(d))])
+  mdr$trial <- matrix(lapply(str_split(mdr$variable,"_"),function(x) {x[2]}))
+  mdr$variable <- NULL
+  
+  # merge together based on trial and workerid
+  m = merge(md, mdr, by=c("workerid","trial"))
+  m$value <- as.numeric(as.character(m$value))
+  
+  # get norms by objects
+  ms_all <- aggregate(value ~ obj, data=m, mean)
+  ms_all$cih <- aggregate(value ~ obj, data=m, ci.high)$value
+  ms_all$cil <- aggregate(value ~ obj, data=m, ci.low)$value
+  
+  names(ms_all)[2] = "meanRating"
+  ms_all <- ms_all[order(ms_all$meanRating),]
+
+  # save complexity by item
+  write.csv(ms_all, "data/complicatedNormsGeons_BYITEM.csv")
+  } 
+
+cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")
+```
+
+```{r, echo = F, fig.width=4, fig.height=4}
+### *plot complexity norm by condition*
+# remove quotes from norms
+cg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
+cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
+cg_norms$obj_item = as.numeric(substr(cg_norms$obj, 2, 2))
+
+# make object class numeric
+cg_norms$obj_class = as.numeric(cg_norms$obj_class) 
+
+# plot
+ggplot(cg_norms, aes(y=meanRating, x=jitter(obj_class))) +
+  geom_pointrange(aes(ymax = meanRating+cih,ymin=meanRating-cil)) + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  annotate("text", x=4, y=.25, color = "red", size=rs,
+           label=paste("r=",round(cor(cg_norms$obj_class, cg_norms$meanRating), 2))) +
+  xlab("Object condition") +
+  ylab("Complexity Rating") +
+  ggtitle("complexity rating vs. # of geons") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+```
+
+```{r, include = F}
+# stats: correlation between num geons and complexity
+cor.test(cg_norms$obj_class, cg_norms$meanRating)
+```
+
+<a name="3"/>
+<h3> Study 3: Geon mapping task control</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment40/ref_complex_40.html" target="_blank"> here</a>.
+
+Plotted below is the proportion complex object selections as a function of the number of syllables in the target label. The dashed line reflects chance selection between the simple and complex alternatives. 
+
+```{r 3:geon_random_syllables, include = F}
+### *read in data*
+d <- read.csv("data/RefComplex40.results",sep="\t",header=TRUE)
+
+### *get in long form and make everything factors*
+#get trial info
+md <- melt(d, id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
+
+md$variable <- as.factor(as.character(md$variable))
+md$trial <- as.factor(as.character(md$trial))
+md$value <- as.factor(as.character(md$value))
+md$workerid <- as.factor(as.character(md$workerid))
+
+md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
+dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
+dc$seq <- NULL
+
+#make everything factors
+dc$criticalComplicated <- as.factor(dc$criticalComplicated)
+dc$criticalSimple   <- as.factor(dc$criticalSimple)
+dc$langCondition   <- as.factor(dc$langCondition)
+dc$objCondition   <- as.factor(dc$objCondition)
+dc$response   <- as.factor(dc$response)
+dc$responseSide   <- as.factor(dc$responseSide)
+dc$responseValue   <- as.factor(dc$responseValue)
+dc$word <- as.factor(dc$word)
+
+# relable length to be numeric
+dc$len <- 1
+dc$len[dc$langCondition=='"three"'] <- 3
+dc$len[dc$langCondition=='"five"'] <- 5
+```
+
+```{r, warning = F, message = F, echo = F, fig.width = 4, fig.height = 4}
+###  *plot by length condition*
+# get props
+ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")})
+
+# plot
+qplot(len,p_complex, position=position_dodge(),
+      data=ms,geom="line",ylab="Prop. selection complex object", 
+      xlab="Number of syllables")  +
+  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+  geom_point(aes(len,p_complex), position=position_dodge(.9)) +
+  geom_abline(intercept = .5, slope = 0, linetype = 2) + #
+  ylim(0,1) +
+  ggtitle("Complex selections vs. # of syllables") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+```
+
+```{r include = F}
+# stats
+summary(glm(responseValue ~ len, data=dc, family = "binomial"))
+```
+
+<a name="4"/>
+<h3> Study 4: Real object complexity norms</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment9/ref_complex_9.html" target="_blank"> here</a>.
+
+Plotted below is the correlation between the two samples (_N_ = 60 each) of complexity norms. Each dot corresponds to an object (_n_ = 60). 
+```{r 4:objects_complexity_norms, include = FALSE}
+### *get data into long form, compute correlations between 2 samples, figure out quintiles, remove dupliate subjects*
+if (processNorms){
+  ## Sample #1
+  da <- read.csv("data/RefComplex9a.results",sep="\t",header=TRUE)
+  da[,31:92] <- lapply(da[,31:92],as.character)
+  da[,31:92] <- lapply(da[,31:92],as.numeric)
+  
+  # melt
+  md <- melt(da,id.vars=c("workerid"),measure.vars=names(da)[grepl("rating",names(da))])
+  names(md) <- c("workerid", "rating", "value")
+  ms = aggregate(value ~ rating, md, mean)
+
+  ## Sample #2
+  db <- read.csv("data/RefComplex9b.results",sep="\t",header=TRUE)
+  db[,30:92] <- lapply(db[,30:92],as.character)
+  db[,30:92] <- lapply(db[,30:92],as.numeric)
+  
+  # melt
+  mdb <- melt(db,id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
+  names(mdb) <- c("workerid", "rating", "value")
+  msb = aggregate(value ~ rating, mdb, mean)
+  
+  # merge two samples together to get lists for experiments 
+  all_ratings = rbind(md, mdb)
+  all_ms = aggregate(value ~ rating, all_ratings, mean)
+  all_ms$ratingNum <- matrix(sapply(str_split(matrix(sapply(str_split(all_ms$rating,"rating"),
+                                                            function(x) {x[2]})),"_"),function(x){x[1]}))
+  all_ms$ratingNum<- as.numeric(str_replace_all(as.character(all_ms$ratingNum),"\\\"",""))
+  all_ms$cil = aggregate(value ~ rating, all_ratings, ci.low)$value
+  all_ms$cih = aggregate(value ~ rating, all_ratings, ci.high)$value
+  
+  all_ms = all_ms[!is.na(all_ms$ratingNum),] # get rid of ball and motherboard
+  
+  # add back in ratings for each samples
+  all_ms = merge(all_ms, ms, by="rating")
+  all_ms = merge(all_ms, msb, by="rating")
+  
+  all_ms$rating <- NULL
+  names(all_ms) = c("meanRating" , "ratingNum", "cil", "cih" ,"rating_1","rating_2" )
+  all_ms <- all_ms[c(2,1,3:6)]
+  
+  # get quintiles
+  q = quantile(all_ms$meanRating, seq(0,1, by=.2))
+  one = all_ms[which(all_ms$meanRating<q[2]), "ratingNum"]
+  two = all_ms[which(all_ms$meanRating>q[2] & all_ms$meanRating<q[3]), "ratingNum"]
+  three = all_ms[which(all_ms$meanRating>q[3] & all_ms$meanRating<q[4]), "ratingNum"]
+  four = all_ms[which(all_ms$meanRating>q[4] & all_ms$meanRating<q[5]), "ratingNum"]
+  five = all_ms[which(all_ms$meanRating>q[5]), "ratingNum"]
+  
+  one # 13 15 19 20 28 29  3 44 46 54 57 59
+  two # 10 17  2 22 34 37  4 49  5 55  6  9
+  three # 12 50 7 8 48 16 1 39 40 56 24 60
+  four # 26 18 11 47 42 30 23 31 51 58 41 45
+  five # 14 21 25 27 32 33 35 36 38 43 52 53
+  
+  all_ms$quintile = ifelse(is.element(all_ms$ratingNum, one), 1, 
+                           ifelse(is.element(all_ms$ratingNum, two), 2,
+                                  ifelse(is.element(all_ms$ratingNum, three), 3,
+                                         ifelse(is.element(all_ms$ratingNum, four), 4,
+                                                ifelse(is.element(all_ms$ratingNum, five), 5,
+                                                       "error")))))
+  all_ms$quintile = as.numeric(all_ms$quintile)
+  all_ms <- all_ms[order(all_ms$meanRating),]
+  
+  # there is one participant who was in both samples. Look at correlation between samples without this participant in Sample #2 
+  # Sample #2 
+  # melt
+  mdb <- melt(db[db$workerid != 'A1BQEX75BE1AYE',]
+              ,id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
+  names(mdb) <- c("workerid", "rating", "value")
+  msb = aggregate(value ~ rating, mdb, mean)
+  
+  co_norms_unique_sample = merge(ms, msb, by="rating")
+  co_norms_unique_sample$ratingNum <- as.numeric(matrix(sapply(str_split(matrix(sapply(str_split(
+    co_norms_unique_sample$rating,"rating"), function(x) {x[2]})),"_"),function(x){x[1]})))
+  co_norms_unique_sample = co_norms_unique_sample[!is.na(co_norms_unique_sample$ratingNum),] # get rid of ball and motherboard
+
+  co_norms_unique_sample$rating <- NULL
+  names(co_norms_unique_sample) = c( "rating_1", "rating_2", "ratingNum")
+  print(paste('reliability, removing duplicate subj:', round(cor(co_norms_unique_sample$rating_1, co_norms_unique_sample$rating_2),2))) # nearly identical to original sample
+  
+  # write to csv (use write.table to can exclude headers, so matlab can read for figure)
+  write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
+            row.names=FALSE, col.names=FALSE, sep=",")
+  
+  # write to csv
+  write.csv(all_ms, "data/complicatedNormsObjs_BYITEM.csv")
+  }
+
+co_norms = read.csv("data/complicatedNormsObjs_BYITEM.csv")
+```
+
+```{r echo = F, fig.width = 4, fig.height = 4, warning = FALSE, message = FALSE, output = FALSE}
+### *get reliability between two samples*
+qplot(rating_1,rating_2, position=position_dodge(),
+      data=co_norms, geom="point", ylab="Sample #2", xlab="Sample #1")  +
+  geom_point(aes(rating_1,rating_2), position=position_dodge(.9)) +
+  stat_smooth(method="lm") +
+  ylim(0,1) +
+  xlim(0,1) +
+  ggtitle("Complexity rating samples") +
+  annotate("text", x=.75, y=.2, color = "red", size = rs,
+           label=paste("r=", round(cor(co_norms$rating_1, co_norms$rating_2), 2))) +
+  theme(text = element_text(size=fs),
+          plot.title=element_text(size=ts, face = "bold"),
+          plot.background = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          axis.line = element_line(color = 'black'))
+```
+
+```{r, include = F}
+# stats
+cor.test(co_norms$rating_1, co_norms$rating_2)
+```
+
+<a name="5"/>
+<h3> Study 5: Real object mapping task</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment35/ref_complex_35.html" target="_blank"> here</a>.
+
+The linguistic items were identical to Study 1.
+
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. In the left plot, complexity is operationalized as the explicit complexity norms (Study 4). In the right plot, complexity is operationalized in terms of study times (Study 9). 
+
+```{r 5:objects_mapping, warning = F, include = F}
+### *get data into long form*
+if (doSlow) {
+  d <- read.csv("data/RefComplex35.results", sep="\t", header=TRUE)
+  
+  # get in long form
+  # get trial info
+  md <- melt(d,id.vars=c("workerid"),
+             measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+  md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
+  
+  md$variable <- as.factor(as.character(md$variable))
+  md$trial <- as.factor(as.character(md$trial))
+  md$value <- as.factor(as.character(md$value))
+  md$workerid <- as.factor(as.character(md$workerid))
+  
+  md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
+  dc = dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
+  dc$seq <- NULL
+  
+  write.csv(dc, "data/RC35_long.csv")
+  }
+
+dc <- read.csv("data/RC35_long.csv")
+```
+
+```{r, include = F}
+### *make everything factors*
+dc$criticalComplicated= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalComplicated))
+dc$criticalSimple= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalSimple))
+
+dc$criticalComplicated <- as.factor(dc$criticalComplicated)
+dc$criticalSimple <- as.factor(dc$criticalSimple)
+dc$langCondition <- as.factor(dc$langCondition)
+dc$objCondition <- as.factor(dc$objCondition)
+dc$response <- as.factor(dc$response)
+dc$responseSide <- as.factor(dc$responseSide)
+dc$responseValue <- as.factor(dc$responseValue)
+dc$word <- as.factor(dc$word)
+dc$trial <- as.numeric(dc$trial)
+```
+
+```{r, include = F}
+### *merge in norms*
+index <- match(dc$criticalSimple, co_norms$ratingNum)
+dc$criticalSimple_c.norms <- co_norms$meanRating[index]
+index <- match(dc$criticalComplicated, co_norms$ratingNum)
+dc$criticalComplicated_c.norms <- co_norms$meanRating[index]
+
+rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv") #analyzed from raw data below (Study 9)
+index <- match(dc$criticalSimple, rto_norms$Answer.train_image)
+dc$criticalSimple_rt.norms <- rto_norms$log.rt [index]
+index <- match(dc$criticalComplicated, rto_norms$Answer.train_image)
+dc$criticalComplicated_rt.norms <- rto_norms$log.rt [index]
+
+dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
+dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
+```
+
+
+```{r, warning = F, echo = F, fig.height = 5, fig.width = 10}
+### *plot complexity ratios vs. condition*
+
+### *get effect sizes*
+de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
+
+### *get obj conditions*
+de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
+de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
+de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
+de$cond2<- as.factor(gsub("[[:punct:]]", "", de$cond2))
+de$objRatio = as.numeric(de$cond1)/as.numeric(de$cond2)
+de$l.objRatio <- log(de$objRatio)
+
+de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
+
+# complexity plot
+obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
+  geom_pointrange(aes(ymax = cill, ymin=ciul)) +
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  ylab("Effect size") +
+  xlab("Complexity rating ratio") + 
+  scale_y_continuous(limits = c(-.33, .66)) +
+  geom_text(aes(c.Mratio + .04, effect_size, label=objCondition2)) +
+  annotate("text", x=1, y=.5, col = "red",
+           label=paste("r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)),
+           size = rs) +
+  ggtitle("Effect size vs. complexity ratio") + 
+  theme(text = element_text(size=fs), 
+        plot.title = element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+
+# RT ratio plot
+obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
+  geom_pointrange(aes(ymax = cill, ymin=ciul)) +
+  geom_hline(yintercept=0,lty=2) +
+  stat_smooth(method="lm") +
+  ylab("Effect size") +
+  xlab("Study time ratio") +
+  geom_text(aes(rt.Mratio + .001, effect_size, label=objCondition2)) +
+  annotate("text", x=1, y=.5, col = "red",
+           label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)),
+           size = rs) +  
+  ggtitle("Effect size vs. study time ratio") +
+  theme(text = element_text(size=fs), 
+        plot.title = element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) +
+        scale_y_continuous(limits = c(-.33, .66)) 
+  
+  multiplot(obj_c_plot, obj_rt_plot, cols = 2)
+```
+
+<a name="6"/>
+<h3> Study 6: Real object mapping task control</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment41/ref_complex_41.html" target="_blank"> here</a>.
+
+Plotted below is the proportion of complex object selections as function of number of syllables. The dashed line reflects chance selection between simple and complex alternatives.
+
+```{r 6:objects_random_syllables, warning = F, message = F, output = F, include = F}
+### *read data*
+d <- read.csv("data/RefComplex41.results",sep="\t",header=TRUE)
+```
+
+```{r, warning = F, message = F, output = F, include = F}
+### *get in long form and make everything factors*
+# get trial info
+md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
+md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
+
+md$variable <- as.factor(as.character(md$variable))
+md$trial <- as.factor(as.character(md$trial))
+md$value <- as.factor(as.character(md$value))
+md$workerid <- as.factor(as.character(md$workerid))
+
+md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
+dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
+dc$seq <- NULL
+
+#make everything factors
+dc$criticalComplicated <- as.factor(dc$criticalComplicated)
+dc$criticalSimple   <- as.factor(dc$criticalSimple)
+dc$langCondition   <- as.factor(dc$langCondition)
+dc$objCondition   <- as.factor(dc$objCondition)
+dc$response   <- as.factor(dc$response)
+dc$responseSide   <- as.factor(dc$responseSide)
+dc$responseValue   <- as.factor(dc$responseValue)
+dc$word <- as.factor(dc$word)
+
+# re-label length to be numeric
+dc$len <- 1
+dc$len[dc$langCondition=='"three"'] <- 3
+dc$len[dc$langCondition=='"five"'] <- 5
+```
+
+```{r, warning = F, message = F, output = F, echo=F, fig.width = 4, fig.height = 4}
+### *plot by length condition*
+
+# get props
+ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")})
+
+#plot
+qplot(len,p_complex, position=position_dodge(),
+      data=ms,geom="line",ylab="Prop. selection complex object", 
+      xlab="Number of syllables")  +
+  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+  geom_point(aes(len,p_complex), position=position_dodge(.9)) +
+  geom_abline(intercept = .5, slope = 0, linetype = 2) + #
+  ylim(0,1) +
+  ggtitle("Complex selections vs. # of syllables") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+```
+
+```{r, include = F}
+# stats
+summary(glm(responseValue ~ len, data=dc, family = "binomial"))
+```
+
+<a name="7"/>
+<h3> Study 7: Real object production task</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment27/ref_complex_27.html" target="_blank"> here</a>.
+
+The objects were from the 
+
+There were 26 productions (4%) that included more than one word. These productions were excluded. 
+
+For each object, we analyzed the log length of the production (in characters) as a function of the complexity norms (Study 4, left below). Length of production was correlated with the complexity norms: Longer labels were coined for objects that were rated as more complex (_r_=.17, _p_<.0001). 
+
+We also analyzed the log length of the production (in characters) as a function of study times (Study 9, right below). Length of production was correlated with study times: longer labels were cointed for objects that were studied longer (_r_=.16, _p_<.001). 
+
+```{r 7:objects_production_labels, warning = F, message = F, output = F, include = F}
+### *get data into long form*
+d <- read.csv("data/RefComplex27.results",sep="\t",header=TRUE)
+  
+n <- names(d)
+d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
+d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
+d$Answer.pic_3 = as.factor(as.character(d$Answer.pic_3))
+d$Answer.pic_4 = as.factor(as.character(d$Answer.pic_4))
+d$Answer.pic_5 = as.factor(as.character(d$Answer.pic_5))
+d$Answer.pic_6 = as.factor(as.character(d$Answer.pic_6))
+d$Answer.pic_7 = as.factor(as.character(d$Answer.pic_7))
+d$Answer.pic_8 = as.factor(as.character(d$Answer.pic_8))
+d$Answer.pic_9 = as.factor(as.character(d$Answer.pic_9))
+d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
+
+cols = c(n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+md1$trial <- as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+
+md1 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("pic",n)],na.rm=TRUE)
+md1$trial <- as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
+names(md1)[3] = "picture"
+md1 = md1[,-2]
+
+md2 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("desc_",n)],na.rm=TRUE)
+md2$trial <- as.numeric(matrix(lapply(str_split(md2$variable,"_"),function(x) {x[2]})))
+names(md2)[3] = "description"
+md2 = md2[,-2]
+
+md3 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("descLength",n)],na.rm=TRUE)
+md3$trial <- as.numeric(matrix(lapply(str_split(md3$variable,"_"),function(x) {x[2]})))
+names(md3)[3] = "length"
+md3 = md3[,-2]
+
+md4 <- melt(d,id.vars=c("workerid"), measure.vars=n[grepl("cond",n)],na.rm=TRUE)
+md4$trial <- as.numeric(matrix(lapply(str_split(md4$variable,"_"),function(x) {x[2]})))
+names(md4)[3] = "condition"
+md4 = md4[,-2]
+
+md12 <- join(md1, md2,type = "inner")
+md123 <- join(md12, md3,type = "inner")
+md <- join(md123, md4,type = "inner")
+
+# add columns
+md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
+md <- md[md$numWords == 1,] #remove multi word responses
+md$log.length <- log(md$length) 
+md$log.trial <- log(md$trial)
+```
+
+```{r, include = F}
+### *relationship between condition and label length*
+# aggregate across participants
+md.agg <- ddply(md, .(workerid,condition), function (d) {mean(d$log.length)})
+md.agg$condition = as.factor(md.agg$condition)
+names(md.agg)[3] = "log.length"
+md.agg = md.agg[md.agg$workerid != "A24IF41IP6LT55" ,] # one participant doesn't have both simple and complex (due to multi word responses)
+
+# stats: paired t-test
+t.test(md.agg[md.agg$condition == '"complex"',"log.length"],
+       md.agg[md.agg$condition == '"simple"',"log.length"],paired = TRUE)
+summary(lmer(log.length~condition + (1+log.trial|workerid), md))
+```
+
+```{r, include = F}
+### *relationship between complicated norms and label length*
+index <- match(md$picture, co_norms$ratingNum)
+md$c.norms <- co_norms$meanRating[index]
+
+ms <- aggregate(log.length ~ c.norms + picture, data=md, mean)
+ms$cih <- aggregate(log.length ~ c.norms + picture, data=md, ci.high)$log.length
+ms$cil <- aggregate(log.length ~ c.norms + picture, data=md, ci.low)$log.length
+```
+
+```{r, include = F}
+#plot
+obj_c_p_plot = ggplot(ms, aes(c.norms,log.length)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2) +
+  xlab("Object Complexity Norms") +
+  ylab("Log Word Length (characters)") +
+  annotate("text", x=.755, y=1.7, color = "red", size = rs,
+    label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
+  ggtitle('Label length vs. Complicated norms') +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+```
+
+```{r, include = F}
+# stats
+cor.test(md$log.length, md$c.norms)
+summary(lmer(scale(log.length)~scale(c.norms) + (1+trial|workerid), md))
+```
+
+```{r, include = F}
+### *relationship between study time norms and label length*
+index <- match(md$picture, rto_norms$Answer.train_image)
+md$rt.norms <- rto_norms$log.rt[index]
+
+ms <- aggregate(log.length ~ rt.norms + picture, data=md, mean)
+ms$cih <- aggregate(log.length ~ rt.norms + picture, data=md, ci.high)$log.length
+ms$cil <- aggregate(log.length ~ rt.norms + picture, data=md, ci.low)$log.length
+```
+
+```{r echo = F, fig.width = 8, fig.height = 4}
+#plot
+obj_rt_p_plot = ggplot(ms, aes(rt.norms,log.length)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2) +
+  xlab("Object Study Time") +
+  ylab("Log Word Length (characters)") +
+  annotate("text", x=7.5, y=1.7, color = "red", size = rs,
+    label=paste("r=",round(cor(md$log.length,md$rt.norms), 2))) +
+  ggtitle('Label length vs. Study time') +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+  
+multiplot(obj_c_p_plot, obj_rt_p_plot, cols = 2)
+```
+
+```{r, include = F}
+#stats
+cor.test(md$log.length, md$rt.norms)
+summary(lmer(scale(log.length)~scale(rt.norms) + (1+trial|workerid), md))
+```
+
+<a name="8"/>
+<h3> Study 8: Geon study time task</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment37/ref_complex_37.html" target="_blank"> here</a>.
+
+We excluded subjects who performed below chance on the memory task (fewer than 20 correct out of 40). A response was counted as correct if it was a correct rejection or a hit. This excluded 9 subjects (4%). With these participants excluded, the mean correct was 72%. 
+
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below. The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
+
+```{r 8:geon_rt_norms, warning = F, echo = F, fig.width = 4, fig.height = 4, message = F}
+### *get data into long form (accuracy and RT df) and do exclusions*
+#if (processNorms) {
+  # read in data
+  raw <- read.csv("data/RefComplex37.results",sep="\t",header=TRUE)
+  
+  # look at accuracy, and exclude those below chance
+  #boxplot(raw$Answer.correct, main = "distribution before accuracy exclusions")
+  raw = raw[raw$Answer.correct > 20,]
+
+  # prep accuracy and RT dataframes
+  # accuracy data frame
+  # melt
+  n <- names(raw)
+  cols = c( n[grepl("test",n)])
+  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  mda$trial <-as.numeric(matrix(lapply(str_split(mda$variable,"_"),function(x) {x[3]})))
+  mda$var1 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[1]}))
+  mda$var2 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[2]}))
+  mda$var <- paste(mda$var1, mda$var2, sep = "_")
+  mda$variable <- NULL; mda$var1 <- NULL; mda$var2 <- NULL
+  
+  mda$seq <- with(mda, ave(value, workerid, var, FUN = seq_along))
+  da = dcast(workerid + seq + trial ~ var, data = mda, value.var = "value")
+  da$seq <- NULL
+  
+  da=da[!is.na(da$trial),]
+  
+  da$Answer.test_answer = as.factor(da$Answer.test_answer)
+  da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
+  da$Answer.test_image  = as.factor(da$Answer.test_image)
+  
+  # look at memory performance (correct: CR or hit)
+  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
+  numH = length(which(da$Answer.test_answerEval == "\"H\""))
+
+  correct = (numCR + numH)/ dim(da)[1]
+  #print(paste("percent correct:", round(correct,2)))
+  
+  # get obj condition variable
+  da$test_image2 <- as.character(matrix(lapply(str_split(da$Answer.test_image,"j"), function(x) {x[2]})))
+  da$objCondition <- as.factor(as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[1]}))))
+  da$objItem <- as.character(matrix(lapply(str_split(da$test_image2,"-"), function(x) {x[2]})))
+  da$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", da$objItem)))
+  da$test_image2 <- NULL
+  
+  # look at memory performance (correct: CR or hit)
+  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
+  numH = length(which(da$Answer.test_answerEval == "\"H\""))
+
+  correct = (numCR + numH)/ dim(da)[1]
+  #print(paste("percent correct:" , round(correct,2)))
+  
+  # RT dataframe
+  # melt
+  n <- names(raw)
+  cols = c(n[grepl("train", n)])
+  cols = cols[1:40]
+  md <- melt(raw, id.vars=c("workerid"), measure.vars=cols)
+  md$trial <- as.numeric(matrix(lapply(str_split(md$variable,"_"),function(x) {x[3]})))
+  md$var1 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]}))
+  md$var2 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$var <- paste(md$var1, md$var2, sep = "_")
+  md$variable <- NULL; md$var1 <- NULL; md$var2 <- NULL
+  
+  md$seq <- with(md, ave(value, workerid, var, FUN = seq_along))
+  d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
+  d$Answer.train_NA <- NULL; d$seq <- NULL
+  
+  d=d[!is.na(d$trial),]
+  d=d[!is.na(d$Answer.train_image),]
+  d=d[!is.na(d$Answer.train_rt),]
+  d=d[d$Answer.train_image != "undefined",]
+  d=d[d$Answer.train_image != "",]
+  
+  d$Answer.train_rt = as.numeric(d$Answer.train_rt)
+  
+  # exclude outliers 2 standard deviations above and below mean (in log space)
+  d$log.rt = log(d$Answer.train_rt)
+  total = dim(d)[1]
+  sd2 = 2*sd(d$log.rt)
+  d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
+  #print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
+  
+  # plot histogram
+  sd = sd(d$log.rt)
+  ggplot(d, aes(x=log.rt)) + 
+    geom_histogram(fill = "black", alpha = .6) +
+    geom_vline(aes(xintercept=mean(log.rt, na.rm=T)), 
+               color="red", linetype="solid", size=.5) + 
+    geom_vline(aes(xintercept=mean(log.rt, na.rm=T)-2*sd), 
+               color="red", linetype="dashed", size=.5) +
+    geom_vline(aes(xintercept=mean(log.rt, na.rm=T)+2*sd), 
+               color="red", linetype="dashed", size=.5) +
+  xlab("Log Study Time (ms)") +
+  ylab("Frequency") +
+  ggtitle('Histogram of study time') +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+  
+  # get obj condition
+  d = d[d$trial > 1,] # exclude anchors (not interesting because order not randomized)
+  d$train_image2 <- as.character(matrix(lapply(str_split(d$Answer.train_image,"j"), function(x) {x[2]})))
+  d$objCondition <- as.factor(as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[1]}))))
+  d$objItem <- as.character(matrix(lapply(str_split(d$train_image2,"-"), function(x) {x[2]})))
+  d$objItem<- as.factor(as.numeric(gsub("[[:punct:]]", "", d$objItem)))
+  d$obj <- paste("\"", d$objCondition, "-" ,d$objItem,"\"", sep = "" )
+  d$train_image2 <- NULL
+
+  # look at relationship between rt and memory peformance (no relationship)
+  D = merge(d, da, by=c("workerid","objCondition","objItem"))
+  # aggregate across participants
+  D.agg <- ddply(D, .(workerid,Answer.test_answerEval), function (d) {mean(d$log.rt)})
+  names(D.agg)[3] = "log.rt"
+  
+  # remove subjects that don't have both hits and misses for
+  m = as.data.frame(table(D.agg$workerid))
+  names(m)[1] = "workerid"
+  goodIDs = m[which(m$Freq != 1),"workerid"]
+  
+  D.agg$good = ifelse(is.element(D.agg$workerid, goodIDs),1, 0)
+  D.agg = D.agg[D.agg$good == 1,]
+
+  # stats: paired t-test
+  # t.test(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"],
+        # D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"], paired = TRUE)
+
+  # rt by item
+  ms_all <- aggregate(log.rt  ~ obj, data=d, mean)
+  ms_all$cih <- aggregate(log.rt ~ obj, data=d, ci.high)$log.rt
+  ms_all$cil <- aggregate(log.rt ~ obj, data=d, ci.low)$log.rt
+  
+  # save RT by item
+   #write.csv(ms_all, "data/rtNormsGeons_BYITEM.csv")
+  #} 
+
+rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv")
+```
+
+Like for the complexity norms, study times were highly correlated with the number of geons in each object (_r_=.93, _p_<.01; see plot below, x-coordinates jittered to avoid over-plotting). Objects that contained more geons tended to be studied longer. 
+
+```{r, echo = F, fig.width = 4, fig.height = 4}
+###  *plot RT by condition*
+rg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", rg_norms$obj)))
+rg_norms$obj_class = substr(rg_norms$obj, 1, 1)
+rg_norms$obj_item = substr(rg_norms$obj, 2, 2)
+
+# plot
+ggplot(rg_norms, aes(y=log.rt, x=jitter(as.numeric(obj_class)))) +
+  geom_pointrange(aes(ymax = log.rt+cih,ymin=log.rt-cil)) + 
+  annotate("text", x=4.5, y=7.1, color = "red", size=rs,
+           label=paste("r=",round(cor(as.numeric(rg_norms$obj_class), rg_norms$log.rt), 2))) +
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  xlab("Object Condition") +
+  ylab("Log study time (ms)") +
+  ggtitle("Study time vs. # of geons") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+```
+
+```{r, include = F}
+# stats
+cor.test(as.numeric(rg_norms$obj_class), rg_norms$log.rt)
+```
+
+```{r, include = F}
+### *stats: get RT correlation with condition*
+# make object class numeric
+rg_norms$obj_class = as.numeric(rg_norms$obj_class) 
+
+# correlation between num geons and complexity
+cor.test(rg_norms$obj_class, rg_norms$log.rt)
+```
+
+Study times were also highly correlated with complexity norms. Objects that were rated as more complex tended to be studied longer.
+
+```{r, echo = F, fig.width = 4, fig.height = 4, warning = F}
+index <- match(cg_norms$obj, rg_norms$obj)
+cg_norms$rt_meanRating <- rg_norms$log.rt[index]
+cg_norms$rt_meanRating_cil <- rg_norms$cil[index]
+cg_norms$rt_meanRating_cih <- rg_norms$cih[index]
+
+# plot complexity rating vs. RT
+ggplot(cg_norms, aes(meanRating, rt_meanRating))+
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbarh(aes(xmin=meanRating-cil, 
+                     xmax=meanRating+cih), size=0.2, colour="black") +
+  geom_errorbar(aes(ymin=rt_meanRating-rt_meanRating_cil, 
+                    ymax=rt_meanRating+rt_meanRating_cih), size=0.2, colour="black") +
+  annotate("text", x=.9, y=7.1, 
+           label=paste("r=",round(cor(cg_norms$rt_meanRating, cg_norms$meanRating, 
+                                      use = "complete"), 2)), col="red", size = 6) +
+  ylim(7,7.7) +
+  xlim(0,1) +
+  xlab("Complexity Norms") +
+  ylab("Log study time (ms)") +
+  ggtitle("Study time vs. Complexity norms") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+```
+
+```{r, include = F}
+### *stats: correlation between between complexity rating and RT*
+cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
+```
+
+Study times were did not predict memory performance. The study times for hits (correct "yes" responses; _M_ = 7.33 ) did not differ from misses (correct "no" responses; _M_ = 7.34; _t_(223) = .61, _p_=.54).
+
+
+<a name="9"/>
+<h3> Study 9: Real object study time task</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment30/ref_complex_30.html" target="_blank"> here</a>.
+
+We excluded subjects who performed below chance on the memory task (fewer than 30 correct out of 60). A response was counted as correct if it was a correct rejection or a hit. This excluded 6 subjects (1%). With these participants excluded, the mean correct was 84%.
+
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below. The solid line indicates the mean, and the dashed lines indicates two standard deviations above and below the mean.
+
+```{r 9:objects_rt_norms, warning = F, echo = F, fig.width = 4, fig.height = 4, message = F}
+### *get data into long form (accuracy and RT df) and do exclusions*
+#if (processNorms){
+  raw <- read.csv("data/RefComplex30.results",sep="\t",header=TRUE)
+    
+  # look at accuracy, and exclude those below chance
+  #boxplot(raw$Answer.correct, main = "distribution before accuracy exclusions")
+  raw = raw[raw$Answer.correct > 30, ]
+  
+  # accuracy dataframe
+  n <- names(raw)
+  cols = c( n[grepl("test",n)])
+  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  mda$trial <-as.numeric(matrix(lapply(str_split(mda$variable,"_"),function(x) {x[3]})))
+  mda$var1 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[1]}))
+  mda$var2 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[2]}))
+  mda$var <- paste(mda$var1, mda$var2, sep = "_")
+  mda$variable <- NULL; mda$var1 <- NULL; mda$var2 <- NULL
+  
+  mda$seq <- with(mda, ave(value, workerid, var, FUN = seq_along))
+  da = dcast(workerid + seq + trial ~ var, data = mda, value.var = "value")
+  da$seq <- NULL
+  
+  da=da[!is.na(da$trial),]
+  
+  da$Answer.test_answer = as.factor(da$Answer.test_answer)
+  da$Answer.test_answerEval = as.factor(da$Answer.test_answerEval)
+  da$Answer.test_image  = as.factor(da$Answer.test_image)
+  
+  # look at memory performance (correct: CR or hit)
+  numCR = length(which(da$Answer.test_answerEval == "\"CR\""))
+  numH = length(which(da$Answer.test_answerEval == "\"H\""))
+
+  correct = (numCR + numH)/ dim(da)[1]
+  #print(paste("percent correct:" , round(correct,2)))
+  
+  # RT dataframe
+  n <- names(raw)
+  cols = c(  n[grepl("train",n)], n["correct"])
+  cols = cols[1:154]
+  md <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  md$trial <-as.numeric(matrix(lapply(str_split(md$variable,"_"),function(x) {x[3]})))
+  md$var1 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]}))
+  md$var2 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$var <- paste(md$var1, md$var2, sep = "_")
+  md$variable <- NULL; md$var1 <- NULL; md$var2 <- NULL
+  
+  md$seq <- with(md, ave(value, workerid, var, FUN = seq_along))
+  d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
+  d$Answer.train_NA <- NULL; d$seq <- NULL
+  
+  d=d[!is.na(d$trial),]
+  d=d[!is.na(d$Answer.train_image),]
+  d=d[!is.na(d$Answer.train_rt),]
+  d=d[d$Answer.train_image != "undefined",]
+  d=d[d$Answer.train_image != "",]
+  
+  d$Answer.train_image = as.factor(d$Answer.train_image)
+  d$Answer.train_rt = as.numeric(d$Answer.train_rt)
+  
+  #exclude outlier 2 standard deviations above and below mean (in log space)
+  d$log.rt = log(d$Answer.train_rt)
+  total = dim(d)[1]
+  sd2 = 2*sd(d$log.rt)
+  d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
+  #print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
+  
+  # plot histogram
+  sd = sd(d$log.rt)
+  ggplot(d, aes(x=log.rt)) + 
+    geom_histogram(fill = "black", alpha = .6) +
+    geom_vline(aes(xintercept=mean(log.rt, na.rm=T)), 
+               color="red", linetype="solid", size=.5) + 
+    geom_vline(aes(xintercept=mean(log.rt, na.rm=T)-2*sd), 
+               color="red", linetype="dashed", size=.5) +
+    geom_vline(aes(xintercept=mean(log.rt, na.rm=T)+2*sd), 
+               color="red", linetype="dashed", size=.5) +
+  xlab("Log Study Time (ms)") +
+  ylab("Frequency") +
+  ggtitle('Histogram of study time') +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+  
+  # look at relationship between rt and memory peformance (no relationship)
+  D = merge(d, da, by.x=c("workerid","Answer.train_image"), by.y = c("workerid","Answer.test_image"))
+  D = D[D$Answer.train_image != 61,] # get rid of ball and motherboard
+  D = D[D$Answer.train_image != 62,] 
+  D_ms = ddply(D ,.(Answer.test_answerEval), function (d) {mean(d$log.rt)})
+  # aggregate across participants
+  D.agg <- ddply(D, .(workerid,Answer.test_answerEval), function (d) {mean(d$log.rt)})
+  names(D.agg)[3] = "log.rt"
+  
+  # remove subjects that don't have both hits and misses for
+  m = as.data.frame(table(D.agg$workerid))
+  names(m)[1] = "workerid"
+  goodIDs = m[which(m$Freq != 1),"workerid"]
+  
+  D.agg$good = ifelse(is.element(D.agg$workerid, goodIDs), 1, 0)
+  D.agg = D.agg[D.agg$good == 1,]
+  means = ddply(D.agg, .(Answer.test_answerEval), function (d) {mean(d$log.rt)})
+
+  # stats: paired t-test
+  # t.test(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"],
+       #D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"], paired = TRUE)
+
+  # aggregate
+  ms <- aggregate(log.rt  ~ Answer.train_image, data=d, mean)
+  ms$rt_cil <- aggregate(log.rt ~ Answer.train_image, data=d, ci.low)$log.rt 
+  ms$rt_cih <- aggregate(log.rt ~ Answer.train_image, data=d, ci.high)$log.rt 
+  
+  ms = ms[ms$Answer.train_image != 61,] # get rid of ball and motherboard
+  ms = ms[ms$Answer.train_image != 62,] 
+
+  #write.csv(ms,"data/rtNormsObjs_BYITEM.csv")
+  #}
+
+rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv")
+```
+
+The plot below shows the correlation between study time and explicit complexity norms for each object. Like for the geons, objects that were rated as more complex were studied longer.
+
+```{r, echo = F, fig.width = 4, fig.height = 4, warning = F}
+index <- match(co_norms$ratingNum, rto_norms$Answer.train_image)
+co_norms$log.rt <- rto_norms$log.rt[index]
+co_norms$rt_meanRating_cil <- rto_norms$rt_cil[index]
+co_norms$rt_meanRating_cih <- rto_norms$rt_cih[index]
+
+# plot complexity rating vs. RT
+ggplot(co_norms, aes(meanRating, log.rt))+
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbarh(aes(xmin=meanRating-cil, 
+                     xmax=meanRating+cih), size=0.2, colour="black") +
+  geom_errorbar(aes(ymin=log.rt-rt_meanRating_cil, 
+                    ymax=log.rt+rt_meanRating_cih), size=0.2, colour="black") +
+  annotate("text", x=.9, y=7.1, 
+           label=paste("r=",round(cor(co_norms$meanRating, co_norms$log.rt,
+                                      use = "complete"), 2)), col="red", size = 6) +
+  ylim(7,7.7) +
+  xlim(0,1) +
+  xlab("Complexity Norms") +
+  ylab("Log study time (ms)") +
+  ggtitle("Study times vs. Complexity norms") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+```
+
+```{r include = F}
+### *stats: correlation between between complexity rating and RT*
+cor.test(co_norms$meanRating, co_norms$log.rt)
+```
+For the real objects, study times did predict memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24) were greater than for misses (correct “no” responses; _M_ = 7.11; _t_(393) = 9.74, _p_<.0001).
+
+<a name="10"/>
+<h3> Study 10: English complexity norms</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment26/ref_complex_26.html" target="_blank"> here</a>.
+
+TO DO
+
+```{r 10:english_norms, warning= F, include = F}
+### *preprocess and merge in stuff*
+if (processNorms) {
+  d1 <- read.csv("data/RefComplex26.results1",sep="\t",header=TRUE)
+  d2 <- read.csv("data/RefComplex26.results",sep="\t",header=TRUE)
+  d <- rbind(d1,d2)
+  
+  # take out people who missed check question
+  d = d[d$Answer.value_18 == 7, ] 
+  
+  # melt into word and values into two data frames, then rejoin based on workerid+trial id
+  # (tricky because variable is string and number)
+  n <- names(d)
+  colsV =  n[grepl("value",n)] 
+  colsW =  n[grepl("word_",n)] 
+  mdW <- melt(d,id.vars=c("workerid"), measure.vars=colsW,na.rm=TRUE)
+  mdW$trial <- as.numeric(matrix(lapply(str_split(mdW$variable,"_"),function(x) {x[2]})))
+  mdW$index <- paste(mdW$workerid, mdW$trial, sep="_")
+  mdV <- melt(d,id.vars=c("workerid"), measure.vars=colsV,na.rm=TRUE)
+  mdV$trial <- as.numeric(matrix(lapply(str_split(mdV$variable,"_"),function(x) {x[2]})))
+  mdV$index <- paste(mdV$workerid, mdV$trial, sep="_")
+  
+  # merge together
+  index <- match(mdW$index, mdV$index)
+  mdW$complexity <- mdV$value[index]
+ 
+  # delete variables
+  mdW$index <- NULL; mdW$variable <- NULL; names(mdW)[2] <- "word"; md <- mdW
+  
+  # remove quotes from words
+  md$word= gsub(" ", "", gsub("[[:punct:]]", "", md$word))
+  md$word = as.factor(md$word)
+  
+  # remove non-words
+  md = md[md$word != "ball",] # anchor
+  md = md[md$word != "motherboard",] # anchor
+  md = md[md$word != "43",] # take out check question
+  md = md[md$word != "peso",] # take out bad word
+  
+  # add length in characters
+  md$nchars = nchar(as.character(md$word))
+  
+  # merge in word info
+  # -- add mrc data --
+  mrc = read.csv("data/MRC_corpus.csv")
+  mrc = mrc[mrc$mrc.syl != "NA",]
+  index <- match(md$word, mrc$word)
+  md$mrc.fam <- mrc$mrc.fam[index]
+  md$mrc.conc <- mrc$mrc.conc[index]
+  md$mrc.imag <- mrc$mrc.imag[index]
+  md$mrc.syl <- mrc$mrc.syl[index]
+ 
+  # -- add phonemes from MRC --
+  mrc = mrc[mrc$mrc.wtype != " ",]
+  index <- match(md$word, mrc$word)
+  md$mrc.phon <- mrc$mrc.phon[index]
+
+  # -- add class --
+  class = read.csv("data/english_class_codes.csv")
+  index <- match(md$word, class$ENGLISH)
+  md$class <- class$class_MLL[index]
+  
+  # -- add morphemes --
+  morph = read.csv("data/numMorph_celex2.csv")
+  index <- match(md$word, morph$ENGLISH)
+  md$clx.morph <- morph$clx.numMorph[index]
+  
+  # -- add frequency --
+  freqs = read.table("data/SUBTLEXusDataBase.txt",header=TRUE)
+  index <- match(md$word, freqs$Word)
+  md$subt.log.freq <- freqs$Lg10WF[index]
+  
+  # -- add brysbaert concreteness --
+  b <- read.csv("data/brysbaert_corpus.csv",header=TRUE)
+  b <- b[b$Word != "",] # get rid of empty rows
+  b <- b[b$Bigram == 0,]# get rid of two word lemmas
+  index <- match(md$word, b$Word)
+  md$b.conc <- b$Conc.M[index]
+  
+  write.csv(md, "data/englishComplexityNorms.csv")
+ }
+
+eng = read.csv("data/englishComplexityNorms.csv")
+```
+
+```{r, echo = F, fig.width = 4, fig.height = 4}
+### plot complexity norms vs word length
+
+# aggregate across words of the same length
+ms2 <- aggregate(complexity ~ nchars, data=eng, mean)
+ms2$cih <- aggregate(complexity ~ nchars,  data=eng, ci.high)$complexity
+ms2$cil <- aggregate(complexity ~ nchars,  data=eng, ci.low)$complexity
+
+# plot 
+ggplot(ms2, aes(complexity, nchars)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_errorbarh(aes(xmax=complexity+cih, xmin=complexity-cil), size=.2, colour="black") +
+  annotate("text", x=6, y=3, size = rs, 
+           label=paste("r=",round(cor(eng$complexity, eng$nchars), 2)), col="red") +
+  scale_y_continuous(limits = c(0, 15), breaks = 1:14, labels = 1:14) +
+  scale_x_continuous(limits = c(0, 7), breaks = 1:7, labels = 1:7)  +
+  xlab('Complexity Rating') +
+  ylab('Word Length (chars.)') +
+  ggtitle("# of characters vs. complexity rating") +
+  theme(text = element_text(size=fs),
+       plot.title=element_text(size=ts, face = "bold"),
+       plot.background = element_blank(),
+       panel.grid.major = element_blank(),
+       panel.grid.minor = element_blank(),
+       panel.border = element_blank(),
+       axis.line = element_line(color = 'black'))
+```
+
+```{r, include = F}
+### *aggregate across participants*
+# have to do this separately for each length variable because drops words for which there are NAs *for any of the length vars*
+ms.syl <- aggregate(complexity ~ word + mrc.syl, data=eng, mean)
+ms.phon <- aggregate(complexity ~ word + mrc.phon, data=eng, mean)
+ms.morph <- aggregate(complexity ~ word + clx.morph, data=eng, mean)
+ms.chars <- aggregate(complexity ~ word + nchars +subt.log.freq + mrc.conc, data=eng, mean)
+```
+
+```{r, include = F}
+### *stats: correlations between length and complexity in English*
+# correlation between syllables and complexity
+cor.test(ms.syl$complexity, ms.syl$mrc.syl)
+
+# correlation between phonemes and complexity
+cor.test(ms.phon$complexity, ms.phon$mrc.phon)
+
+# correlation between morphomes and complexity
+cor.test(ms.morph$complexity, ms.morph$clx.morph)
+
+# mono-morphemic
+ms_mono.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$clx.morph == 1,], mean)
+ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph == 1,], mean)
+
+# correlation between syllables and complexity [mono-morphemic only]
+cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
+
+# correlation between phonemes and complexity [mono-morphemic only]
+cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
+
+# open class
+ms_open.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$class != 0,], mean)
+ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$class != 0,], mean)
+ms_open.morph = aggregate(complexity ~ word + clx.morph, data=eng[eng$class != 0,], mean)
+
+# correlation between syllables and complexity [open class only]
+cor.test(ms_open.syl$complexity, ms_open.syl$mrc.syl)
+
+# correlation between phonemes and complexity [open class only]
+cor.test(ms_open.phon$complexity, ms_open.phon$mrc.phon)
+
+# correlation between morphemes and complexity [open class only]
+cor.test(ms_open.morph$complexity, ms_open.morph$clx.morph)
+
+# paritialing out frequency
+pcor.test(ms.chars$complexity,ms.chars$nchars,ms.chars$subt.log.freq)
+
+# concreteness split
+ms.chars <- aggregate(complexity ~ word + nchars + mrc.conc, data=eng, mean) # do this again without freq because drops missing words
+ms.chars$conc.split = ifelse(ms.chars$mrc.conc < median(ms.chars$mrc.conc), 1, 2)
+ms.chars$conc.split=as.factor(ms.chars$conc.split)
+ms.charsL = ms.chars[ms.chars$conc.split == 1,]
+cor.test(ms.charsL$nchars, ms.charsL$complexity)
+
+ms.chars <- aggregate(complexity ~ word + nchars + mrc.conc + subt.log.freq, data=eng, mean) # do this again without freq because drops missing words
+ms.chars$conc.split = ifelse(ms.chars$mrc.conc < median(ms.chars$mrc.conc), 1, 2)
+ms.charsL = ms.chars[ms.chars$conc.split == 1,]
+pcor.test(ms.charsL$complexity,ms.charsL$nchars,ms.charsL$subt.log.freq)
+```
+
+
+```{r, include = F}
+### *are the correlations between length and complexity reliable, controlling for everything? [yes]*
+# all
+m_syl = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
+m_phon = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
+m_morph = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
+summary(m_syl)
+summary(m_phon)
+summary(m_morph)
+
+# mono-morphemic
+m_syl_m = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$clx.morph == 1,])
+m_phon_m = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$clx.morph == 1,])
+summary(m_syl_m)
+summary(m_phon_m)
+
+# open class
+m_syl_o = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$class != 0,])
+m_phon_o = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$class != 0,])
+m_morph_o = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$class != 0,])
+summary(m_syl_o)
+summary(m_phon_o)
+summary(m_morph_o)
+```
+
+```{r, include = F}
+### *create english word data frame with relevant variables for xling analysis*
+xling.eng <- aggregate(complexity ~ word + class, data=eng, mean)
+
+# -- add morphemes --
+morph = read.csv("data/numMorph_celex2.csv")
+index <- match(xling.eng$word, morph$ENGLISH)
+xling.eng$clx.morph <- morph$clx.numMorph[index]
+
+# -- add frequency --
+freqs = read.table("data/SUBTLEXusDataBase.txt",header=TRUE)
+index <- match(xling.eng$word, freqs$Word)
+xling.eng$subt.log.freq <- freqs$Lg10WF[index]
+
+xling.eng$class = as.factor(xling.eng$class)
+xling.eng$clx.morph = as.factor(xling.eng$clx.morph)
+```
+
+<a name="11"/>
+<h3> Study 11: Cross-linguistic analysis</h3> 
+
+TO DO
+
+<a name="12"/>
+<h3> Study 12: Simultaneous frequency task</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment17_2/ref_complex_17_2.html" target="_blank"> here</a>.
+
+Plotted below is the proportion low frequency object selections as a function of language condition (long vs. short). 
+
+```{r 12: simul_freq, include = F}
+# read in data
+d_simultaneous <- read.csv("data/RefComplex6_all.results", header=TRUE)
+```
+
+```{r, echo = F, fig.width = 4, fig.height = 4}
+# plot proportion low freq by language condition
+
+# get proportions by condition
+ms_simult = ddply(d_simultaneous ,.(Answer.lang_condition), function (d, dv) {p.fc(d, "\"low_freq\"")})
+ms_simult$Answer.lang_condition = c("long", "short")
+
+# plot
+qplot(Answer.lang_condition, p_complex, fill = Answer.lang_condition,
+      ylim = c(0,1), position=position_dodge(),
+      data = ms_simult, geom="bar", 
+      ylab = "Prop. selection low freq. object", xlab="Language condition", 
+      main = "Low freq. selections vs. language", stat="identity")  +
+  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+  geom_abline(intercept = .5, slope = 0, linetype = 2) +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'),
+        legend.position="none")
+```
+
+```{r, include = F}
+# stats
+chisq.test(table(d_simultaneous$responseValue, d_simultaneous$Answer.lang_condition))
+```
+
+<a name="13"/>
+<h3> Study 13: Sequential frequency task</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment16/ref_complex_16.html" target="_blank"> here</a>.
+
+Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). There difference between conditions is not reliable.
+
+```{r, include = F}
+# read in data
+d_sequential <- read.csv("data/RefComplex16.results",sep="\t",header=TRUE)
+
+# pre-processing
+d_sequential <- d_sequential[d_sequential$Answer.frequency_condition == '\"uneven\"', ]
+levels(d_sequential$Answer.crit_selection) = c("\"high_freq\"", "\"low_freq\"")
+names(d_sequential)[35] = "responseValue"
+```
+
+```{r 13:sequential_freq, echo = F, fig.width = 4, fig.height = 4}
+# plot proportion low freq by language condition
+
+# get proportions by condition
+ms_seq = ddply(d_sequential,.(Answer.lang_condition), function (d, dv) {p.fc(d, "\"low_freq\"")})
+ms_seq$Answer.lang_condition = c("long", "short")
+
+# plot
+qplot(Answer.lang_condition,p_complex, fill = Answer.lang_condition,
+      ylim=c(0,1), position=position_dodge(),
+      data=ms_seq,geom="bar", ylab="Prop. selection low freq. object", 
+      main = "Low freq. selections vs. language",
+      xlab="Language condition", stat="identity") +
+  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
+  geom_abline(intercept = .5, slope = 0, linetype = 2) +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'),
+        legend.position="none")
+```
+
+```{r, include = F}
+# stats
+chisq.test(table(d_sequential$responseValue, d_sequential$Answer.lang_condition))
+```
