@@ -25,7 +25,7 @@ This document was created from an R Markdown file. The R Markdown file can be fo
 ***
 
 ```{r global_vars, include=F}
-#### SET GLOBAL VARIABLES
+## SET GLOBAL VARIABLES
 rm(list=ls())
 processNorms = TRUE # process norms or load norms? 
 doSlow = FALSE # do time-consuming pre-processing steps?
@@ -33,7 +33,7 @@ fs = 15 # set graphical params
 ts = 15
 rs = 6
 
-#### LOAD LIBRARIES AND FUNCTIONS
+## LOAD LIBRARIES AND FUNCTIONS
 library('psych')
 library('boot')
 library("rmarkdown")
@@ -43,7 +43,7 @@ source("/Documents/GRADUATE_SCHOOL/Ranalysis/useful.R")
 library('RCurl')
 library('bitops')
 options(rpubs.upload.method="internal")
-options(RCurlOptions = list(verbose = F,capath=system.file("CurlSSL","cacert.pem",package="RCurl",ssl.verifypeer=F)))
+options(RCurlOptions = list(verbose = F,capath=system.file("CurlSSL", "cacert.pem", package="RCurl", ssl.verifypeer=F)))
 
 # bootstrap CIs on CI (http://dodonovs.com/R/002-r.htm)
 boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){ 
@@ -149,10 +149,10 @@ The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "grona
 
 Across all studies presented here, some participants completed more than one study. The results presented here include the data from all participants, but all reported results remain reliable when excluding participants who completed more than one study. Participants were counted as a repeat participant if they completed a study using the same stimuli (e.g., completed both Studies 1 and 2 with geons).
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative was from the first qunitile and the other was from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio. In this and all subsequent plots, errors bars reflect  bootstrapped 95% confidence intervals.
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative was from the first quintile and the other was from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio. In this and all subsequent plots, errors bars reflect  95% confidence intervals.
 
 ```{r 1:geon_mapping, warning=F, include=F}
-### *get data into long form*
+## get data into long form
 if (doSlow){
   # read in data
   d <- read.csv("data/RefComplex38.results",sep="\t",header=TRUE)
@@ -211,18 +211,18 @@ dc <- read.csv('data/RC38_long.csv')
 ```
 
 ```{r, warning = F, echo = F, fig.height = 5, fig.width = 10}
-### *plot complexity ratios as a function of condition*
-### *get effect sizes*
+## plot complexity ratios as a function of condition
+# get effect sizes
 de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
 
-### *get obj conditions*
+# get obj conditions
 de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
 de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
 de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
 de$cond2<- as.numeric(gsub("[[:punct:]]", "", de$cond2))
 de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
 
-# plot complexity ratio
+# plot complexity norm ratio
 geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   geom_pointrange(aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0,lty=2) +
@@ -244,6 +244,7 @@ geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
         panel.border = element_blank(),
         axis.line = element_line(color = 'black')) 
 
+# rt norm ratio
 geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   geom_pointrange(aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0, lty=2) +
@@ -266,11 +267,10 @@ geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
         axis.line = element_line(color = 'black')) 
 
 multiplot(geon_c_plot, geon_rt_plot, cols = 2)
-
 ```
 
 ```{r, include = FALSE}
-###  *stats: correlations between norms and effect sizes*
+## stats: correlations between norms and effect sizes
 cor.test(de$c.Mratio, de$effect_size)
 cor.test(de$rt.Mratio, de$effect_size)
 ```
@@ -283,6 +283,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 The relationship between number of geons and complexity rating is plotted below. Each dot corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting.
 
 ```{r 2:geon_complexity_norms, warning = F, include = F}
+## read in data and pre-process
 if (processNorms) {
   # read in data
   d <- read.csv("data/RefComplex34.results",sep="\t",header=TRUE)
@@ -322,7 +323,7 @@ cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")
 ```
 
 ```{r, echo = F, fig.width=4, fig.height=4}
-### *plot complexity norm by condition*
+## plot complexity norm by number of geons
 # remove quotes from norms
 cg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
 cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
@@ -350,7 +351,7 @@ ggplot(cg_norms, aes(y=meanRating, x=jitter(obj_class))) +
 ```
 
 ```{r, include = F}
-# stats: correlation between num geons and complexity
+## stats: correlation between complexity norms and num geons (BY ITEM)
 cor.test(cg_norms$obj_class, cg_norms$meanRating)
 ```
 
@@ -362,11 +363,11 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 Plotted below is the proportion complex object selections as a function of the number of syllables in the target label. The dashed line reflects chance selection between the simple and complex alternatives. 
 
 ```{r 3:geon_random_syllables, include = F}
-### *read in data*
+## read in data 
 d <- read.csv("data/RefComplex40.results",sep="\t",header=TRUE)
 
-### *get in long form and make everything factors*
-#get trial info
+## get in long form and make everything factors
+# get trial info
 md <- melt(d, id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
 md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
 md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
@@ -381,7 +382,7 @@ md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
 dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
 dc$seq <- NULL
 
-#make everything factors
+# make everything factors
 dc$criticalComplicated <- as.factor(dc$criticalComplicated)
 dc$criticalSimple   <- as.factor(dc$criticalSimple)
 dc$langCondition   <- as.factor(dc$langCondition)
@@ -391,14 +392,14 @@ dc$responseSide   <- as.factor(dc$responseSide)
 dc$responseValue   <- as.factor(dc$responseValue)
 dc$word <- as.factor(dc$word)
 
-# relable length to be numeric
+# re-label length to be numeric
 dc$len <- 1
 dc$len[dc$langCondition=='"three"'] <- 3
 dc$len[dc$langCondition=='"five"'] <- 5
 ```
 
 ```{r, warning = F, message = F, echo = F, fig.width = 4, fig.height = 4}
-###  *plot by length condition*
+## plot by length condition
 # get props
 ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")})
 
@@ -421,7 +422,7 @@ qplot(len,p_complex, position=position_dodge(),
 ```
 
 ```{r include = F}
-# stats
+## stats: predict selections with word length
 summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 ```
 
@@ -432,7 +433,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 Plotted below is the correlation between the two samples (_N_ = 60 each) of complexity norms. Each dot corresponds to an object (_n_ = 60). 
 ```{r 4:objects_complexity_norms, include = FALSE}
-### *get data into long form, compute correlations between 2 samples, figure out quintiles, remove dupliate subjects*
+## get data into long form, compute correlations between 2 samples, figure out quintiles, and remove dupliate subjects
 if (processNorms){
   ## Sample #1
   da <- read.csv("data/RefComplex9a.results",sep="\t",header=TRUE)
@@ -470,7 +471,7 @@ if (processNorms){
   all_ms = merge(all_ms, msb, by="rating")
   
   all_ms$rating <- NULL
-  names(all_ms) = c("meanRating" , "ratingNum", "cil", "cih" ,"rating_1","rating_2" )
+  names(all_ms) = c("meanRating", "ratingNum", "cil", "cih" ,"rating_1","rating_2")
   all_ms <- all_ms[c(2,1,3:6)]
   
   # get quintiles
@@ -525,9 +526,9 @@ co_norms = read.csv("data/complicatedNormsObjs_BYITEM.csv")
 ```
 
 ```{r echo = F, fig.width = 4, fig.height = 4, warning = FALSE, message = FALSE, output = FALSE}
-### *get reliability between two samples*
+## plot correlation between two samples
 qplot(rating_1,rating_2, position=position_dodge(),
-      data=co_norms, geom="point", ylab="Sample #2", xlab="Sample #1")  +
+      data=co_norms, geom="point", ylab="Sample #2", xlab="Sample #1") +
   geom_point(aes(rating_1,rating_2), position=position_dodge(.9)) +
   stat_smooth(method="lm") +
   ylim(0,1) +
@@ -545,7 +546,7 @@ qplot(rating_1,rating_2, position=position_dodge(),
 ```
 
 ```{r, include = F}
-# stats
+## stats: correlation between sample #1 and #2
 cor.test(co_norms$rating_1, co_norms$rating_2)
 ```
 
@@ -559,8 +560,9 @@ The linguistic items were identical to Study 1.
 Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. In the left plot, complexity is operationalized as the explicit complexity norms (Study 4). In the right plot, complexity is operationalized in terms of study times (Study 9). 
 
 ```{r 5:objects_mapping, warning = F, include = F}
-### *get data into long form*
+## read in data get into long form
 if (doSlow) {
+  # read in data 
   d <- read.csv("data/RefComplex35.results", sep="\t", header=TRUE)
   
   # get in long form
@@ -587,7 +589,7 @@ dc <- read.csv("data/RC35_long.csv")
 ```
 
 ```{r, include = F}
-### *make everything factors*
+## make everything factors
 dc$criticalComplicated= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalComplicated))
 dc$criticalSimple= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalSimple))
 
@@ -603,7 +605,7 @@ dc$trial <- as.numeric(dc$trial)
 ```
 
 ```{r, include = F}
-### *merge in norms*
+## merge in norms
 index <- match(dc$criticalSimple, co_norms$ratingNum)
 dc$criticalSimple_c.norms <- co_norms$meanRating[index]
 index <- match(dc$criticalComplicated, co_norms$ratingNum)
@@ -621,12 +623,11 @@ dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
 
 
 ```{r, warning = F, echo = F, fig.height = 5, fig.width = 10}
-### *plot complexity ratios vs. condition*
-
-### *get effect sizes*
+## plot complexity ratios vs. condition
+# get effect sizes
 de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
 
-### *get obj conditions*
+# get obj conditions
 de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[1]}))))
 de$cond2 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),function(x) {x[2]}))))
 de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
@@ -689,12 +690,9 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 Plotted below is the proportion of complex object selections as function of number of syllables. The dashed line reflects chance selection between simple and complex alternatives.
 
 ```{r 6:objects_random_syllables, warning = F, message = F, output = F, include = F}
-### *read data*
+## read data, and pre-process
 d <- read.csv("data/RefComplex41.results",sep="\t",header=TRUE)
-```
 
-```{r, warning = F, message = F, output = F, include = F}
-### *get in long form and make everything factors*
 # get trial info
 md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
 md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
@@ -706,11 +704,12 @@ md$trial <- as.factor(as.character(md$trial))
 md$value <- as.factor(as.character(md$value))
 md$workerid <- as.factor(as.character(md$workerid))
 
+# get into long form
 md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
 dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
 dc$seq <- NULL
 
-#make everything factors
+# make everything factors
 dc$criticalComplicated <- as.factor(dc$criticalComplicated)
 dc$criticalSimple   <- as.factor(dc$criticalSimple)
 dc$langCondition   <- as.factor(dc$langCondition)
@@ -727,8 +726,7 @@ dc$len[dc$langCondition=='"five"'] <- 5
 ```
 
 ```{r, warning = F, message = F, output = F, echo=F, fig.width = 4, fig.height = 4}
-### *plot by length condition*
-
+## plot proportion complex selections by length condition
 # get props
 ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")})
 
@@ -751,7 +749,7 @@ qplot(len,p_complex, position=position_dodge(),
 ```
 
 ```{r, include = F}
-# stats
+## stats: predict reference selection by word length
 summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 ```
 
@@ -760,17 +758,15 @@ summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment27/ref_complex_27.html" target="_blank"> here</a>.
 
-The objects were from the 
-
 There were 26 productions (4%) that included more than one word. These productions were excluded. 
 
-For each object, we analyzed the log length of the production (in characters) as a function of the complexity norms (Study 4, left below). Length of production was correlated with the complexity norms: Longer labels were coined for objects that were rated as more complex (_r_=.17, _p_<.0001). 
+For each object, we analyzed the log length of the production in characters as a function of the complexity norms (Study 4, left below). Length of production was correlated with the complexity norms: Longer labels were coined for objects that were rated as more complex (_r_=.17, _p_<.0001). 
 
 We also analyzed the log length of the production (in characters) as a function of study times (Study 9, right below). Length of production was correlated with study times: longer labels were cointed for objects that were studied longer (_r_=.16, _p_<.001). 
 
 ```{r 7:objects_production_labels, warning = F, message = F, output = F, include = F}
-### *get data into long form*
-d <- read.csv("data/RefComplex27.results",sep="\t",header=TRUE)
+## read in data and get into long form
+d <- read.csv("data/RefComplex27.results", sep="\t", header=TRUE)
   
 n <- names(d)
 d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
@@ -820,31 +816,30 @@ md$log.trial <- log(md$trial)
 ```
 
 ```{r, include = F}
-### *relationship between condition and label length*
+## look at relationship between condition and label length
 # aggregate across participants
 md.agg <- ddply(md, .(workerid,condition), function (d) {mean(d$log.length)})
 md.agg$condition = as.factor(md.agg$condition)
 names(md.agg)[3] = "log.length"
 md.agg = md.agg[md.agg$workerid != "A24IF41IP6LT55" ,] # one participant doesn't have both simple and complex (due to multi word responses)
 
-# stats: paired t-test
+## stats: paired t-test of length between simple and complex conditions 
 t.test(md.agg[md.agg$condition == '"complex"',"log.length"],
-       md.agg[md.agg$condition == '"simple"',"log.length"],paired = TRUE)
+       md.agg[md.agg$condition == '"simple"',"log.length"], paired = TRUE)
 summary(lmer(log.length~condition + (1+log.trial|workerid), md))
 ```
 
 ```{r, include = F}
-### *relationship between complicated norms and label length*
+## look at relationship between complicated norms and label length
+# merge and aggregate
 index <- match(md$picture, co_norms$ratingNum)
 md$c.norms <- co_norms$meanRating[index]
 
 ms <- aggregate(log.length ~ c.norms + picture, data=md, mean)
 ms$cih <- aggregate(log.length ~ c.norms + picture, data=md, ci.high)$log.length
 ms$cil <- aggregate(log.length ~ c.norms + picture, data=md, ci.low)$log.length
-```
 
-```{r, include = F}
-#plot
+# plot
 obj_c_p_plot = ggplot(ms, aes(c.norms,log.length)) +
   geom_point() + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
@@ -864,23 +859,22 @@ obj_c_p_plot = ggplot(ms, aes(c.norms,log.length)) +
 ```
 
 ```{r, include = F}
-# stats
+## stats: relationship between length and complexity norms
 cor.test(md$log.length, md$c.norms)
 summary(lmer(scale(log.length)~scale(c.norms) + (1+trial|workerid), md))
 ```
 
-```{r, include = F}
-### *relationship between study time norms and label length*
+```{r, echo = F, fig.width = 8, fig.height = 4}
+## look at relationship between study time and label length
+# merge and aggregate
 index <- match(md$picture, rto_norms$Answer.train_image)
 md$rt.norms <- rto_norms$log.rt[index]
 
 ms <- aggregate(log.length ~ rt.norms + picture, data=md, mean)
 ms$cih <- aggregate(log.length ~ rt.norms + picture, data=md, ci.high)$log.length
 ms$cil <- aggregate(log.length ~ rt.norms + picture, data=md, ci.low)$log.length
-```
 
-```{r echo = F, fig.width = 8, fig.height = 4}
-#plot
+# plot
 obj_rt_p_plot = ggplot(ms, aes(rt.norms,log.length)) +
   geom_point() + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
@@ -902,7 +896,7 @@ multiplot(obj_c_p_plot, obj_rt_p_plot, cols = 2)
 ```
 
 ```{r, include = F}
-#stats
+## stats: relationship between length and RT norms
 cor.test(md$log.length, md$rt.norms)
 summary(lmer(scale(log.length)~scale(rt.norms) + (1+trial|workerid), md))
 ```
@@ -917,7 +911,7 @@ We excluded subjects who performed below chance on the memory task (fewer than 2
 Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below. The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
 ```{r 8:geon_rt_norms, warning = F, echo = F, fig.width = 4, fig.height = 4, message = F}
-### *get data into long form (accuracy and RT df) and do exclusions*
+## get data into long form (accuracy and RT df) and do exclusions
 #if (processNorms) {
   # read in data
   raw <- read.csv("data/RefComplex37.results",sep="\t",header=TRUE)
@@ -1044,7 +1038,7 @@ Participants were also excluded based on study times. We transformed the time in
   D.agg$good = ifelse(is.element(D.agg$workerid, goodIDs),1, 0)
   D.agg = D.agg[D.agg$good == 1,]
 
-  # stats: paired t-test
+  ## stats: paired t-test
   # t.test(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"],
         # D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"], paired = TRUE)
 
@@ -1063,7 +1057,7 @@ rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv")
 Like for the complexity norms, study times were highly correlated with the number of geons in each object (_r_=.93, _p_<.01; see plot below, x-coordinates jittered to avoid over-plotting). Objects that contained more geons tended to be studied longer. 
 
 ```{r, echo = F, fig.width = 4, fig.height = 4}
-###  *plot RT by condition*
+## plot RT by condition
 rg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", rg_norms$obj)))
 rg_norms$obj_class = substr(rg_norms$obj, 1, 1)
 rg_norms$obj_item = substr(rg_norms$obj, 2, 2)
@@ -1087,28 +1081,21 @@ ggplot(rg_norms, aes(y=log.rt, x=jitter(as.numeric(obj_class)))) +
 ```
 
 ```{r, include = F}
-# stats
+## stats: relationship between reaction time norms and number of geons (BY ITEM)
 cor.test(as.numeric(rg_norms$obj_class), rg_norms$log.rt)
-```
-
-```{r, include = F}
-### *stats: get RT correlation with condition*
-# make object class numeric
-rg_norms$obj_class = as.numeric(rg_norms$obj_class) 
-
-# correlation between num geons and complexity
-cor.test(rg_norms$obj_class, rg_norms$log.rt)
 ```
 
 Study times were also highly correlated with complexity norms. Objects that were rated as more complex tended to be studied longer.
 
 ```{r, echo = F, fig.width = 4, fig.height = 4, warning = F}
+## plot RT by complexity rating
+# merge
 index <- match(cg_norms$obj, rg_norms$obj)
 cg_norms$rt_meanRating <- rg_norms$log.rt[index]
 cg_norms$rt_meanRating_cil <- rg_norms$cil[index]
 cg_norms$rt_meanRating_cih <- rg_norms$cih[index]
 
-# plot complexity rating vs. RT
+# plot 
 ggplot(cg_norms, aes(meanRating, rt_meanRating))+
   geom_point() + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
@@ -1134,7 +1121,7 @@ ggplot(cg_norms, aes(meanRating, rt_meanRating))+
 ```
 
 ```{r, include = F}
-### *stats: correlation between between complexity rating and RT*
+## stats: correlation between between complexity rating and RT
 cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
 ```
 
@@ -1151,12 +1138,12 @@ We excluded subjects who performed below chance on the memory task (fewer than 3
 Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below. The solid line indicates the mean, and the dashed lines indicates two standard deviations above and below the mean.
 
 ```{r 9:objects_rt_norms, warning = F, echo = F, fig.width = 4, fig.height = 4, message = F}
-### *get data into long form (accuracy and RT df) and do exclusions*
+## get data into long form (accuracy and RT df) and do exclusions
 #if (processNorms){
   raw <- read.csv("data/RefComplex30.results",sep="\t",header=TRUE)
     
   # look at accuracy, and exclude those below chance
-  #boxplot(raw$Answer.correct, main = "distribution before accuracy exclusions")
+  # boxplot(raw$Answer.correct, main = "distribution before accuracy exclusions")
   raw = raw[raw$Answer.correct > 30, ]
   
   # accuracy dataframe
@@ -1256,7 +1243,7 @@ Participants were also excluded based on study times. We transformed the time in
   D.agg = D.agg[D.agg$good == 1,]
   means = ddply(D.agg, .(Answer.test_answerEval), function (d) {mean(d$log.rt)})
 
-  # stats: paired t-test
+  ## stats: paired t-test of RTs between misses and hits  
   # t.test(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"],
        #D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"], paired = TRUE)
 
@@ -1277,12 +1264,14 @@ rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv")
 The plot below shows the correlation between study time and explicit complexity norms for each object. Like for the geons, objects that were rated as more complex were studied longer.
 
 ```{r, echo = F, fig.width = 4, fig.height = 4, warning = F}
+## plot complexity ratings vs RTs
+# merge
 index <- match(co_norms$ratingNum, rto_norms$Answer.train_image)
 co_norms$log.rt <- rto_norms$log.rt[index]
 co_norms$rt_meanRating_cil <- rto_norms$rt_cil[index]
 co_norms$rt_meanRating_cih <- rto_norms$rt_cih[index]
 
-# plot complexity rating vs. RT
+# plot
 ggplot(co_norms, aes(meanRating, log.rt))+
   geom_point() + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
@@ -1308,10 +1297,10 @@ ggplot(co_norms, aes(meanRating, log.rt))+
 ```
 
 ```{r include = F}
-### *stats: correlation between between complexity rating and RT*
+## stats: correlation between between complexity rating and RT
 cor.test(co_norms$meanRating, co_norms$log.rt)
 ```
-For the real objects, study times did predict memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24) were greater than for misses (correct “no” responses; _M_ = 7.11; _t_(393) = 9.74, _p_<.0001).
+For the real objects, study times predicted memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24) were greater than for misses (correct “no” responses; _M_ = 7.11; _t_(393) = 9.74, _p_<.0001).
 
 <a name="10"/>
 <h3> Study 10: English complexity norms</h3> 
@@ -1321,7 +1310,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 TO DO
 
 ```{r 10:english_norms, warning= F, include = F}
-### *preprocess and merge in stuff*
+## preprocess and merge in stuff
 if (processNorms) {
   d1 <- read.csv("data/RefComplex26.results1",sep="\t",header=TRUE)
   d2 <- read.csv("data/RefComplex26.results",sep="\t",header=TRUE)
@@ -1406,8 +1395,7 @@ eng = read.csv("data/englishComplexityNorms.csv")
 ```
 
 ```{r, echo = F, fig.width = 4, fig.height = 4}
-### plot complexity norms vs word length
-
+## plot complexity norms vs word length
 # aggregate across words of the same length
 ms2 <- aggregate(complexity ~ nchars, data=eng, mean)
 ms2$cih <- aggregate(complexity ~ nchars,  data=eng, ci.high)$complexity
@@ -1435,7 +1423,7 @@ ggplot(ms2, aes(complexity, nchars)) +
 ```
 
 ```{r, include = F}
-### *aggregate across participants*
+## aggregate across participants
 # have to do this separately for each length variable because drops words for which there are NAs *for any of the length vars*
 ms.syl <- aggregate(complexity ~ word + mrc.syl, data=eng, mean)
 ms.phon <- aggregate(complexity ~ word + mrc.phon, data=eng, mean)
@@ -1444,7 +1432,7 @@ ms.chars <- aggregate(complexity ~ word + nchars +subt.log.freq + mrc.conc, data
 ```
 
 ```{r, include = F}
-### *stats: correlations between length and complexity in English*
+## stats: correlations between length and complexity in English
 # correlation between syllables and complexity
 cor.test(ms.syl$complexity, ms.syl$mrc.syl)
 
@@ -1496,7 +1484,7 @@ pcor.test(ms.charsL$complexity,ms.charsL$nchars,ms.charsL$subt.log.freq)
 
 
 ```{r, include = F}
-### *are the correlations between length and complexity reliable, controlling for everything? [yes]*
+## are the correlations between length and complexity reliable, controlling for everything? [yes]
 # all
 m_syl = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
 m_phon = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
@@ -1521,7 +1509,7 @@ summary(m_morph_o)
 ```
 
 ```{r, include = F}
-### *create english word data frame with relevant variables for xling analysis*
+## create english word data frame with relevant variables for xling analysis
 xling.eng <- aggregate(complexity ~ word + class, data=eng, mean)
 
 # -- add morphemes --
@@ -1548,7 +1536,7 @@ TO DO
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment17_2/ref_complex_17_2.html" target="_blank"> here</a>.
 
-Plotted below is the proportion low frequency object selections as a function of language condition (long vs. short). 
+Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ.
 
 ```{r 12: simul_freq, include = F}
 # read in data
@@ -1556,8 +1544,7 @@ d_simultaneous <- read.csv("data/RefComplex6_all.results", header=TRUE)
 ```
 
 ```{r, echo = F, fig.width = 4, fig.height = 4}
-# plot proportion low freq by language condition
-
+## plot proportion low freq by language condition
 # get proportions by condition
 ms_simult = ddply(d_simultaneous ,.(Answer.lang_condition), function (d, dv) {p.fc(d, "\"low_freq\"")})
 ms_simult$Answer.lang_condition = c("long", "short")
@@ -1581,7 +1568,7 @@ qplot(Answer.lang_condition, p_complex, fill = Answer.lang_condition,
 ```
 
 ```{r, include = F}
-# stats
+## stats: proportion low freq. in long vs. short condition
 chisq.test(table(d_simultaneous$responseValue, d_simultaneous$Answer.lang_condition))
 ```
 
@@ -1590,21 +1577,19 @@ chisq.test(table(d_simultaneous$responseValue, d_simultaneous$Answer.lang_condit
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment16/ref_complex_16.html" target="_blank"> here</a>.
 
-Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). There difference between conditions is not reliable.
+Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ.
 
 ```{r, include = F}
-# read in data
+## read in data and pre-process
 d_sequential <- read.csv("data/RefComplex16.results",sep="\t",header=TRUE)
 
-# pre-processing
 d_sequential <- d_sequential[d_sequential$Answer.frequency_condition == '\"uneven\"', ]
 levels(d_sequential$Answer.crit_selection) = c("\"high_freq\"", "\"low_freq\"")
 names(d_sequential)[35] = "responseValue"
 ```
 
 ```{r 13:sequential_freq, echo = F, fig.width = 4, fig.height = 4}
-# plot proportion low freq by language condition
-
+## plot proportion low freq by language condition
 # get proportions by condition
 ms_seq = ddply(d_sequential,.(Answer.lang_condition), function (d, dv) {p.fc(d, "\"low_freq\"")})
 ms_seq$Answer.lang_condition = c("long", "short")
@@ -1628,6 +1613,6 @@ qplot(Answer.lang_condition,p_complex, fill = Answer.lang_condition,
 ```
 
 ```{r, include = F}
-# stats
+## stats: proportion low freq. in long vs. short condition
 chisq.test(table(d_sequential$responseValue, d_sequential$Answer.lang_condition))
 ```

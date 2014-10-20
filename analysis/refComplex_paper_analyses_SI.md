@@ -37,7 +37,7 @@ The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "grona
 
 Across all studies presented here, some participants completed more than one study. The results presented here include the data from all participants, but all reported results remain reliable when excluding participants who completed more than one study. Participants were counted as a repeat participant if they completed a study using the same stimuli (e.g., completed both Studies 1 and 2 with geons).
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative was from the first qunitile and the other was from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio. In this and all subsequent plots, errors bars reflect  bootstrapped 95% confidence intervals.
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative was from the first quintile and the other was from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio. In this and all subsequent plots, errors bars reflect  95% confidence intervals.
 
 
 
@@ -63,7 +63,7 @@ The relationship between number of geons and complexity rating is plotted below.
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment40/ref_complex_40.html" target="_blank"> here</a>.
 
-Plotted below is the proportion complex object selections as a function of the number of syllables in the target label. The dashed line reflects chance selection between simple and complex alternatives. 
+Plotted below is the proportion complex object selections as a function of the number of syllables in the target label. The dashed line reflects chance selection between the simple and complex alternatives. 
 
 
 
@@ -76,7 +76,7 @@ Plotted below is the proportion complex object selections as a function of the n
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment9/ref_complex_9.html" target="_blank"> here</a>.
 
-Plotted below is the correlation between the two samples (_N_=60 each) of complexity norms. Each dot corresponds to an object (_n_=60). 
+Plotted below is the correlation between the two samples (_N_ = 60 each) of complexity norms. Each dot corresponds to an object (_n_ = 60). 
 
 
 ![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
@@ -90,7 +90,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 The linguistic items were identical to Study 1.
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object conditions. Conditions are labeled by the quintiles of the two alternatives. In the left plot, complexity is operationalized from the explicit complexity norms (Study 4), and on the right, complexity is operationalized in terms of study times (Study 9). 
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. In the left plot, complexity is operationalized as the explicit complexity norms (Study 4). In the right plot, complexity is operationalized in terms of study times (Study 9). 
 
 
 
@@ -106,13 +106,11 @@ Plotted below is the effect size (bias to select complex alternative in long vs.
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment41/ref_complex_41.html" target="_blank"> here</a>.
 
-Plotted below is the proportion complex object selections as function of number of syllables. The dashed line reflects chance selection between simple and complex alternatives.
+Plotted below is the proportion of complex object selections as function of number of syllables. The dashed line reflects chance selection between simple and complex alternatives.
 
 
 
-
-
-![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13.png) 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
 
 
 
@@ -121,9 +119,9 @@ Plotted below is the proportion complex object selections as function of number 
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment27/ref_complex_27.html" target="_blank"> here</a>.
 
-There were 26 productions (4%) that were that included more than one word. These productions were excluded. 
+There were 26 productions (4%) that included more than one word. These productions were excluded. 
 
-For each object, we analyzed the log length of the production (in characters) as a function of the complexity norms (Study 4, left below). Length of production was correlated with the complexity norms: Long labels were coined for objects that were rated as more complex (_r_=.17, _p_<.0001). 
+For each object, we analyzed the log length of the production in characters as a function of the complexity norms (Study 4, left below). Length of production was correlated with the complexity norms: Longer labels were coined for objects that were rated as more complex (_r_=.17, _p_<.0001). 
 
 We also analyzed the log length of the production (in characters) as a function of study times (Study 9, right below). Length of production was correlated with study times: longer labels were cointed for objects that were studied longer (_r_=.16, _p_<.001). 
 
@@ -135,11 +133,7 @@ We also analyzed the log length of the production (in characters) as a function 
 
 
 
-
-
-
-
-![plot of chunk unnamed-chunk-20](figure/unnamed-chunk-20.png) 
+![plot of chunk unnamed-chunk-17](figure/unnamed-chunk-17.png) 
 
 
 
@@ -156,15 +150,13 @@ Participants were also excluded based on study times. We transformed the time in
 
 Like for the complexity norms, study times were highly correlated with the number of geons in each object (_r_=.93, _p_<.01; see plot below, x-coordinates jittered to avoid over-plotting). Objects that contained more geons tended to be studied longer. 
 
-![plot of chunk unnamed-chunk-22](figure/unnamed-chunk-22.png) 
-
-
+![plot of chunk unnamed-chunk-19](figure/unnamed-chunk-19.png) 
 
 
 
 Study times were also highly correlated with complexity norms. Objects that were rated as more complex tended to be studied longer.
 
-![plot of chunk unnamed-chunk-25](figure/unnamed-chunk-25.png) 
+![plot of chunk unnamed-chunk-21](figure/unnamed-chunk-21.png) 
 
 
 
@@ -184,10 +176,10 @@ Participants were also excluded based on study times. We transformed the time in
 
 The plot below shows the correlation between study time and explicit complexity norms for each object. Like for the geons, objects that were rated as more complex were studied longer.
 
-![plot of chunk unnamed-chunk-27](figure/unnamed-chunk-27.png) 
+![plot of chunk unnamed-chunk-23](figure/unnamed-chunk-23.png) 
 
 
-For the real objects, study times did predict memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24) were greater than for misses (correct “no” responses; _M_ = 7.11; _t_(393) = 9.74, _p_<.0001).
+For the real objects, study times predicted memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24) were greater than for misses (correct “no” responses; _M_ = 7.11; _t_(393) = 9.74, _p_<.0001).
 
 <a name="10"/>
 <h3> Study 10: English complexity norms</h3> 
@@ -198,7 +190,7 @@ TO DO
 
 
 
-![plot of chunk unnamed-chunk-29](figure/unnamed-chunk-29.png) 
+![plot of chunk unnamed-chunk-25](figure/unnamed-chunk-25.png) 
 
 
 
@@ -219,11 +211,11 @@ TO DO
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment17_2/ref_complex_17_2.html" target="_blank"> here</a>.
 
-Plotted below is the proportion low frequency object selections as a function of language condition (long vs. short). 
+Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ.
 
 
 
-![plot of chunk unnamed-chunk-34](figure/unnamed-chunk-34.png) 
+![plot of chunk unnamed-chunk-30](figure/unnamed-chunk-30.png) 
 
 
 
@@ -232,7 +224,7 @@ Plotted below is the proportion low frequency object selections as a function of
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment16/ref_complex_16.html" target="_blank"> here</a>.
 
-Plotted below is the proportion low frequency object selections as a function of language condition (long vs. short).
+Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ.
 
 
 
