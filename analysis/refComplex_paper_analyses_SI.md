@@ -98,7 +98,6 @@ Plotted below is the effect size (bias to select complex alternative in long vs.
 
 
 
-
 ![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11.png) 
 
 <a name="6"/>

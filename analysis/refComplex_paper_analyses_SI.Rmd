@@ -222,13 +222,15 @@ de$cond1<- as.factor(gsub("[[:punct:]]", "", de$cond1))
 de$cond2<- as.numeric(gsub("[[:punct:]]", "", de$cond2))
 de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
 
+#fs = 20
+#rs = 9
 # plot complexity norm ratio
 geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   geom_pointrange(aes(ymax = cill, ymin=ciul))+
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  ylab("Effect size") +
-  xlab("Complexity rating ratio") + 
+  ylab("Effect Size") +
+  xlab("Complexity Rating Ratio") + 
   ggtitle("Effect size vs. complexity ratio") +
   theme(text = element_text(size=fs))  +
   scale_y_continuous(limits = c(-.33, .66)) +
@@ -250,8 +252,8 @@ geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   geom_hline(yintercept=0, lty=2) +
   ggtitle("Effect size vs. study time ratio") +
   stat_smooth(method="lm") +
-  ylab("Effect size") +
-  xlab("Study time ratio") + 
+  ylab("Effect Size") +
+  xlab("Study Time Ratio") + 
   theme(text = element_text(size=fs)) +  
   scale_y_continuous(limits = c(-.33, .66)) +
   scale_x_continuous(limits = c(.949, 1.005)) +
@@ -266,7 +268,9 @@ geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
         panel.border = element_blank(),
         axis.line = element_line(color = 'black')) 
 
+#png("figure/geons_plot.png", height = 6, width = 12, units = "in", res=500)
 multiplot(geon_c_plot, geon_rt_plot, cols = 2)
+#dev.off()
 ```
 
 ```{r, include = FALSE}
@@ -621,7 +625,6 @@ dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
 dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
 ```
 
-
 ```{r, warning = F, echo = F, fig.height = 5, fig.width = 10}
 ## plot complexity ratios vs. condition
 # get effect sizes
@@ -637,13 +640,15 @@ de$l.objRatio <- log(de$objRatio)
 
 de$objCondition2 = paste(de$cond1, "/", de$cond2, sep = "")
 
+#fs = 20
+#rs = 9 
 # complexity plot
 obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   geom_pointrange(aes(ymax = cill, ymin=ciul)) +
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  ylab("Effect size") +
-  xlab("Complexity rating ratio") + 
+  ylab("Effect Size") +
+  xlab("Complexity Rating Ratio") + 
   scale_y_continuous(limits = c(-.33, .66)) +
   geom_text(aes(c.Mratio + .04, effect_size, label=objCondition2)) +
   annotate("text", x=1, y=.5, col = "red",
@@ -663,8 +668,8 @@ obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   geom_pointrange(aes(ymax = cill, ymin=ciul)) +
   geom_hline(yintercept=0,lty=2) +
   stat_smooth(method="lm") +
-  ylab("Effect size") +
-  xlab("Study time ratio") +
+  ylab("Effect Size") +
+  xlab("Study Time Ratio") +
   geom_text(aes(rt.Mratio + .001, effect_size, label=objCondition2)) +
   annotate("text", x=1, y=.5, col = "red",
            label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)),
@@ -679,7 +684,10 @@ obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
         axis.line = element_line(color = 'black')) +
         scale_y_continuous(limits = c(-.33, .66)) 
   
-  multiplot(obj_c_plot, obj_rt_plot, cols = 2)
+#png("figure/obj_plot.png", height = 6, width = 12, units = "in", res=500)
+multiplot(obj_c_plot, obj_rt_plot, cols = 2)
+#dev.off()
+
 ```
 
 <a name="6"/>
