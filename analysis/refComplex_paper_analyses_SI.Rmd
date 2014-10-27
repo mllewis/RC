@@ -719,12 +719,12 @@ dc$seq <- NULL
 
 # make everything factors
 dc$criticalComplicated <- as.factor(dc$criticalComplicated)
-dc$criticalSimple   <- as.factor(dc$criticalSimple)
-dc$langCondition   <- as.factor(dc$langCondition)
-dc$objCondition   <- as.factor(dc$objCondition)
-dc$response   <- as.factor(dc$response)
-dc$responseSide   <- as.factor(dc$responseSide)
-dc$responseValue   <- as.factor(dc$responseValue)
+dc$criticalSimple <- as.factor(dc$criticalSimple)
+dc$langCondition <- as.factor(dc$langCondition)
+dc$objCondition <- as.factor(dc$objCondition)
+dc$response <- as.factor(dc$response)
+dc$responseSide <- as.factor(dc$responseSide)
+dc$responseValue <- as.factor(dc$responseValue)
 dc$word <- as.factor(dc$word)
 
 # re-label length to be numeric
@@ -776,18 +776,11 @@ We also analyzed the log length of the production (in characters) as a function 
 ## read in data and get into long form
 d <- read.csv("data/RefComplex27.results", sep="\t", header=TRUE)
   
+# make pic columns into factors
 n <- names(d)
-d$Answer.pic_1 = as.factor(as.character(d$Answer.pic_1))
-d$Answer.pic_2 = as.factor(as.character(d$Answer.pic_2))
-d$Answer.pic_3 = as.factor(as.character(d$Answer.pic_3))
-d$Answer.pic_4 = as.factor(as.character(d$Answer.pic_4))
-d$Answer.pic_5 = as.factor(as.character(d$Answer.pic_5))
-d$Answer.pic_6 = as.factor(as.character(d$Answer.pic_6))
-d$Answer.pic_7 = as.factor(as.character(d$Answer.pic_7))
-d$Answer.pic_8 = as.factor(as.character(d$Answer.pic_8))
-d$Answer.pic_9 = as.factor(as.character(d$Answer.pic_9))
-d$Answer.pic_10 = as.factor(as.character(d$Answer.pic_10))
-
+d[,n[grepl("pic",n)]] <- colwise(as.character)(d[,n[grepl("pic",n)]])
+d[,n[grepl("pic",n)]] <- colwise(as.factor)(d[,n[grepl("pic",n)]])
+                             
 cols = c(n[grepl("cond",n)], n[grepl("pic",n)], n[grepl("descLength",n)] )
 md1 <- melt(d,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
 md1$trial <- as.numeric(matrix(lapply(str_split(md1$variable,"_"),function(x) {x[2]})))
@@ -1480,7 +1473,7 @@ pcor.test(ms.chars$complexity,ms.chars$nchars,ms.chars$subt.log.freq)
 # concreteness split
 ms.chars <- aggregate(complexity ~ word + nchars + mrc.conc, data=eng, mean) # do this again without freq because drops missing words
 ms.chars$conc.split = ifelse(ms.chars$mrc.conc < median(ms.chars$mrc.conc), 1, 2)
-ms.chars$conc.split=as.factor(ms.chars$conc.split)
+ms.chars$conc.split = as.factor(ms.chars$conc.split)
 ms.charsL = ms.chars[ms.chars$conc.split == 1,]
 cor.test(ms.charsL$nchars, ms.charsL$complexity)
 

@@ -103,7 +103,7 @@ D$Answer.crit_response = as.factor(D$Answer.crit_response)
 names(D)[35] = "responseValue"
 
 # RC 6,17,182 -simultaneous presentation
-E1 = ddply(D ,.(Answer.lang_condition), function (d,"\"low_freq\"") {p.fc(d, "\"low_freq\"" )}, .inform = TRUE)
+E1 = ddply(D ,.(Answer.lang_condition), function (d,dv) {p.fc(d, "\"low_freq\"")}, .inform = TRUE)
 E1$exp = "simultaneous presentation"
 
 # RC17 -simultaneous presentation, no cover AND simultaneous presentation, real ojects
