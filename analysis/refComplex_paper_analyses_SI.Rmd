@@ -34,9 +34,10 @@ ts = 15
 rs = 6
 
 ## LOAD LIBRARIES AND FUNCTIONS
-library('psych')
-library('boot')
-library("rmarkdown")
+library(psych)
+library(boot)
+library(rmarkdown)
+library(wordcloud)
 source("/Documents/GRADUATE_SCHOOL/Ranalysis/useful.R")
 
 # stuff for rendering to html in R markdown (need rmarkdown library too.)
@@ -62,14 +63,6 @@ boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){
   vec = c(cor.b[a+1], cor(x, y, use = "pairwise", method), cor.b[b-1]) 
   n.r = c("value"); n.c = c("lower_bound", "correlation", "upper_bound") 
   matrix(vec,1,3,dimnames = list(n.r,n.c)) 
-  }
-
-# partial correlation
-bm.partial<-function(x,y,z) {
-  round((cor(x,y, use="complete.obs")-
-           cor(x,z, use="complete.obs")*
-           cor(y,z, use="complete.obs"))/
-                                     sqrt((1-cor(x,z, use="complete.obs")^2)*(1-cor(y,z, use="complete.obs")^2)),4)
   }
 
 # effect size for forced choice tasks
@@ -149,7 +142,7 @@ The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "grona
 
 Across all studies presented here, some participants completed more than one study. The results presented here include the data from all participants, but all reported results remain reliable when excluding participants who completed more than one study. Participants were counted as a repeat participant if they completed a study using the same stimuli (e.g., completed both Studies 1 and 2 with geons).
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative was from the first quintile and the other was from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio. In this and all subsequent plots, errors bars reflect  95% confidence intervals.
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative was from the first quintile and the other was from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio. In this and all subsequent plots, errors bars reflect  95% confidence intervals.
 
 ```{r 1:geon_mapping, warning=F, include=F}
 ## get data into long form
@@ -163,27 +156,21 @@ if (doSlow){
   md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
   md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
   
-  md$variable <- as.factor(as.character(md$variable))
-  md$trial <- as.factor(as.character(md$trial))
-  md$value <- as.factor(as.character(md$value))
-  md$workerid <- as.factor(as.character(md$workerid))
-  
+  # make all variables a factor
+  md <- colwise(as.character)(md)
+  md <- colwise(as.factor)(md)
+
   md$seq <- with(md, ave(value, workerid, variable, trial, FUN = seq_along))
   dc <- dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
   dc$seq <- NULL
   
-  # make everything factors
+  # make everything factors and strip punctuations
+  dc <- colwise(as.factor)(dc)
   dc$criticalComplicated <- as.factor(as.numeric(gsub(
-    "[[:punct:]]", "", dc$criticalComplicated))) #strip punctuations
+    "[[:punct:]]", "", dc$criticalComplicated))) 
   dc$criticalSimple <- as.factor(as.numeric(gsub(
-    "[[:punct:]]", "", dc$criticalSimple))) #strip punctuations
-  dc$langCondition <- as.factor(dc$langCondition)
-  dc$objCondition <- as.factor(dc$objCondition)
-  dc$response <- as.factor(dc$response)
-  dc$responseSide <- as.factor(dc$responseSide)
-  dc$responseValue <- as.factor(dc$responseValue)
-  dc$word <- as.factor(dc$word)
-  
+    "[[:punct:]]", "", dc$criticalSimple))) 
+
   # merge in norms
   # see below for processing of these norms from raw data
   cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")  # Study 2
@@ -284,7 +271,7 @@ cor.test(de$rt.Mratio, de$effect_size)
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment34/ref_complex_34.html" target="_blank"> here</a>.
 
-The relationship between number of geons and complexity rating is plotted below. Each dot corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting.
+The relationship between number of geons and complexity rating is plotted below. Each point corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting.
 
 ```{r 2:geon_complexity_norms, warning = F, include = F}
 ## read in data and pre-process
@@ -329,7 +316,7 @@ cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")
 ```{r, echo = F, fig.width=4, fig.height=4}
 ## plot complexity norm by number of geons
 # remove quotes from norms
-cg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
+cg_norms$obj = as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
 cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
 cg_norms$obj_item = as.numeric(substr(cg_norms$obj, 2, 2))
 
@@ -371,30 +358,20 @@ Plotted below is the proportion complex object selections as a function of the n
 d <- read.csv("data/RefComplex40.results",sep="\t",header=TRUE)
 
 ## get in long form and make everything factors
-# get trial info
-md <- melt(d, id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
+md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
 md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
 md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
 md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
 
-md$variable <- as.factor(as.character(md$variable))
-md$trial <- as.factor(as.character(md$trial))
-md$value <- as.factor(as.character(md$value))
-md$workerid <- as.factor(as.character(md$workerid))
+md <- colwise(as.character)(md)
+md <- colwise(as.factor)(md)
 
 md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
 dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
 dc$seq <- NULL
 
 # make everything factors
-dc$criticalComplicated <- as.factor(dc$criticalComplicated)
-dc$criticalSimple   <- as.factor(dc$criticalSimple)
-dc$langCondition   <- as.factor(dc$langCondition)
-dc$objCondition   <- as.factor(dc$objCondition)
-dc$response   <- as.factor(dc$response)
-dc$responseSide   <- as.factor(dc$responseSide)
-dc$responseValue   <- as.factor(dc$responseValue)
-dc$word <- as.factor(dc$word)
+dc <- colwise(as.factor)(dc)
 
 # re-label length to be numeric
 dc$len <- 1
@@ -435,7 +412,7 @@ summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment9/ref_complex_9.html" target="_blank"> here</a>.
 
-Plotted below is the correlation between the two samples (_N_ = 60 each) of complexity norms. Each dot corresponds to an object (_n_ = 60). 
+Plotted below is the correlation between the two samples (_N_ = 60 each) of complexity norms. Each point corresponds to an object (_n_ = 60). 
 ```{r 4:objects_complexity_norms, include = FALSE}
 ## get data into long form, compute correlations between 2 samples, figure out quintiles, and remove dupliate subjects
 if (processNorms){
@@ -476,7 +453,7 @@ if (processNorms){
   
   all_ms$rating <- NULL
   names(all_ms) = c("meanRating", "ratingNum", "cil", "cih" ,"rating_1","rating_2")
-  all_ms <- all_ms[c(2,1,3:6)]
+  all_ms <- all_ms[c(2, 1, 3:6)]
   
   # get quintiles
   q = quantile(all_ms$meanRating, seq(0,1, by=.2))
@@ -561,7 +538,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 The linguistic items were identical to Study 1.
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. In the left plot, complexity is operationalized as the explicit complexity norms (Study 4). In the right plot, complexity is operationalized in terms of study times (Study 9). 
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. In the left plot, complexity is operationalized as the explicit complexity norms (Study 4). In the right plot, complexity is operationalized in terms of study times (Study 9). 
 
 ```{r 5:objects_mapping, warning = F, include = F}
 ## read in data get into long form
@@ -577,11 +554,10 @@ if (doSlow) {
   md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
   md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
   
-  md$variable <- as.factor(as.character(md$variable))
-  md$trial <- as.factor(as.character(md$trial))
-  md$value <- as.factor(as.character(md$value))
-  md$workerid <- as.factor(as.character(md$workerid))
-  
+  # make everything a factor
+  md <- colwise(as.character)(md)
+  md <- colwise(as.factor)(md)
+
   md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
   dc = dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
   dc$seq <- NULL
@@ -593,19 +569,11 @@ dc <- read.csv("data/RC35_long.csv")
 ```
 
 ```{r, include = F}
-## make everything factors
-dc$criticalComplicated= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalComplicated))
+## strip punctuation and make everything factors
+dc$criticalComplicated = gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalComplicated))
 dc$criticalSimple= gsub(" ", "", gsub("[[:punct:]]", "", dc$criticalSimple))
 
-dc$criticalComplicated <- as.factor(dc$criticalComplicated)
-dc$criticalSimple <- as.factor(dc$criticalSimple)
-dc$langCondition <- as.factor(dc$langCondition)
-dc$objCondition <- as.factor(dc$objCondition)
-dc$response <- as.factor(dc$response)
-dc$responseSide <- as.factor(dc$responseSide)
-dc$responseValue <- as.factor(dc$responseValue)
-dc$word <- as.factor(dc$word)
-dc$trial <- as.numeric(dc$trial)
+dc[,c(4:11)] <- colwise(as.factor)(dc[,c(4:11)])
 ```
 
 ```{r, include = F}
@@ -707,10 +675,9 @@ md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
 md$variable <- as.character(matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]})))
 md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}))
 
-md$variable <- as.factor(as.character(md$variable))
-md$trial <- as.factor(as.character(md$trial))
-md$value <- as.factor(as.character(md$value))
-md$workerid <- as.factor(as.character(md$workerid))
+# make everything a factor
+md <- colwise(as.character)(md)
+md <- colwise(as.factor)(md)
 
 # get into long form
 md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
@@ -718,14 +685,7 @@ dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
 dc$seq <- NULL
 
 # make everything factors
-dc$criticalComplicated <- as.factor(dc$criticalComplicated)
-dc$criticalSimple <- as.factor(dc$criticalSimple)
-dc$langCondition <- as.factor(dc$langCondition)
-dc$objCondition <- as.factor(dc$objCondition)
-dc$response <- as.factor(dc$response)
-dc$responseSide <- as.factor(dc$responseSide)
-dc$responseValue <- as.factor(dc$responseValue)
-dc$word <- as.factor(dc$word)
+dc <- colwise(as.factor)(dc)
 
 # re-label length to be numeric
 dc$len <- 1
@@ -1027,6 +987,7 @@ Participants were also excluded based on study times. We transformed the time in
 
   # look at relationship between rt and memory peformance (no relationship)
   D = merge(d, da, by=c("workerid","objCondition","objItem"))
+
   # aggregate across participants
   D.agg <- ddply(D, .(workerid,Answer.test_answerEval), function (d) {mean(d$log.rt)})
   names(D.agg)[3] = "log.rt"
@@ -1308,8 +1269,6 @@ For the real objects, study times predicted memory performance. Study times for 
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment26/ref_complex_26.html" target="_blank"> here</a>.
 
-TO DO
-
 ```{r 10:english_norms, warning= F, include = F}
 ## preprocess and merge in stuff
 if (processNorms) {
@@ -1382,46 +1341,13 @@ if (processNorms) {
   index <- match(md$word, freqs$Word)
   md$subt.log.freq <- freqs$Lg10WF[index]
   
-  # -- add brysbaert concreteness --
-  b <- read.csv("data/brysbaert_corpus.csv",header=TRUE)
-  b <- b[b$Word != "",] # get rid of empty rows
-  b <- b[b$Bigram == 0,]# get rid of two word lemmas
-  index <- match(md$word, b$Word)
-  md$b.conc <- b$Conc.M[index]
-  
   write.csv(md, "data/englishComplexityNorms.csv")
  }
 
 eng = read.csv("data/englishComplexityNorms.csv")
 ```
 
-```{r, echo = F, fig.width = 4, fig.height = 4}
-## plot complexity norms vs word length
-# aggregate across words of the same length
-ms2 <- aggregate(complexity ~ nchars, data=eng, mean)
-ms2$cih <- aggregate(complexity ~ nchars,  data=eng, ci.high)$complexity
-ms2$cil <- aggregate(complexity ~ nchars,  data=eng, ci.low)$complexity
-
-# plot 
-ggplot(ms2, aes(complexity, nchars)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbarh(aes(xmax=complexity+cih, xmin=complexity-cil), size=.2, colour="black") +
-  annotate("text", x=6, y=3, size = rs, 
-           label=paste("r=",round(cor(eng$complexity, eng$nchars), 2)), col="red") +
-  scale_y_continuous(limits = c(0, 15), breaks = 1:14, labels = 1:14) +
-  scale_x_continuous(limits = c(0, 7), breaks = 1:7, labels = 1:7)  +
-  xlab('Complexity Rating') +
-  ylab('Word Length (chars.)') +
-  ggtitle("# of characters vs. complexity rating") +
-  theme(text = element_text(size=fs),
-       plot.title=element_text(size=ts, face = "bold"),
-       plot.background = element_blank(),
-       panel.grid.major = element_blank(),
-       panel.grid.minor = element_blank(),
-       panel.border = element_blank(),
-       axis.line = element_line(color = 'black'))
-```
+We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database (Wilson, 1988). We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database (Baayen, Piepenbrock, & Gulikers, 1995). Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with eachother (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11(phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
 
 ```{r, include = F}
 ## aggregate across participants
@@ -1429,31 +1355,251 @@ ggplot(ms2, aes(complexity, nchars)) +
 ms.syl <- aggregate(complexity ~ word + mrc.syl, data=eng, mean)
 ms.phon <- aggregate(complexity ~ word + mrc.phon, data=eng, mean)
 ms.morph <- aggregate(complexity ~ word + clx.morph, data=eng, mean)
-ms.chars <- aggregate(complexity ~ word + nchars +subt.log.freq + mrc.conc, data=eng, mean)
+ms.chars <- aggregate(complexity ~ word + nchars + subt.log.freq + mrc.conc, data=eng, mean)
+```
+
+```{r, echo = F, fig.width = 12, fig.height = 4}
+## plot histogram of words by phonemes, syllables, morphemes
+
+p_phon = ggplot(ms.phon, aes(x=mrc.phon)) + 
+    geom_histogram(fill = "black", alpha = .6 , binwidth = 1) +
+  xlab("Word length (phonemes)") +
+  ylab("Frequency") +
+  ggtitle('Word length (phonemes)') +
+  annotate("text", x=10, y=100, color = "red", size = rs,
+    label=paste("n=",dim(ms.phon)[1])) +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+
+p_syl = ggplot(ms.syl, aes(x=mrc.syl)) + 
+    geom_histogram(fill = "black", alpha = .6 , binwidth = 1) +
+  xlab("Word length (syllables)") +
+  ylab("Frequency") +
+  ggtitle('Word length (syllables)') +
+  annotate("text", x=5, y=200, color = "red", size = rs,
+    label=paste("n=",dim(ms.syl)[1])) +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+
+p_morph = ggplot(ms.morph, aes(x=clx.morph)) + 
+    geom_histogram(fill = "black", alpha = .6 , binwidth = 1) +
+  xlab("Word length (morphemes)") +
+  ylab("Frequency") +
+  ggtitle('Word length (morphemes)') +
+  annotate("text", x=4, y=300, color = "red", size = rs,
+    label=paste("n=",dim(ms.morph)[1])) +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'))
+
+multiplot(p_phon, p_syl, p_morph, cols = 3)
 ```
 
 ```{r, include = F}
-## stats: correlations between length and complexity in English
-# correlation between syllables and complexity
-cor.test(ms.syl$complexity, ms.syl$mrc.syl)
+## stats: correlations between length metrics
+sp <- aggregate(mrc.syl ~ mrc.phon + word, data=eng, mean)
+cor.test(sp$mrc.phon, sp$mrc.syl)
 
+mp <- aggregate(clx.morph ~ mrc.phon + word, data=eng, mean)
+cor.test(mp$clx.morph, mp$mrc.phon)
+
+ms <- aggregate(clx.morph ~ mrc.syl + word, data=eng, mean)
+cor.test(ms$clx.morph, ms$mrc.syl)
+
+pc <- aggregate(mrc.phon ~ nchars + word, data=eng, mean)
+cor.test(pc$mrc.phon, pc$nchars)
+
+mc <- aggregate(clx.morph ~ nchars + word, data=eng, mean)
+cor.test(mc$clx.morph, mc$nchars)
+
+sc <- aggregate(mrc.syl ~ nchars + word, data=eng, mean)
+cor.test(sc$mrc.syl, sc$nchars)
+```
+
+Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word.
+
+```{r, echo = F, fig.width = 12, fig.height = 4}
+## plot complexity norms vs word length for each of the three metrics
+# get CIs
+ms.phon$cih <- aggregate(complexity ~ word + mrc.phon, data=eng, ci.high)$complexity
+ms.phon$cil <- aggregate(complexity ~ word + mrc.phon, data=eng, ci.low)$complexity
+
+ms.syl$cih <- aggregate(complexity ~ word + mrc.syl, data=eng, ci.high)$complexity
+ms.syl$cil <- aggregate(complexity ~ word + mrc.syl, data=eng, ci.low)$complexity
+
+ms.morph$cih <- aggregate(complexity ~ word + clx.morph, data=eng, ci.high)$complexity
+ms.morph$cil <- aggregate(complexity ~ word + clx.morph, data=eng, ci.low)$complexity
+
+cp = ggplot(ms.phon, aes(y=complexity, x=jitter(mrc.phon))) +
+  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  annotate("text", x=10, y=2, color = "red", size=rs,
+           label=paste("r=",round(cor(ms.phon$complexity, ms.phon$mrc.phon), 2))) +
+  xlab("# of phonemes") +
+  ylab("Complexity rating") +
+  ggtitle("Complexity Rating vs. # of phonemes") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+
+cs = ggplot(ms.syl, aes(y=complexity, x=jitter(mrc.syl))) +
+  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  annotate("text", x=4.5, y=2, color = "red", size=rs,
+           label=paste("r=",round(cor(ms.syl$complexity, ms.syl$mrc.syl), 2))) +
+  xlab("# of syllables") +
+  ylab("Complexity rating") +
+  ggtitle("Complexity Rating vs. # of syllables") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+
+cm = ggplot(ms.morph, aes(y=complexity, x=jitter(clx.morph))) +
+  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  annotate("text", x=3.5, y=2, color = "red", size=rs,
+           label=paste("r=",round(cor(ms.morph$complexity, ms.morph$clx.morph), 2))) +
+  xlab("# of morphemes") +
+  ylab("Complexity rating") +
+  ggtitle("Complexity Rating vs. # of morphemes") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+
+multiplot(cp, cs, cm, cols = 3)
+```
+
+
+```{r, echo = F, fig.width = 8, fig.height = 6, include = F}
+# The plot below show the relationship between complexity and word length in terms phonemes, where each point is labeled by its word.
+textplot(ms.phon$mrc.phon, ms.phon$complexity, ms.phon$word, 
+         ylab = "Complexity rating", xlab="# of phonemes", cex = .45)
+```
+
+The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and monomorphemic. The subset of low-concreteness words was determined by a median split of word based on the concreteness norms in the MRC corpus (Wilson, 1988). Word class was coded by the authors. Plotted below are complexity ratings versus # of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
+
+```{r, echo = F, fig.width = 12, fig.height = 4}
+## plot complexity norms vs word length (phonemes) for open class and monomorphemic
+
+# aggregate
+ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$class != 0,], mean)
+
+# get CIs
+ms_open.phon$cih <- aggregate(complexity ~ word + mrc.phon, data=eng[eng$class != 0,], ci.high)$complexity
+ms_open.phon$cil <- aggregate(complexity ~ word + mrc.phon, data=eng[eng$class != 0,], ci.low)$complexity
+
+cp_o = ggplot(ms_open.phon, aes(y=complexity, x=jitter(mrc.phon))) +
+  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  annotate("text", x=10, y=2, color = "red", size=rs,
+           label=paste("r=",round(cor(ms_open.phon$complexity, ms_open.phon$mrc.phon), 2))) +
+  xlab("# of phonemes") +
+  ylab("Complexity rating") +
+  ggtitle("Open Class:\nComplexity Rating vs. # of phonemes") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+
+## plot complexity norms vs word length (phonemes) for low concreteness words
+# aggregate
+ms.phon.conc <- aggregate(complexity ~ word + mrc.phon + mrc.conc, data=eng, mean) # do this again without freq because drops missing words
+
+# get CIs
+ms.phon.conc$cih <- aggregate(complexity ~ word + mrc.phon + mrc.conc, data=eng, ci.high)$complexity
+ms.phon.conc$cil <- aggregate(complexity ~ word + mrc.phon + mrc.conc, data=eng, ci.low)$complexity
+
+# get median split
+ms.phon.conc$conc.split = ifelse(ms.phon.conc$mrc.conc < median(ms.phon.conc$mrc.conc), 1, 2)
+ms.phon.conc$conc.split=as.factor(ms.phon.conc$conc.split)
+ms.phon.concL = ms.phon.conc[ms.phon.conc$conc.split == 1,]
+
+cp_c = ggplot(ms.phon.concL, aes(y=complexity, x=jitter(mrc.phon))) +
+  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  annotate("text", x=10, y=2, color = "red", size=rs,
+           label=paste("r=",round(cor(ms.phon.concL$complexity, ms.phon.concL$mrc.phon), 2))) +
+  xlab("# of phonemes") +
+  ylab("Complexity rating") +
+  ggtitle("Low Concretenesss:\nComplexity Rating vs. # of phonemes") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+
+## plot complexity norms vs word length (phonemes) for monomorphemic only
+# aggregate
+ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph == 1,], mean)
+
+# get CIs
+ms_mono.phon$cih <- aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph == 1,], ci.high)$complexity
+ms_mono.phon$cil <- aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph == 1,], ci.low)$complexity
+
+cp_m = ggplot(ms_mono.phon, aes(y=complexity, x=jitter(mrc.phon))) +
+  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  annotate("text", x=10, y=2, color = "red", size=rs,
+           label=paste("r=",round(cor(ms_mono.phon$complexity, ms_mono.phon$mrc.phon), 2))) +
+  xlab("# of phonemes") +
+  ylab("Complexity rating") +
+  ggtitle("Monomorphemic:\nComplexity Rating vs. # of phonemes") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+
+multiplot(cp_o, cp_c, cp_m, cols = 3)
+```
+
+```{r, include = F}
+## stats: correlations between length and complexity in English - all words and subsets
+## ALL
 # correlation between phonemes and complexity
 cor.test(ms.phon$complexity, ms.phon$mrc.phon)
 
-# correlation between morphomes and complexity
+# correlation between morphemes and complexity
 cor.test(ms.morph$complexity, ms.morph$clx.morph)
 
-# mono-morphemic
-ms_mono.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$clx.morph == 1,], mean)
-ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph == 1,], mean)
+# correlation between syllables and complexity
+cor.test(ms.syl$complexity, ms.syl$mrc.syl)
 
-# correlation between syllables and complexity [mono-morphemic only]
-cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
-
-# correlation between phonemes and complexity [mono-morphemic only]
-cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
-
-# open class
+## correlations for three subsets of words
+## SUBSET 1: open class
 ms_open.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$class != 0,], mean)
 ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$class != 0,], mean)
 ms_open.morph = aggregate(complexity ~ word + clx.morph, data=eng[eng$class != 0,], mean)
@@ -1470,44 +1616,94 @@ cor.test(ms_open.morph$complexity, ms_open.morph$clx.morph)
 # paritialing out frequency
 pcor.test(ms.chars$complexity,ms.chars$nchars,ms.chars$subt.log.freq)
 
-# concreteness split
-ms.chars <- aggregate(complexity ~ word + nchars + mrc.conc, data=eng, mean) # do this again without freq because drops missing words
-ms.chars$conc.split = ifelse(ms.chars$mrc.conc < median(ms.chars$mrc.conc), 1, 2)
-ms.chars$conc.split = as.factor(ms.chars$conc.split)
-ms.charsL = ms.chars[ms.chars$conc.split == 1,]
-cor.test(ms.charsL$nchars, ms.charsL$complexity)
+## SUBSET 2: low concreteness
+# correlation between phonemes and complexity [low concreteness only]
+cor.test(ms.phon.concL$mrc.phon, ms.phon.concL$complexity)
 
-ms.chars <- aggregate(complexity ~ word + nchars + mrc.conc + subt.log.freq, data=eng, mean) # do this again without freq because drops missing words
-ms.chars$conc.split = ifelse(ms.chars$mrc.conc < median(ms.chars$mrc.conc), 1, 2)
-ms.charsL = ms.chars[ms.chars$conc.split == 1,]
-pcor.test(ms.charsL$complexity,ms.charsL$nchars,ms.charsL$subt.log.freq)
+# partial out frequency 
+ms.phon.conc <- aggregate(complexity ~ word + mrc.phon + mrc.conc + subt.log.freq, data=eng, mean) # do this again without freq because drops missing words
+ms.phon.conc$conc.split = ifelse(ms.phon.conc$mrc.conc < median(ms.phon.conc$mrc.conc), 1, 2)
+ms.phon.concL = ms.phon.conc[ms.phon.conc$conc.split == 1,]
+pcor.test(ms.phon.concL$complexity,ms.phon.concL$mrc.phon,ms.phon.concL$subt.log.freq)
+
+# correlation between morphemes and complexity [low concreteness only]
+ms.morph.conc <- aggregate(complexity ~ word + clx.morph + mrc.conc, data=eng, mean) # do this again without freq because drops missing words
+
+# get median split
+ms.morph.conc$conc.split = ifelse(ms.morph.conc$mrc.conc < median(ms.morph.conc$mrc.conc), 1, 2)
+ms.morph.conc$conc.split = as.factor(ms.morph.conc$conc.split)
+ms.morph.concL = ms.morph.conc[ms.morph.conc$conc.split == 1,]
+
+cor.test(ms.morph.concL$clx.morph, ms.morph.concL$complexity)
+
+# correlation between syllables and complexity [low concreteness only]
+ms.syl.conc <- aggregate(complexity ~ word + mrc.syl + mrc.conc, data=eng, mean) # do this again without freq because drops missing words
+
+# get median split
+ms.syl.conc$conc.split = ifelse(ms.syl.conc$mrc.conc < median(ms.syl.conc$mrc.conc), 1, 2)
+ms.syl.conc$conc.split = as.factor(ms.syl.conc$conc.split)
+ms.syl.concL = ms.syl.conc[ms.syl.conc$conc.split == 1,]
+
+cor.test(ms.syl.concL$mrc.syl, ms.syl.concL$complexity)
+
+## SUBSET 3: monomorphemic
+ms_mono.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$clx.morph == 1,], mean)
+
+# correlation between syllables and complexity [mono-morphemic only]
+cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
+
+# correlation between phonemes and complexity [mono-morphemic only]
+cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
+```
+Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concretess, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts from American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _p_ s <.0001). Length was also highly correlated with frequency ( _r_ = -.53, _p_ <.0001). 
+
+```{r, include = F}
+## complexity between different psycholinguistica variables and complexity
+ms.conc.complexity <- aggregate(complexity ~ word + mrc.conc, data=eng, mean) 
+cor.test(ms.conc.complexity$mrc.conc, ms.conc.complexity$complexity)
+
+ms.fam.complexity <- aggregate(complexity ~ word + mrc.fam, data=eng, mean) 
+cor.test(ms.fam.complexity$mrc.fam, ms.fam.complexity$complexity)
+
+ms.imag.complexity <- aggregate(complexity ~ word + mrc.imag, data=eng, mean) 
+cor.test(ms.imag.complexity$mrc.imag, ms.imag.complexity$complexity)
+
+ms.freq.complexity <- aggregate(complexity ~ word + subt.log.freq, data=eng, mean) 
+cor.test(ms.freq.complexity$subt.log.freq, ms.freq.complexity$complexity)
+
+ms.freq.phon.complexity <- aggregate(complexity ~ word + subt.log.freq + mrc.phon, data=eng, mean) 
+cor.test(ms.freq.phon.complexity$subt.log.freq, ms.freq.phon.complexity$mrc.phon)
 ```
 
+Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. We created an additive linear model predicting word length with complexity, controling for concreteness, imageability, and familiarity. Model parameters are presented below.  
 
 ```{r, include = F}
 ## are the correlations between length and complexity reliable, controlling for everything? [yes]
 # all
-m_syl = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
-m_phon = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
-m_morph = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng)
-summary(m_syl)
+m_phon = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + mrc.conc + subt.log.freq, eng)
+m_morph = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + mrc.conc  + subt.log.freq, eng)
+m_syl = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + mrc.conc + subt.log.freq, eng)
 summary(m_phon)
 summary(m_morph)
+summary(m_syl)
 
 # mono-morphemic
-m_syl_m = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$clx.morph == 1,])
-m_phon_m = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$clx.morph == 1,])
+m_syl_m = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + mrc.conc  + subt.log.freq, eng[eng$clx.morph == 1,])
+m_phon_m = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + mrc.conc + subt.log.freq, eng[eng$clx.morph == 1,])
 summary(m_syl_m)
 summary(m_phon_m)
 
 # open class
-m_syl_o = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$class != 0,])
-m_phon_o = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$class != 0,])
-m_morph_o = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + b.conc + subt.log.freq, eng[eng$class != 0,])
+m_syl_o = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + mrc.conc  + subt.log.freq, eng[eng$class != 0,])
+m_phon_o = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + mrc.conc  + subt.log.freq, eng[eng$class != 0,])
+m_morph_o = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + mrc.conc  + subt.log.freq, eng[eng$class != 0,])
 summary(m_syl_o)
 summary(m_phon_o)
 summary(m_morph_o)
 ```
+
+This pattern held for the other two metrics of word length, morphemes and syllables.
+
 
 ```{r, include = F}
 ## create english word data frame with relevant variables for xling analysis

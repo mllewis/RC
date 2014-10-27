@@ -37,7 +37,7 @@ The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "grona
 
 Across all studies presented here, some participants completed more than one study. The results presented here include the data from all participants, but all reported results remain reliable when excluding participants who completed more than one study. Participants were counted as a repeat participant if they completed a study using the same stimuli (e.g., completed both Studies 1 and 2 with geons).
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative was from the first quintile and the other was from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio. In this and all subsequent plots, errors bars reflect  95% confidence intervals.
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative was from the first quintile and the other was from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio. In this and all subsequent plots, errors bars reflect  95% confidence intervals.
 
 
 
@@ -50,7 +50,7 @@ Plotted below is the effect size (bias to select complex alternative in long vs.
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment34/ref_complex_34.html" target="_blank"> here</a>.
 
-The relationship between number of geons and complexity rating is plotted below. Each dot corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting.
+The relationship between number of geons and complexity rating is plotted below. Each point corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting.
 
 
 
@@ -76,7 +76,7 @@ Plotted below is the proportion complex object selections as a function of the n
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment9/ref_complex_9.html" target="_blank"> here</a>.
 
-Plotted below is the correlation between the two samples (_N_ = 60 each) of complexity norms. Each dot corresponds to an object (_n_ = 60). 
+Plotted below is the correlation between the two samples (_N_ = 60 each) of complexity norms. Each point corresponds to an object (_n_ = 60). 
 
 
 ![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
@@ -90,7 +90,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 The linguistic items were identical to Study 1.
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each dot corresponds to an object condition. In the left plot, complexity is operationalized as the explicit complexity norms (Study 4). In the right plot, complexity is operationalized in terms of study times (Study 9). 
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. In the left plot, complexity is operationalized as the explicit complexity norms (Study 4). In the right plot, complexity is operationalized in terms of study times (Study 9). 
 
 
 
@@ -185,14 +185,29 @@ For the real objects, study times predicted memory performance. Study times for 
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment26/ref_complex_26.html" target="_blank"> here</a>.
 
-TO DO
+
+
+We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database (Wilson, 1988). We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus, while measures of morphemes were taken from CELEX2 database (Baayen, Piepenbrock, & Gulikers, 1995). Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with eachother (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use in Study 11 for the cross-linguistic analyses (phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
 
 
 
-![plot of chunk unnamed-chunk-25](figure/unnamed-chunk-25.png) 
+![plot of chunk unnamed-chunk-26](figure/unnamed-chunk-26.png) 
 
 
 
+Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word.
+
+![plot of chunk unnamed-chunk-28](figure/unnamed-chunk-28.png) 
+
+
+
+
+The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and for the subset of words that were monomorphemic. The subset of low-concretness words was determined by taking a median split of concretness based on the norms Brysbaert and New corpus (year). Word class was coded by the authors. Plotted below are complexity ratings versus # of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
+
+![plot of chunk unnamed-chunk-30](figure/unnamed-chunk-30.png) 
+
+
+Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concretess, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts from American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _p_s <.0001). Length was also highly correlated with frequency ( _r_ = -.53, _p_ <.0001). Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. This held true for each of the three length metrics. [what stats should I report here? a table?]
 
 
 
@@ -214,7 +229,7 @@ Plotted below is the proportion of low frequency object selections as a function
 
 
 
-![plot of chunk unnamed-chunk-30](figure/unnamed-chunk-30.png) 
+![plot of chunk unnamed-chunk-35](figure/unnamed-chunk-35.png) 
 
 
 
