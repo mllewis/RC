@@ -38,7 +38,8 @@ library(psych)
 library(boot)
 library(rmarkdown)
 library(wordcloud)
-source("/Documents/GRADUATE_SCHOOL/Ranalysis/useful.R")
+library(xtable)
+source("useful.R")
 
 # stuff for rendering to html in R markdown (need rmarkdown library too.)
 library('RCurl')
@@ -1332,19 +1333,19 @@ if (processNorms) {
   md$class <- class$class_MLL[index]
   
   # -- add morphemes --
-  morph = read.csv("data/numMorph_celex2.csv")
+  morph = read.csv("data/corpus/CELEX2_numMorph.csv")
   index <- match(md$word, morph$ENGLISH)
   md$clx.morph <- morph$clx.numMorph[index]
   
   # -- add frequency --
-  freqs = read.table("data/SUBTLEXusDataBase.txt",header=TRUE)
+  freqs = read.table("data/corpus/SUBTLEXus_corpus.txt",header=TRUE)
   index <- match(md$word, freqs$Word)
   md$subt.log.freq <- freqs$Lg10WF[index]
   
-  write.csv(md, "data/englishComplexityNorms.csv")
+  write.csv(md, "data/english_complexity_corms.csv")
  }
 
-eng = read.csv("data/englishComplexityNorms.csv")
+eng = read.csv("data/english_complexity_corms.csv")
 ```
 
 We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database (Wilson, 1988). We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database (Baayen, Piepenbrock, & Gulikers, 1995). Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with eachother (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11(phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
@@ -1495,17 +1496,16 @@ cm = ggplot(ms.morph, aes(y=complexity, x=jitter(clx.morph))) +
 multiplot(cp, cs, cm, cols = 3)
 ```
 
-
 ```{r, echo = F, fig.width = 8, fig.height = 6, include = F}
-# The plot below show the relationship between complexity and word length in terms phonemes, where each point is labeled by its word.
+# The plot below shows the relationship between complexity and word length in terms phonemes, where each point is labeled by its word.
 textplot(ms.phon$mrc.phon, ms.phon$complexity, ms.phon$word, 
          ylab = "Complexity rating", xlab="# of phonemes", cex = .45)
 ```
 
-The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and monomorphemic. The subset of low-concreteness words was determined by a median split of word based on the concreteness norms in the MRC corpus (Wilson, 1988). Word class was coded by the authors. Plotted below are complexity ratings versus # of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
+The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and monomorphemic. The subset of low-concreteness words was determined by a median split based on the concreteness norms in the MRC corpus (Wilson, 1988). Word class was coded by the authors. Plotted below are complexity ratings versus # of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
 
 ```{r, echo = F, fig.width = 12, fig.height = 4}
-## plot complexity norms vs word length (phonemes) for open class and monomorphemic
+## plot complexity norms vs. word length (phonemes) for open class and monomorphemic
 
 # aggregate
 ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$class != 0,], mean)
@@ -1655,10 +1655,10 @@ cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
 # correlation between phonemes and complexity [mono-morphemic only]
 cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
 ```
-Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concretess, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts from American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _p_ s <.0001). Length was also highly correlated with frequency ( _r_ = -.53, _p_ <.0001). 
+Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _p_ s <.0001). Length was also highly correlated with frequency ( _r_ = -.53, _p_ <.0001). 
 
 ```{r, include = F}
-## complexity between different psycholinguistica variables and complexity
+## complexity between different psycholinguistics variables and complexity
 ms.conc.complexity <- aggregate(complexity ~ word + mrc.conc, data=eng, mean) 
 cor.test(ms.conc.complexity$mrc.conc, ms.conc.complexity$complexity)
 
@@ -1675,15 +1675,16 @@ ms.freq.phon.complexity <- aggregate(complexity ~ word + subt.log.freq + mrc.pho
 cor.test(ms.freq.phon.complexity$subt.log.freq, ms.freq.phon.complexity$mrc.phon)
 ```
 
-Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. We created an additive linear model predicting word length with complexity, controling for concreteness, imageability, and familiarity. Model parameters are presented below.  
+Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. We created an additive linear model predicting word length with complexity, controling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below.  [not sure if we should do some model selection here...]
 
 ```{r, include = F}
 ## are the correlations between length and complexity reliable, controlling for everything? [yes]
 # all
 m_phon = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + mrc.conc + subt.log.freq, eng)
+summary(m_phon)
+
 m_morph = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + mrc.conc  + subt.log.freq, eng)
 m_syl = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + mrc.conc + subt.log.freq, eng)
-summary(m_phon)
 summary(m_morph)
 summary(m_syl)
 
@@ -1702,8 +1703,7 @@ summary(m_phon_o)
 summary(m_morph_o)
 ```
 
-This pattern held for the other two metrics of word length, morphemes and syllables.
-
+This pattern held for the other two metrics of word length (morphemes and syllables).
 
 ```{r, include = F}
 ## create english word data frame with relevant variables for xling analysis
@@ -1726,7 +1726,7 @@ xling.eng$clx.morph = as.factor(xling.eng$clx.morph)
 <a name="11"/>
 <h3> Study 11: Cross-linguistic analysis</h3> 
 
-TO DO
+
 
 <a name="12"/>
 <h3> Study 12: Simultaneous frequency task</h3> 

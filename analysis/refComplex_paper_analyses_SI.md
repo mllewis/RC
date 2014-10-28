@@ -187,7 +187,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 
 
-We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database (Wilson, 1988). We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus, while measures of morphemes were taken from CELEX2 database (Baayen, Piepenbrock, & Gulikers, 1995). Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with eachother (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use in Study 11 for the cross-linguistic analyses (phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
+We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database (Wilson, 1988). We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database (Baayen, Piepenbrock, & Gulikers, 1995). Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with eachother (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11(phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
 
 
 
@@ -202,23 +202,64 @@ Complexity ratings were highly correlated with length. Below we plot complexity 
 
 
 
-The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and for the subset of words that were monomorphemic. The subset of low-concretness words was determined by taking a median split of concretness based on the norms Brysbaert and New corpus (year). Word class was coded by the authors. Plotted below are complexity ratings versus # of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
+The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and monomorphemic. The subset of low-concreteness words was determined by a median split based on the concreteness norms in the MRC corpus (Wilson, 1988). Word class was coded by the authors. Plotted below are complexity ratings versus # of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
 
 ![plot of chunk unnamed-chunk-30](figure/unnamed-chunk-30.png) 
 
 
-Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concretess, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts from American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _p_s <.0001). Length was also highly correlated with frequency ( _r_ = -.53, _p_ <.0001). Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. This held true for each of the three length metrics. [what stats should I report here? a table?]
+Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _p_ s <.0001). Length was also highly correlated with frequency ( _r_ = -.53, _p_ <.0001). 
 
 
 
+Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. We created an additive linear model predicting word length with complexity, controling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below.  [not sure if we should do some model selection here...]
 
+
+Call:
+lm(formula = mrc.phon ~ complexity + mrc.fam + mrc.imag + mrc.conc + 
+    subt.log.freq, data = eng)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-5.045 -1.079 -0.203  0.950  7.781 
+
+Coefficients:
+               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    7.573898   0.203541   37.21  < 2e-16 ***
+complexity     0.236326   0.011517   20.52  < 2e-16 ***
+mrc.fam        0.002211   0.000490    4.51  6.5e-06 ***
+mrc.imag      -0.000316   0.000426   -0.74     0.46    
+mrc.conc      -0.003316   0.000355   -9.33  < 2e-16 ***
+subt.log.freq -1.148681   0.032964  -34.85  < 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.69 on 6587 degrees of freedom
+  (705 observations deleted due to missingness)
+Multiple R-squared:  0.376,	Adjusted R-squared:  0.375 
+F-statistic:  793 on 5 and 6587 DF,  p-value: <2e-16
+
+<!-- html table generated in R 3.1.0 by xtable 1.7-4 package -->
+<!-- Mon Oct 27 16:04:50 2014 -->
+<table border=1>
+<tr> <th>  </th> <th> Estimate </th> <th> Std. Error </th> <th> t value </th> <th> Pr(&gt;|t|) </th>  </tr>
+  <tr> <td align="right"> (Intercept) </td> <td align="right"> 7.5739 </td> <td align="right"> 0.2035 </td> <td align="right"> 37.21 </td> <td align="right"> 0.0000 </td> </tr>
+  <tr> <td align="right"> complexity </td> <td align="right"> 0.2363 </td> <td align="right"> 0.0115 </td> <td align="right"> 20.52 </td> <td align="right"> 0.0000 </td> </tr>
+  <tr> <td align="right"> mrc.fam </td> <td align="right"> 0.0022 </td> <td align="right"> 0.0005 </td> <td align="right"> 4.51 </td> <td align="right"> 0.0000 </td> </tr>
+  <tr> <td align="right"> mrc.imag </td> <td align="right"> -0.0003 </td> <td align="right"> 0.0004 </td> <td align="right"> -0.74 </td> <td align="right"> 0.4584 </td> </tr>
+  <tr> <td align="right"> mrc.conc </td> <td align="right"> -0.0033 </td> <td align="right"> 0.0004 </td> <td align="right"> -9.33 </td> <td align="right"> 0.0000 </td> </tr>
+  <tr> <td align="right"> subt.log.freq </td> <td align="right"> -1.1487 </td> <td align="right"> 0.0330 </td> <td align="right"> -34.85 </td> <td align="right"> 0.0000 </td> </tr>
+   </table>
+
+
+
+This pattern held for the other two metrics of word length (morphemes and syllables).
 
 
 
 <a name="11"/>
 <h3> Study 11: Cross-linguistic analysis</h3> 
 
-TO DO
+
 
 <a name="12"/>
 <h3> Study 12: Simultaneous frequency task</h3> 
@@ -229,7 +270,7 @@ Plotted below is the proportion of low frequency object selections as a function
 
 
 
-![plot of chunk unnamed-chunk-35](figure/unnamed-chunk-35.png) 
+![plot of chunk unnamed-chunk-36](figure/unnamed-chunk-36.png) 
 
 
 
