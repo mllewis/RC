@@ -26,7 +26,7 @@ This document was created from an R Markdown file. The R Markdown file can be fo
 
 
 
-A blurb about AMT?
+[A blurb about AMT?]
 
 <a name="1"/>
 <h3> Study 1: Geon mapping task</h3>
@@ -143,7 +143,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 We excluded subjects who performed below chance on the memory task (fewer than 20 correct out of 40). A response was counted as correct if it was a correct rejection or a hit. This excluded 9 subjects (4%). With these participants excluded, the mean correct was 72%. 
 
-Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below. The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below (after exclusions). The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
 ![plot of chunk 8:geon_rt_norms](figure/8:geon_rt_norms.png) 
 
@@ -169,7 +169,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 We excluded subjects who performed below chance on the memory task (fewer than 30 correct out of 60). A response was counted as correct if it was a correct rejection or a hit. This excluded 6 subjects (1%). With these participants excluded, the mean correct was 84%.
 
-Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below. The solid line indicates the mean, and the dashed lines indicates two standard deviations above and below the mean.
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below (after exclusions). The solid line indicates the mean, and the dashed lines indicates two standard deviations above and below the mean.
 
 ![plot of chunk 9:objects_rt_norms](figure/9:objects_rt_norms.png) 
 
@@ -195,10 +195,9 @@ We selected 499 English words that were broadly distributed in their length. All
 
 
 
-Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word.
+Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to avoid over-plotting.
 
 ![plot of chunk unnamed-chunk-28](figure/unnamed-chunk-28.png) 
-
 
 
 
@@ -207,48 +206,11 @@ The relationship between length and complexity remained reliable for the subset 
 ![plot of chunk unnamed-chunk-30](figure/unnamed-chunk-30.png) 
 
 
-Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _p_ s <.0001). Length was also highly correlated with frequency ( _r_ = -.53, _p_ <.0001). 
+Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (_r_ = -.53, _p_ <.0001). 
 
 
 
 Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. We created an additive linear model predicting word length with complexity, controling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below.  [not sure if we should do some model selection here...]
-
-
-Call:
-lm(formula = mrc.phon ~ complexity + mrc.fam + mrc.imag + mrc.conc + 
-    subt.log.freq, data = eng)
-
-Residuals:
-   Min     1Q Median     3Q    Max 
--5.045 -1.079 -0.203  0.950  7.781 
-
-Coefficients:
-               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)    7.573898   0.203541   37.21  < 2e-16 ***
-complexity     0.236326   0.011517   20.52  < 2e-16 ***
-mrc.fam        0.002211   0.000490    4.51  6.5e-06 ***
-mrc.imag      -0.000316   0.000426   -0.74     0.46    
-mrc.conc      -0.003316   0.000355   -9.33  < 2e-16 ***
-subt.log.freq -1.148681   0.032964  -34.85  < 2e-16 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 1.69 on 6587 degrees of freedom
-  (705 observations deleted due to missingness)
-Multiple R-squared:  0.376,	Adjusted R-squared:  0.375 
-F-statistic:  793 on 5 and 6587 DF,  p-value: <2e-16
-
-<!-- html table generated in R 3.1.0 by xtable 1.7-4 package -->
-<!-- Mon Oct 27 16:04:50 2014 -->
-<table border=1>
-<tr> <th>  </th> <th> Estimate </th> <th> Std. Error </th> <th> t value </th> <th> Pr(&gt;|t|) </th>  </tr>
-  <tr> <td align="right"> (Intercept) </td> <td align="right"> 7.5739 </td> <td align="right"> 0.2035 </td> <td align="right"> 37.21 </td> <td align="right"> 0.0000 </td> </tr>
-  <tr> <td align="right"> complexity </td> <td align="right"> 0.2363 </td> <td align="right"> 0.0115 </td> <td align="right"> 20.52 </td> <td align="right"> 0.0000 </td> </tr>
-  <tr> <td align="right"> mrc.fam </td> <td align="right"> 0.0022 </td> <td align="right"> 0.0005 </td> <td align="right"> 4.51 </td> <td align="right"> 0.0000 </td> </tr>
-  <tr> <td align="right"> mrc.imag </td> <td align="right"> -0.0003 </td> <td align="right"> 0.0004 </td> <td align="right"> -0.74 </td> <td align="right"> 0.4584 </td> </tr>
-  <tr> <td align="right"> mrc.conc </td> <td align="right"> -0.0033 </td> <td align="right"> 0.0004 </td> <td align="right"> -9.33 </td> <td align="right"> 0.0000 </td> </tr>
-  <tr> <td align="right"> subt.log.freq </td> <td align="right"> -1.1487 </td> <td align="right"> 0.0330 </td> <td align="right"> -34.85 </td> <td align="right"> 0.0000 </td> </tr>
-   </table>
 
 
 
@@ -270,7 +232,7 @@ Plotted below is the proportion of low frequency object selections as a function
 
 
 
-![plot of chunk unnamed-chunk-36](figure/unnamed-chunk-36.png) 
+![plot of chunk unnamed-chunk-35](figure/unnamed-chunk-35.png) 
 
 
 
@@ -286,3 +248,13 @@ Plotted below is the proportion of low frequency object selections as a function
 ![plot of chunk 13:sequential_freq](figure/13:sequential_freq.png) 
 
 
+
+***
+***
+<h3> References </h3>
+
+Baayen, R, R Piepenbrock, and L Gulikers. CELEX2 LDC96L14. Web Download. Philadelphia: Linguistic Data Consortium, 1995. 
+
+Brysbaert, M., & New, B. (2009). Moving beyond Kucera and Francis: A critical evaluation of current word frequency norms and the introduction of a new and improved word frequency measure for American English. _Behavior Research Methods_, _41_, 977–990.
+
+Wilson, M. (1988). MRC psycholinguistic database: Machine-usable dictionary, version 2.00. _Behavior Research Methods, Instruments, & Computers_, _20_, 6–10.

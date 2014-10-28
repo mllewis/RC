@@ -27,7 +27,7 @@ This document was created from an R Markdown file. The R Markdown file can be fo
 ```{r global_vars, include=F}
 ## SET GLOBAL VARIABLES
 rm(list=ls())
-processNorms = TRUE # process norms or load norms? 
+processNorms = FALSE # process norms or load norms? 
 doSlow = FALSE # do time-consuming pre-processing steps?
 fs = 15 # set graphical params
 ts = 15
@@ -38,7 +38,6 @@ library(psych)
 library(boot)
 library(rmarkdown)
 library(wordcloud)
-library(xtable)
 source("useful.R")
 
 # stuff for rendering to html in R markdown (need rmarkdown library too.)
@@ -132,7 +131,7 @@ p.fc <- function(d, dv){
 setwd('/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/analysis/')
 ```
 
-A blurb about AMT?
+[A blurb about AMT?]
 
 <a name="1"/>
 <h3> Study 1: Geon mapping task</h3>
@@ -149,7 +148,7 @@ Plotted below is the effect size (bias to select complex alternative in long vs.
 ## get data into long form
 if (doSlow){
   # read in data
-  d <- read.csv("data/RefComplex38.results",sep="\t",header=TRUE)
+  d <- read.csv("data/experiment/RefComplex38.results_A.csv")
   
   # melt
   md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
@@ -165,17 +164,15 @@ if (doSlow){
   dc <- dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
   dc$seq <- NULL
   
-  # make everything factors and strip punctuations
+  # make everything factors and quotes
+  dc$criticalSimple <- gsub("\"", '', dc$criticalSimple)
+  dc$criticalComplicated <- gsub("\"", '', dc$criticalComplicated)
   dc <- colwise(as.factor)(dc)
-  dc$criticalComplicated <- as.factor(as.numeric(gsub(
-    "[[:punct:]]", "", dc$criticalComplicated))) 
-  dc$criticalSimple <- as.factor(as.numeric(gsub(
-    "[[:punct:]]", "", dc$criticalSimple))) 
 
   # merge in norms
   # see below for processing of these norms from raw data
-  cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")  # Study 2
-  rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv") # Study 8
+  cg_norms = read.csv("data/experiment/complicatedNormsGeons_BYITEM.csv") # Study 2
+  rg_norms = read.csv("data/experiment/rtNormsGeons_BYITEM.csv") # Study 8
 
   # complicated
   index <- match(dc$criticalSimple, cg_norms$obj)
@@ -192,10 +189,10 @@ if (doSlow){
   dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
   dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
   
-  write.csv(dc, "data/RC38_long.csv")
+  write.csv(dc, "data/experiment/RC38_long.csv")
   }
 
-dc <- read.csv('data/RC38_long.csv')
+dc <- read.csv('data/experiment/RC38_long.csv')
 ```
 
 ```{r, warning = F, echo = F, fig.height = 5, fig.width = 10}
@@ -278,7 +275,7 @@ The relationship between number of geons and complexity rating is plotted below.
 ## read in data and pre-process
 if (processNorms) {
   # read in data
-  d <- read.csv("data/RefComplex34.results",sep="\t",header=TRUE)
+  d <- read.csv("data/experiment/RefComplex34.results_A.csv")
   
   # melt
   md <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("obj",names(d))])
@@ -308,10 +305,10 @@ if (processNorms) {
   ms_all <- ms_all[order(ms_all$meanRating),]
 
   # save complexity by item
-  write.csv(ms_all, "data/complicatedNormsGeons_BYITEM.csv")
+  write.csv(ms_all, "data/experiment/complicatedNormsGeons_BYITEM.csv")
   } 
 
-cg_norms = read.csv("data/complicatedNormsGeons_BYITEM.csv")
+cg_norms = read.csv("data/experiment/complicatedNormsGeons_BYITEM.csv")
 ```
 
 ```{r, echo = F, fig.width=4, fig.height=4}
@@ -356,7 +353,7 @@ Plotted below is the proportion complex object selections as a function of the n
 
 ```{r 3:geon_random_syllables, include = F}
 ## read in data 
-d <- read.csv("data/RefComplex40.results",sep="\t",header=TRUE)
+d <- read.csv("data/experiment/RefComplex40.results_A.csv")
 
 ## get in long form and make everything factors
 md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
@@ -418,7 +415,7 @@ Plotted below is the correlation between the two samples (_N_ = 60 each) of comp
 ## get data into long form, compute correlations between 2 samples, figure out quintiles, and remove dupliate subjects
 if (processNorms){
   ## Sample #1
-  da <- read.csv("data/RefComplex9a.results",sep="\t",header=TRUE)
+  da <- read.csv("data/experiment/RefComplex9a.results_A.csv")
   da[,31:92] <- lapply(da[,31:92],as.character)
   da[,31:92] <- lapply(da[,31:92],as.numeric)
   
@@ -428,7 +425,7 @@ if (processNorms){
   ms = aggregate(value ~ rating, md, mean)
 
   ## Sample #2
-  db <- read.csv("data/RefComplex9b.results",sep="\t",header=TRUE)
+  db <- read.csv("data/experiment/RefComplex9b.results_A.csv")
   db[,30:92] <- lapply(db[,30:92],as.character)
   db[,30:92] <- lapply(db[,30:92],as.numeric)
   
@@ -479,14 +476,6 @@ if (processNorms){
   all_ms$quintile = as.numeric(all_ms$quintile)
   all_ms <- all_ms[order(all_ms$meanRating),]
   
-  # there is one participant who was in both samples. Look at correlation between samples without this participant in Sample #2 
-  # Sample #2 
-  # melt
-  mdb <- melt(db[db$workerid != 'A1BQEX75BE1AYE',]
-              ,id.vars=c("workerid"),measure.vars=names(db)[grepl("rating",names(db))])
-  names(mdb) <- c("workerid", "rating", "value")
-  msb = aggregate(value ~ rating, mdb, mean)
-  
   co_norms_unique_sample = merge(ms, msb, by="rating")
   co_norms_unique_sample$ratingNum <- as.numeric(matrix(sapply(str_split(matrix(sapply(str_split(
     co_norms_unique_sample$rating,"rating"), function(x) {x[2]})),"_"),function(x){x[1]})))
@@ -497,14 +486,14 @@ if (processNorms){
   print(paste('reliability, removing duplicate subj:', round(cor(co_norms_unique_sample$rating_1, co_norms_unique_sample$rating_2),2))) # nearly identical to original sample
   
   # write to csv (use write.table to can exclude headers, so matlab can read for figure)
-  write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
-            row.names=FALSE, col.names=FALSE, sep=",")
+  #write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
+           # row.names=FALSE, col.names=FALSE, sep=",")
   
   # write to csv
-  write.csv(all_ms, "data/complicatedNormsObjs_BYITEM.csv")
+  write.csv(all_ms, "data/experiment/complicatedNormsObjs_BYITEM.csv")
   }
 
-co_norms = read.csv("data/complicatedNormsObjs_BYITEM.csv")
+co_norms = read.csv("data/experiment/complicatedNormsObjs_BYITEM.csv")
 ```
 
 ```{r echo = F, fig.width = 4, fig.height = 4, warning = FALSE, message = FALSE, output = FALSE}
@@ -545,7 +534,7 @@ Plotted below is the effect size (bias to select complex alternative in long vs.
 ## read in data get into long form
 if (doSlow) {
   # read in data 
-  d <- read.csv("data/RefComplex35.results", sep="\t", header=TRUE)
+  d <- read.csv("data/experiment/RefComplex35.results_A.csv")
   
   # get in long form
   # get trial info
@@ -563,10 +552,10 @@ if (doSlow) {
   dc = dcast(workerid + seq + trial ~ variable, data = md, value.var = "value")
   dc$seq <- NULL
   
-  write.csv(dc, "data/RC35_long.csv")
+  write.csv(dc, "data/experiment/RC35_long.csv")
   }
 
-dc <- read.csv("data/RC35_long.csv")
+dc <- read.csv("data/experiment/RC35_long.csv")
 ```
 
 ```{r, include = F}
@@ -584,7 +573,7 @@ dc$criticalSimple_c.norms <- co_norms$meanRating[index]
 index <- match(dc$criticalComplicated, co_norms$ratingNum)
 dc$criticalComplicated_c.norms <- co_norms$meanRating[index]
 
-rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv") #analyzed from raw data below (Study 9)
+rto_norms = read.csv("data/experiment/rtNormsObjs_BYITEM.csv") #analyzed from raw data below (Study 9)
 index <- match(dc$criticalSimple, rto_norms$Answer.train_image)
 dc$criticalSimple_rt.norms <- rto_norms$log.rt [index]
 index <- match(dc$criticalComplicated, rto_norms$Answer.train_image)
@@ -668,7 +657,7 @@ Plotted below is the proportion of complex object selections as function of numb
 
 ```{r 6:objects_random_syllables, warning = F, message = F, output = F, include = F}
 ## read data, and pre-process
-d <- read.csv("data/RefComplex41.results",sep="\t",header=TRUE)
+d <- read.csv("data/experiment/RefComplex41.results_A.csv")
 
 # get trial info
 md <- melt(d,id.vars=c("workerid"),measure.vars=c(names(d)[c(grepl("_",names(d)))]))
@@ -735,7 +724,7 @@ We also analyzed the log length of the production (in characters) as a function 
 
 ```{r 7:objects_production_labels, warning = F, message = F, output = F, include = F}
 ## read in data and get into long form
-d <- read.csv("data/RefComplex27.results", sep="\t", header=TRUE)
+d <- read.csv("data/experiment/RefComplex27.results_A.csv")
   
 # make pic columns into factors
 n <- names(d)
@@ -780,10 +769,10 @@ md$log.trial <- log(md$trial)
 ```{r, include = F}
 ## look at relationship between condition and label length
 # aggregate across participants
-md.agg <- ddply(md, .(workerid,condition), function (d) {mean(d$log.length)})
+md.agg <- ddply(md, .(workerid, condition), function (d){mean(d$log.length)})
 md.agg$condition = as.factor(md.agg$condition)
 names(md.agg)[3] = "log.length"
-md.agg = md.agg[md.agg$workerid != "A24IF41IP6LT55" ,] # one participant doesn't have both simple and complex (due to multi word responses)
+md.agg = md.agg[md.agg$workerid != "33",] # one participant doesn't have both simple and complex (due to multi word responses)
 
 ## stats: paired t-test of length between simple and complex conditions 
 t.test(md.agg[md.agg$condition == '"complex"',"log.length"],
@@ -870,13 +859,13 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 We excluded subjects who performed below chance on the memory task (fewer than 20 correct out of 40). A response was counted as correct if it was a correct rejection or a hit. This excluded 9 subjects (4%). With these participants excluded, the mean correct was 72%. 
 
-Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below. The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below (after exclusions). The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
 ```{r 8:geon_rt_norms, warning = F, echo = F, fig.width = 4, fig.height = 4, message = F}
 ## get data into long form (accuracy and RT df) and do exclusions
 #if (processNorms) {
   # read in data
-  raw <- read.csv("data/RefComplex37.results",sep="\t",header=TRUE)
+  raw <- read.csv("data/experiment/RefComplex37.results_A.csv")
   
   # look at accuracy, and exclude those below chance
   #boxplot(raw$Answer.correct, main = "distribution before accuracy exclusions")
@@ -1009,12 +998,13 @@ Participants were also excluded based on study times. We transformed the time in
   ms_all <- aggregate(log.rt  ~ obj, data=d, mean)
   ms_all$cih <- aggregate(log.rt ~ obj, data=d, ci.high)$log.rt
   ms_all$cil <- aggregate(log.rt ~ obj, data=d, ci.low)$log.rt
-  
-  # save RT by item
-   #write.csv(ms_all, "data/rtNormsGeons_BYITEM.csv")
-  #} 
+  ms_all$obj <- gsub("\"", '', ms_all$obj) #strip quotes
 
-rg_norms = read.csv("data/rtNormsGeons_BYITEM.csv")
+  # save RT by item
+   write.csv(ms_all, "data/experiment/rtNormsGeons_BYITEM.csv")
+  #} 
+  
+rg_norms = read.csv("data/experiment/rtNormsGeons_BYITEM.csv")
 ```
 
 Like for the complexity norms, study times were highly correlated with the number of geons in each object (_r_=.93, _p_<.01; see plot below, x-coordinates jittered to avoid over-plotting). Objects that contained more geons tended to be studied longer. 
@@ -1098,12 +1088,12 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 We excluded subjects who performed below chance on the memory task (fewer than 30 correct out of 60). A response was counted as correct if it was a correct rejection or a hit. This excluded 6 subjects (1%). With these participants excluded, the mean correct was 84%.
 
-Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below. The solid line indicates the mean, and the dashed lines indicates two standard deviations above and below the mean.
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below (after exclusions). The solid line indicates the mean, and the dashed lines indicates two standard deviations above and below the mean.
 
 ```{r 9:objects_rt_norms, warning = F, echo = F, fig.width = 4, fig.height = 4, message = F}
 ## get data into long form (accuracy and RT df) and do exclusions
 #if (processNorms){
-  raw <- read.csv("data/RefComplex30.results",sep="\t",header=TRUE)
+  raw <- read.csv("data/experiment/RefComplex30.results_A.csv")
     
   # look at accuracy, and exclude those below chance
   # boxplot(raw$Answer.correct, main = "distribution before accuracy exclusions")
@@ -1138,8 +1128,8 @@ Participants were also excluded based on study times. We transformed the time in
   
   # RT dataframe
   n <- names(raw)
-  cols = c(  n[grepl("train",n)], n["correct"])
-  cols = cols[1:154]
+  cols = n[grepl("train",n)]
+  cols = cols[1:64]
   md <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
   md$trial <-as.numeric(matrix(lapply(str_split(md$variable,"_"),function(x) {x[3]})))
   md$var1 <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[1]}))
@@ -1151,16 +1141,10 @@ Participants were also excluded based on study times. We transformed the time in
   d = dcast(workerid + seq + trial ~ var, data = md, value.var = "value")
   d$Answer.train_NA <- NULL; d$seq <- NULL
   
-  d=d[!is.na(d$trial),]
-  d=d[!is.na(d$Answer.train_image),]
-  d=d[!is.na(d$Answer.train_rt),]
-  d=d[d$Answer.train_image != "undefined",]
-  d=d[d$Answer.train_image != "",]
-  
   d$Answer.train_image = as.factor(d$Answer.train_image)
   d$Answer.train_rt = as.numeric(d$Answer.train_rt)
   
-  #exclude outlier 2 standard deviations above and below mean (in log space)
+  # exclude outlier 2 standard deviations above and below mean (in log space)
   d$log.rt = log(d$Answer.train_rt)
   total = dim(d)[1]
   sd2 = 2*sd(d$log.rt)
@@ -1218,10 +1202,10 @@ Participants were also excluded based on study times. We transformed the time in
   ms = ms[ms$Answer.train_image != 61,] # get rid of ball and motherboard
   ms = ms[ms$Answer.train_image != 62,] 
 
-  #write.csv(ms,"data/rtNormsObjs_BYITEM.csv")
+  write.csv(ms,"data/experiment/rtNormsObjs_BYITEM.csv")
   #}
 
-rto_norms = read.csv("data/rtNormsObjs_BYITEM.csv")
+rto_norms = read.csv("data/experiment/rtNormsObjs_BYITEM.csv")
 ```
 
 The plot below shows the correlation between study time and explicit complexity norms for each object. Like for the geons, objects that were rated as more complex were studied longer.
@@ -1273,10 +1257,8 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 ```{r 10:english_norms, warning= F, include = F}
 ## preprocess and merge in stuff
 if (processNorms) {
-  d1 <- read.csv("data/RefComplex26.results1",sep="\t",header=TRUE)
-  d2 <- read.csv("data/RefComplex26.results",sep="\t",header=TRUE)
-  d <- rbind(d1,d2)
-  
+  d <- read.csv("data/experiment/RefComplex26_all.results_A.csv",) ## THERE ARE FOUR DUPLICATE SUBJECTS-  remove these?
+
   # take out people who missed check question
   d = d[d$Answer.value_18 == 7, ] 
   
@@ -1314,7 +1296,7 @@ if (processNorms) {
   
   # merge in word info
   # -- add mrc data --
-  mrc = read.csv("data/MRC_corpus.csv")
+  mrc = read.csv("data/corpus/MRC_corpus.csv")
   mrc = mrc[mrc$mrc.syl != "NA",]
   index <- match(md$word, mrc$word)
   md$mrc.fam <- mrc$mrc.fam[index]
@@ -1328,7 +1310,7 @@ if (processNorms) {
   md$mrc.phon <- mrc$mrc.phon[index]
 
   # -- add class --
-  class = read.csv("data/english_class_codes.csv")
+  class = read.csv("data/corpus/english_classCodes.csv")
   index <- match(md$word, class$ENGLISH)
   md$class <- class$class_MLL[index]
   
@@ -1338,14 +1320,14 @@ if (processNorms) {
   md$clx.morph <- morph$clx.numMorph[index]
   
   # -- add frequency --
-  freqs = read.table("data/corpus/SUBTLEXus_corpus.txt",header=TRUE)
+  freqs = read.table("data/corpus/SUBTLEXus_corpus.txt", header=TRUE)
   index <- match(md$word, freqs$Word)
   md$subt.log.freq <- freqs$Lg10WF[index]
   
-  write.csv(md, "data/english_complexity_corms.csv")
+  write.csv(md, "data/corpus/english_complexity_norms.csv")
  }
 
-eng = read.csv("data/english_complexity_corms.csv")
+eng = read.csv("data/corpus/english_complexity_norms.csv")
 ```
 
 We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database (Wilson, 1988). We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database (Baayen, Piepenbrock, & Gulikers, 1995). Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with eachother (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11(phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
@@ -1431,7 +1413,7 @@ sc <- aggregate(mrc.syl ~ nchars + word, data=eng, mean)
 cor.test(sc$mrc.syl, sc$nchars)
 ```
 
-Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word.
+Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to avoid over-plotting.
 
 ```{r, echo = F, fig.width = 12, fig.height = 4}
 ## plot complexity norms vs word length for each of the three metrics
@@ -1655,7 +1637,7 @@ cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
 # correlation between phonemes and complexity [mono-morphemic only]
 cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
 ```
-Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _p_ s <.0001). Length was also highly correlated with frequency ( _r_ = -.53, _p_ <.0001). 
+Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (_r_ = -.53, _p_ <.0001). 
 
 ```{r, include = F}
 ## complexity between different psycholinguistics variables and complexity
@@ -1710,12 +1692,12 @@ This pattern held for the other two metrics of word length (morphemes and syllab
 xling.eng <- aggregate(complexity ~ word + class, data=eng, mean)
 
 # -- add morphemes --
-morph = read.csv("data/numMorph_celex2.csv")
+morph = read.csv("data/corpus/CELEX2_numMorph.csv")
 index <- match(xling.eng$word, morph$ENGLISH)
 xling.eng$clx.morph <- morph$clx.numMorph[index]
 
 # -- add frequency --
-freqs = read.table("data/SUBTLEXusDataBase.txt",header=TRUE)
+freqs = read.table("data/corpus/SUBTLEXus_corpus.txt", header=TRUE)
 index <- match(xling.eng$word, freqs$Word)
 xling.eng$subt.log.freq <- freqs$Lg10WF[index]
 
@@ -1737,7 +1719,7 @@ Plotted below is the proportion of low frequency object selections as a function
 
 ```{r 12: simul_freq, include = F}
 # read in data
-d_simultaneous <- read.csv("data/RefComplex6_all.results", header=TRUE)
+d_simultaneous <- read.csv("data/experiment/RefComplex6_all.results_A.csv")
 ```
 
 ```{r, echo = F, fig.width = 4, fig.height = 4}
@@ -1778,7 +1760,7 @@ Plotted below is the proportion of low frequency object selections as a function
 
 ```{r, include = F}
 ## read in data and pre-process
-d_sequential <- read.csv("data/RefComplex16.results",sep="\t",header=TRUE)
+d_sequential <- read.csv("data/experiment/RefComplex16.results_A.csv")
 
 d_sequential <- d_sequential[d_sequential$Answer.frequency_condition == '\"uneven\"', ]
 levels(d_sequential$Answer.crit_selection) = c("\"high_freq\"", "\"low_freq\"")
@@ -1813,3 +1795,13 @@ qplot(Answer.lang_condition,p_complex, fill = Answer.lang_condition,
 ## stats: proportion low freq. in long vs. short condition
 chisq.test(table(d_sequential$responseValue, d_sequential$Answer.lang_condition))
 ```
+
+***
+***
+<h3> References </h3>
+
+Baayen, R., R. Piepenbrock, and L. Gulikers. CELEX2 LDC96L14. Web Download. Philadelphia: Linguistic Data Consortium, 1995. 
+
+Brysbaert, M., & New, B. (2009). Moving beyond Kucera and Francis: A critical evaluation of current word frequency norms and the introduction of a new and improved word frequency measure for American English. _Behavior Research Methods_, _41_, 977–990.
+
+Wilson, M. (1988). MRC psycholinguistic database: Machine-usable dictionary, version 2.00. _Behavior Research Methods, Instruments, & Computers_, _20_, 6–10.
