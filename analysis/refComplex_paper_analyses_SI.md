@@ -227,7 +227,7 @@ This pattern held for the other two metrics of word length (morphemes and syllab
 ```
 
 ```
-## Error: object 'language' not found
+## Error: $ operator is invalid for atomic vectors
 ```
 
 
@@ -243,14 +243,38 @@ This pattern held for the other two metrics of word length (morphemes and syllab
 
 
 
+<a name="12"/>
+<h3> Study 12: Simultaneous frequency task</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment17_2/ref_complex_17_2.html" target="_blank"> here</a>.
+
+Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ.
 
 
 
+![plot of chunk unnamed-chunk-40](figure/unnamed-chunk-40.png) 
 
 
 
+<a name="13"/>
+<h3> Study 13: Sequential frequency task</h3> 
+
+The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment16/ref_complex_16.html" target="_blank"> here</a>.
+
+Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ.
 
 
 
+![plot of chunk 13:sequential_freq](figure/13:sequential_freq.png) 
 
 
+
+***
+***
+<h3> References </h3>
+
+Baayen, R., R. Piepenbrock, and L. Gulikers. CELEX2 LDC96L14. Web Download. Philadelphia: Linguistic Data Consortium, 1995. 
+
+Brysbaert, M., & New, B. (2009). Moving beyond Kucera and Francis: A critical evaluation of current word frequency norms and the introduction of a new and improved word frequency measure for American English. _Behavior Research Methods_, _41_, 977–990.
+
+Wilson, M. (1988). MRC psycholinguistic database: Machine-usable dictionary, version 2.00. _Behavior Research Methods, Instruments, & Computers_, _20_, 6–10.

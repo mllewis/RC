@@ -1719,9 +1719,9 @@ checksR = checksR[checksR$ENGLISH != "peso",]
 
 accuracy = colSums(checksR[,2:13], dims = 1)/ dim(checksR[,])[1]
 accuracy = as.data.frame(accuracy)
-accuracy$language = tolower(rownames(m))
+accuracy$language = tolower(rownames(accuracy))
 
-qplot(language, accuracy, fill = as.factor(accuracy),
+qplot(accuracy$language, accuracy$accuracy, fill = as.factor(accuracy),
       ylim=c(0,1), position=position_dodge(),
       data=accuracy, geom="bar", ylab="Prop. correct Google translations", 
       main = "Google translation accuracy",
@@ -1738,7 +1738,7 @@ qplot(language, accuracy, fill = as.factor(accuracy),
 ```
 
 
-```{r, include = F}
+```{r, include = F, eval = F}
 ## read in xling data and merge with English complexity norms
 xling = read.csv("data/corpus/xling_csv.csv") 
 index <- match(xling$ENGLISH, xling.eng$word)
@@ -1753,7 +1753,7 @@ xling = xling[xling$ENGLISH != "peso",] # remove bad item
 ```
 
 
-```{r, include = F}
+```{r, include = F, eval = F}
 ## get correlations by language
 lens = c(which(grepl("LEN",names(xling)))) # get length column indices
 xlingCORR = xling[c(lens, which(names(xling)== "subt.log.freq"), which(names(xling)== "complexity"), which(names(xling)== "clx.morph"), which(names(xling)== "class"))] 
@@ -1823,7 +1823,7 @@ c_l$checked = as.factor(ifelse(is.element(c_l$language, coded_languages), "yes",
 ```
 
 
-```{r, include = F}
+```{r, include = F, eval = F}
 ## plot correlations by language
 
 # fix one label 
@@ -1861,11 +1861,11 @@ ggplot(c_l, aes(language, corr, fill = "grey")) +
 #if(savePlots){dev.off()}
 ```
 
-```{r, include = F}
+```{r, include = F, , eval = F}
 c_l <- c_l[order(c_l$language),]
 ```
 
-```{r, include = F}
+```{r, include = F, , eval = F}
 ## grand mean correlation between complexity and length
 
 # grand mean correlation between complexity and length
