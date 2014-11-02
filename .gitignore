@@ -1,8 +1,15 @@
 writeup/misc/
 
 analysis/figure/
+analysis/refComplex_paper_analyses_SI.md
+analysis/refComplex_paper_analyses_SI.Rmd
+analysis/.RData
+analysis/.Rhistory
+analysis/.Rprofile
+analysis/Results with repeat subjects removed.txt
 
 *.DS_Store
+
 
 # LaTeX #
 *.bet
