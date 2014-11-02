@@ -26,7 +26,7 @@ This document was created from an R Markdown file. The R Markdown file can be fo
 
 
 
-[A blurb about AMT?]
+All experimental studies (Studies 1-10 and 12-13) were completed on Amazon Mechanical Turk (AMT). AMT is an online crowdsourcing platform that provides a reliable subject pool for web-based studies (Crump, McDonnell, Gureckis, 2013). Participants were paid US$0.15-0.30 for their participation, depending on the length of the task. 
 
 <a name="1"/>
 <h3> Study 1: Geon mapping task</h3>
@@ -105,7 +105,7 @@ Plotted below is the effect size (bias to select complex alternative in long vs.
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment41/ref_complex_41.html" target="_blank"> here</a>.
 
-Plotted below is the proportion of complex object selections as function of number of syllables. The dashed line reflects chance selection between simple and complex alternatives.
+Plotted below is the proportion of complex object selections as function of number of syllables. The dashed line reflects chance selection between the simple and complex alternatives.
 
 
 
@@ -145,7 +145,7 @@ We excluded subjects who performed at or below chance on the memory task (20 or 
 
 Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below (after exclusions). The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
-![plot of chunk 8:geon_rt_norms](figure/8:geon_rt_norms.png) 
+
 
 Like for the complexity norms, study times were highly correlated with the number of geons in each object (_r_=.93, _p_<.01; see plot below, x-coordinates jittered to avoid over-plotting). Objects that contained more geons tended to be studied longer. 
 
@@ -159,7 +159,7 @@ Study times were also highly correlated with complexity norms. Objects that were
 
 
 
-Study times did not predict memory performance. The study times for hits (correct "yes" responses; _M_ = 7.33 ) did not differ from misses (correct "no" responses; _M_ = 7.34; _t_(223) = .61, _p_=.54).
+Study times did not predict memory performance. The study times for hits (correct "yes" responses; _M_ = 7.33) did not differ from misses (correct "no" responses; _M_ = 7.34; _t_(223) = .61, _p_=.54).
 
 <a name="9"/>
 <h3> Study 9: Real object study time task</h3> 
@@ -170,7 +170,7 @@ We excluded subjects who performed at or below chance on the memory task (30 or 
 
 Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below (after exclusions). The solid line indicates the mean, and the dashed lines indicates two standard deviations above and below the mean.
 
-![plot of chunk 9:objects_rt_norms](figure/9:objects_rt_norms.png) 
+
 
 The plot below shows the correlation between study time and explicit complexity norms for each object. Like for the geons, objects that were rated as more complex were studied longer.
 
@@ -194,7 +194,7 @@ We selected 499 English words that were broadly distributed in their length. All
 
 
 
-Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to avoid over-plotting.
+246 participants completed the rating task. We excluded participants who missed a simple math question in the middle of the task that served as an attentional check. This excluded 6 participants (2%). Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to avoid over-plotting.
 
 ![plot of chunk unnamed-chunk-28](figure/unnamed-chunk-28.png) 
 
@@ -206,11 +206,23 @@ The relationship between length and complexity remained reliable for the subset 
 
 
 
-Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (_r_ = -.53, _p_ <.0001). 
+Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009). All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (phonemes: _r_ = -.53, _p_ <.0001). 
 
 
 
-Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. We created an additive linear model predicting word length with complexity, controling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below.  [not sure if we should do some model selection here...]
+Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. We created an additive linear model predicting word length in terms of phonemes with complexity, controling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below. 
+
+<!-- html table generated in R 3.1.0 by xtable 1.7-4 package -->
+<!-- Sun Nov  2 14:16:52 2014 -->
+<table border=1>
+<tr> <th>  </th> <th> Estimate </th> <th> Std. Error </th> <th> t value </th> <th> Pr(&gt;|t|) </th>  </tr>
+  <tr> <td align="right"> (Intercept) </td> <td align="right"> 7.6007 </td> <td align="right"> 0.2034 </td> <td align="right"> 37.36 </td> <td align="right"> 0.0000 </td> </tr>
+  <tr> <td align="right"> complexity </td> <td align="right"> 0.2322 </td> <td align="right"> 0.0114 </td> <td align="right"> 20.32 </td> <td align="right"> 0.0000 </td> </tr>
+  <tr> <td align="right"> mrc.fam </td> <td align="right"> 0.0022 </td> <td align="right"> 0.0005 </td> <td align="right"> 4.53 </td> <td align="right"> 0.0000 </td> </tr>
+  <tr> <td align="right"> mrc.imag </td> <td align="right"> -0.0003 </td> <td align="right"> 0.0004 </td> <td align="right"> -0.63 </td> <td align="right"> 0.5308 </td> </tr>
+  <tr> <td align="right"> mrc.conc </td> <td align="right"> -0.0034 </td> <td align="right"> 0.0004 </td> <td align="right"> -9.51 </td> <td align="right"> 0.0000 </td> </tr>
+  <tr> <td align="right"> subt.log.freq </td> <td align="right"> -1.1514 </td> <td align="right"> 0.0330 </td> <td align="right"> -34.92 </td> <td align="right"> 0.0000 </td> </tr>
+   </table>
 
 
 
@@ -221,23 +233,24 @@ This pattern held for the other two metrics of word length (morphemes and syllab
 <a name="11"/>
 <h3> Study 11: Cross-linguistic analysis</h3> 
 
+We translated all 499 words from Study 10 into 79 languages using Google translate (www.translate.google.com, retrieved March 2014). We translated the set of words into all languages available in Google translate. Words that were translated as English words were removed from the data set.
 
-```
-## Error: replacement has 494 rows, data has 12
-```
+Native speakers evaluated the accuracy of these langauges for 12 of the languages. Native speakers were told to look at the translations provided by Google, and in cases where the translation was bad or not given, provide a "better translation." Translations were not marked as inaccurate if the translation was missing. 
 
-```
-## Error: $ operator is invalid for atomic vectors
-```
+![plot of chunk 11:google_xling](figure/11:google_xling.png) 
 
 
 
 
+We counted the number of unicode characters for each translation. Plotted below is the  mean number of characters for all 499 words for all 80 languages. The dashed line indicates the grand mean across languages (_M_ = 9.97).
+
+![plot of chunk unnamed-chunk-37](figure/unnamed-chunk-37.png) 
 
 
 
+Variability in word length within languages was positively correlated with complexity ratings. Below the correlation coefficients are plotted for each language. Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages. The dashed line indicates the grand mean correlation across langauges. Triangles indicate the correlation between complexity and length, partialling out spoken frequency in English. Circles indicate the correlation between complexity and length for the subset of words that are monomorphemic in English. Squares indicate the correlation between complexity and length for the subset of open class words. 
 
-
+![plot of chunk unnamed-chunk-39](figure/unnamed-chunk-39.png) 
 
 
 
@@ -252,7 +265,7 @@ Plotted below is the proportion of low frequency object selections as a function
 
 
 
-![plot of chunk unnamed-chunk-40](figure/unnamed-chunk-40.png) 
+![plot of chunk unnamed-chunk-42](figure/unnamed-chunk-42.png) 
 
 
 
@@ -276,5 +289,7 @@ Plotted below is the proportion of low frequency object selections as a function
 Baayen, R., R. Piepenbrock, and L. Gulikers. CELEX2 LDC96L14. Web Download. Philadelphia: Linguistic Data Consortium, 1995. 
 
 Brysbaert, M., & New, B. (2009). Moving beyond Kucera and Francis: A critical evaluation of current word frequency norms and the introduction of a new and improved word frequency measure for American English. _Behavior Research Methods_, _41_, 977–990.
+
+Crump MJC., McDonnell J., Gureckis TM. (2013). Evaluating Amazon's Mechanical Turk as a Tool for Experimental Behavioral Research. _PLoS ONE_, 8(3).
 
 Wilson, M. (1988). MRC psycholinguistic database: Machine-usable dictionary, version 2.00. _Behavior Research Methods, Instruments, & Computers_, _20_, 6–10.

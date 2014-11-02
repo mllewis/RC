@@ -33,11 +33,15 @@ fs = 15 # set graphical params
 ts = 15
 rs = 6
 
+## SET WORKING DIRECTOR
+setwd('/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/analysis/')
+
 ## LOAD LIBRARIES AND FUNCTIONS
 library(psych)
 library(boot)
 library(rmarkdown)
 library(wordcloud)
+library(xtable)
 source("useful.R")
 
 # stuff for rendering to html in R markdown (need rmarkdown library too.)
@@ -62,6 +66,34 @@ boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){
   n.r = c("value"); n.c = c("lower_bound", "correlation", "upper_bound") 
   matrix(vec,1,3,dimnames = list(n.r,n.c)) 
   }
+
+# proportions and CIs for forced choice tasks
+p.fc <- function(d, dv){ 
+  # get proportions
+  complex_proport_c = sum(d$responseValue==dv)/length(d$responseValue)
+  
+  # get bootstrapped 95% CIs
+  if (!is.na(complex_proport_c)) { 
+    # bootstrap across subjects proportion responses for each category
+    b <- boot(d$responseValue, function(u,i) table(u[i])[dv]/length(u), R = 1000) 
+    ci <- boot.ci(b, type =  "basic")  
+    ciwl = ci$basic[4]
+    ciwu = ci$basic[5]
+    
+    es <- data.frame(p_complex = complex_proport_c,
+                     ciwl = ciwl,
+                     ciul = ciwu,
+                     n=length(d$workerid))
+    
+  } else {
+    es <- data.frame(p_c = NA,
+                     ciwl = NA,
+                     ciul = NA,
+                     n=NA)
+    
+  }
+  return (es)
+}
 
 # effect size for forced choice tasks
 d.fc <- function(d) {
@@ -96,40 +128,9 @@ d.fc <- function(d) {
     }
   return (es)
   }
-
-# proportions and CIs for forced choice tasks
-p.fc <- function(d, dv){ 
-  # get proportions
-  complex_proport_c = sum(d$responseValue==dv)/length(d$responseValue)
-  
-  # get bootstrapped 95% CIs
-  if (!is.na(complex_proport_c)) { 
-    # bootstrap across subjects proportion responses for each category
-    b <- boot(d$responseValue, function(u,i) table(u[i])[dv]/length(u), R = 1000) 
-    ci <- boot.ci(b, type =  "basic")  
-    ciwl = ci$basic[4]
-    ciwu = ci$basic[5]
-    
-    es <- data.frame(p_complex = complex_proport_c,
-                     ciwl = ciwl,
-                     ciul = ciwu,
-                     n=length(d$workerid))
-    
-  } else {
-    es <- data.frame(p_c = NA,
-                     ciwl = NA,
-                     ciul = NA,
-                     n=NA)
-    
-  }
-  return (es)
-}
-
-# set working directory
-setwd('/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/analysis/')
 ```
 
-[A blurb about AMT?]
+All experimental studies (Studies 1-10 and 12-13) were completed on Amazon Mechanical Turk (AMT). AMT is an online crowdsourcing platform that provides a reliable subject pool for web-based studies (Crump, McDonnell, & Gureckis, 2013). Participants were paid US$0.15-0.30 for their participation, depending on the length of the task. 
 
 <a name="1"/>
 <h3> Study 1: Geon mapping task</h3>
@@ -322,7 +323,7 @@ cg_norms$obj_class = as.numeric(cg_norms$obj_class)
 # plot
 ggplot(cg_norms, aes(y=meanRating, x=jitter(obj_class))) +
   geom_pointrange(aes(ymax = meanRating+cih,ymin=meanRating-cil)) + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  geom_smooth(method = "lm", color="red", formula = y ~ x) +
   annotate("text", x=4, y=.25, color = "red", size=rs,
            label=paste("r=",round(cor(cg_norms$obj_class, cg_norms$meanRating), 2))) +
   xlab("Object condition") +
@@ -388,7 +389,7 @@ qplot(len,p_complex, position=position_dodge(),
   geom_point(aes(len,p_complex), position=position_dodge(.9)) +
   geom_abline(intercept = .5, slope = 0, linetype = 2) + #
   ylim(0,1) +
-  ggtitle("Complex selections vs. # of syllables") +
+  ggtitle("Complex choices vs. # of syllables") +
   theme(text = element_text(size=fs),
         plot.title=element_text(size=ts, face = "bold"),
         plot.background = element_blank(),
@@ -650,7 +651,7 @@ multiplot(obj_c_plot, obj_rt_plot, cols = 2)
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment41/ref_complex_41.html" target="_blank"> here</a>.
 
-Plotted below is the proportion of complex object selections as function of number of syllables. The dashed line reflects chance selection between simple and complex alternatives.
+Plotted below is the proportion of complex object selections as function of number of syllables. The dashed line reflects chance selection between the simple and complex alternatives.
 
 ```{r 6:objects_random_syllables, warning = F, message = F, output = F, include = F}
 ## read data, and pre-process
@@ -693,7 +694,7 @@ qplot(len,p_complex, position=position_dodge(),
   geom_point(aes(len,p_complex), position=position_dodge(.9)) +
   geom_abline(intercept = .5, slope = 0, linetype = 2) + #
   ylim(0,1) +
-  ggtitle("Complex selections vs. # of syllables") +
+  ggtitle("Complex choices vs. # of syllables") +
   theme(text = element_text(size=fs),
         plot.title=element_text(size=ts, face = "bold"),
         plot.background = element_blank(),
@@ -867,7 +868,7 @@ Participants were also excluded based on study times. We transformed the time in
 
 ```{r 8:geon_rt_norms, warning = F, echo = F, fig.width = 4, fig.height = 4, message = F}
 ## get data into long form (accuracy and RT df) and do exclusions
-#if (processNorms) {
+if (processNorms) {
   # read in data
   raw <- read.csv("data/experiment/RefComplex37.results_A.csv")
   
@@ -1006,7 +1007,7 @@ Participants were also excluded based on study times. We transformed the time in
 
   # save RT by item
    write.csv(ms_all, "data/experiment/rtNormsGeons_BYITEM.csv")
-  #} 
+  } 
   
 rg_norms = read.csv("data/experiment/rtNormsGeons_BYITEM.csv")
 ```
@@ -1082,7 +1083,7 @@ ggplot(cg_norms, aes(meanRating, rt_meanRating))+
 cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
 ```
 
-Study times did not predict memory performance. The study times for hits (correct "yes" responses; _M_ = 7.33 ) did not differ from misses (correct "no" responses; _M_ = 7.34; _t_(223) = .61, _p_=.54).
+Study times did not predict memory performance. The study times for hits (correct "yes" responses; _M_ = 7.33) did not differ from misses (correct "no" responses; _M_ = 7.34; _t_(223) = .61, _p_=.54).
 
 <a name="9"/>
 <h3> Study 9: Real object study time task</h3> 
@@ -1095,7 +1096,7 @@ Participants were also excluded based on study times. We transformed the time in
 
 ```{r 9:objects_rt_norms, warning = F, echo = F, fig.width = 4, fig.height = 4, message = F}
 ## get data into long form (accuracy and RT df) and do exclusions
-#if (processNorms){
+if (processNorms){
   raw <- read.csv("data/experiment/RefComplex30.results_A.csv")
     
   # look at accuracy, and exclude those below chance
@@ -1206,7 +1207,7 @@ Participants were also excluded based on study times. We transformed the time in
   ms = ms[ms$Answer.train_image != 62,] 
 
   write.csv(ms,"data/experiment/rtNormsObjs_BYITEM.csv")
-  #}
+  }
 
 rto_norms = read.csv("data/experiment/rtNormsObjs_BYITEM.csv")
 ```
@@ -1260,9 +1261,15 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 ```{r 10:english_norms, warning= F, include = F}
 ## preprocess and merge in stuff
 if (processNorms) {
-  d <- read.csv("data/experiment/RefComplex26_all.results_A.csv",) ## THERE ARE FOUR DUPLICATE SUBJECTS-  remove these?
+  d <- read.csv("data/experiment/RefComplex26_all.results_A.csv")
+  
+  # remove subjects who participated in two different samples
+  d$workerid <- as.factor(d$workerid)
+  d$duplicate = as.factor(ifelse(((d$workerid == 24) | (d$workerid == 43) | (d$workerid == 66) 
+                                  | (d$workerid == 67)) & d$hitid == '2Z3KH1Q6SVQ801EMMZXLBOBYHFW2LF', 1, 0))
+  d = d[d$duplicate == 0,]
 
-  # take out people who missed check question
+  # remove subjects who missed check question
   d = d[d$Answer.value_18 == 7, ] 
   
   # melt into word and values into two data frames, then rejoin based on workerid+trial id
@@ -1348,7 +1355,7 @@ ms.chars <- aggregate(complexity ~ word + nchars + subt.log.freq + mrc.conc, dat
 ## plot histogram of words by phonemes, syllables, morphemes
 
 p_phon = ggplot(ms.phon, aes(x=mrc.phon)) + 
-    geom_histogram(fill = "black", alpha = .6 , binwidth = 1) +
+    geom_histogram(fill = "black", alpha = .6 , binwidth = 1, origin = -0.5) +
   xlab("Word length (phonemes)") +
   ylab("Frequency") +
   ggtitle('Word length (phonemes)') +
@@ -1363,7 +1370,7 @@ p_phon = ggplot(ms.phon, aes(x=mrc.phon)) +
         axis.line = element_line(color = 'black'))
 
 p_syl = ggplot(ms.syl, aes(x=mrc.syl)) + 
-    geom_histogram(fill = "black", alpha = .6 , binwidth = 1) +
+    geom_histogram(fill = "black", alpha = .6 , binwidth = 1, origin = -0.5) +
   xlab("Word length (syllables)") +
   ylab("Frequency") +
   ggtitle('Word length (syllables)') +
@@ -1378,7 +1385,7 @@ p_syl = ggplot(ms.syl, aes(x=mrc.syl)) +
         axis.line = element_line(color = 'black'))
 
 p_morph = ggplot(ms.morph, aes(x=clx.morph)) + 
-    geom_histogram(fill = "black", alpha = .6 , binwidth = 1) +
+    geom_histogram(fill = "black", alpha = .6 , binwidth = 1,  origin = -0.5) +
   xlab("Word length (morphemes)") +
   ylab("Frequency") +
   ggtitle('Word length (morphemes)') +
@@ -1416,7 +1423,7 @@ sc <- aggregate(mrc.syl ~ nchars + word, data=eng, mean)
 cor.test(sc$mrc.syl, sc$nchars)
 ```
 
-Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to avoid over-plotting.
+246 participants completed the rating task. We excluded participants who missed a simple math question in the middle of the task that served as an attentional check. This excluded 6 participants (2%). Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to avoid over-plotting.
 
 ```{r, echo = F, fig.width = 12, fig.height = 4}
 ## plot complexity norms vs word length for each of the three metrics
@@ -1641,7 +1648,7 @@ cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
 cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
 ```
 
-Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009) All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (_r_ = -.53, _p_ <.0001). 
+Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009). All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (phonemes: _r_ = -.53, _p_ <.0001). 
 
 ```{r, include = F}
 ## complexity between different psycholinguistics variables and complexity
@@ -1661,14 +1668,16 @@ ms.freq.phon.complexity <- aggregate(complexity ~ word + subt.log.freq + mrc.pho
 cor.test(ms.freq.phon.complexity$subt.log.freq, ms.freq.phon.complexity$mrc.phon)
 ```
 
-Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. We created an additive linear model predicting word length with complexity, controling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below.  [not sure if we should do some model selection here...]
+Nonetheless, the relationship between word length and complexity remained reliable controling for all four of these factors. We created an additive linear model predicting word length in terms of phonemes with complexity, controling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below. 
 
-```{r, include = F}
+```{r, results='asis', echo = F, warning = F}
 ## are the correlations between length and complexity reliable, controlling for everything? [yes]
 # all
 m_phon = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + mrc.conc + subt.log.freq, eng)
-summary(m_phon)
+print(xtable(summary(m_phon)), type='html')
+```
 
+```{r, include = F}
 m_morph = lm(clx.morph ~ complexity + mrc.fam + mrc.imag + mrc.conc  + subt.log.freq, eng)
 m_syl = lm(mrc.syl ~ complexity + mrc.fam + mrc.imag + mrc.conc + subt.log.freq, eng)
 summary(m_morph)
@@ -1712,21 +1721,24 @@ xling.eng$clx.morph = as.factor(xling.eng$clx.morph)
 <a name="11"/>
 <h3> Study 11: Cross-linguistic analysis</h3> 
 
+We translated all 499 words from Study 10 into 79 languages using Google translate (www.translate.google.com, retrieved March 2014). We translated the set of words into all languages available in Google translate. Words that were translated as English words were removed from the data set.
+
+Native speakers evaluated the accuracy of these langauges for 12 of the languages. Native speakers were told to look at the translations provided by Google, and in cases where the translation was bad or not given, provide a "better translation." Translations were not marked as inaccurate if the translation was missing. 
+
 ```{r 11:google_xling, echo = F, fig.width = 4, fig.height = 4}
 ## translation accuracy
-checksR = read.csv("data/corpus/translation_accuracy.csv")[1:500,]
-checksR = checksR[checksR$ENGLISH != "peso",]
+checksR = read.csv("data/corpus/translation_accuracy.csv")[1:499,]
 
 accuracy = colSums(checksR[,2:13], dims = 1)/ dim(checksR[,])[1]
-accuracy = as.data.frame(accuracy)
-accuracy$language = tolower(rownames(accuracy))
+accuracy.df = as.data.frame(accuracy)
+accuracy.df$language = tolower(rownames(accuracy.df))
 
-qplot(accuracy$language, accuracy$accuracy, fill = as.factor(accuracy),
+qplot(accuracy.df$language, accuracy.df$accuracy, fill = "red",
       ylim=c(0,1), position=position_dodge(),
-      data=accuracy, geom="bar", ylab="Prop. correct Google translations", 
+      data=accuracy.df, geom="bar", ylab="Prop. correct", 
       main = "Google translation accuracy",
       xlab="Language", stat="identity") +
-  geom_abline(intercept = mean(accuracy$accuracy), slope = 0, linetype = 2) +
+  geom_abline(intercept = mean(accuracy.df$accuracy), slope = 0, linetype = 2) +
   theme(text = element_text(size=fs),
         plot.title=element_text(size=ts, face = "bold"),
         plot.background = element_blank(),
@@ -1734,11 +1746,12 @@ qplot(accuracy$language, accuracy$accuracy, fill = as.factor(accuracy),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         axis.line = element_line(color = 'black'),
-        legend.position="none")
+        legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5))
 ```
 
 
-```{r, include = F, eval = F}
+```{r, include = F}
 ## read in xling data and merge with English complexity norms
 xling = read.csv("data/corpus/xling_csv.csv") 
 index <- match(xling$ENGLISH, xling.eng$word)
@@ -1748,24 +1761,56 @@ xling$class <- xling.eng$class[index]
 xling$clx.morph <- xling.eng$clx.morph[index]
 xling$subt.log.freq  <- xling.eng$subt.log.freq[index]
 xling$X <- NULL
-
-xling = xling[xling$ENGLISH != "peso",] # remove bad item
 ```
 
+We counted the number of unicode characters for each translation. Plotted below is the  mean number of characters for all 499 words for all 80 languages. The dashed line indicates the grand mean across languages (_M_ = 9.97). Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages.
 
-```{r, include = F, eval = F}
-## get correlations by language
+```{r, echo = F, fig.width = 10, fig.height = 5}
+# get mean length by language
+ML = colMeans(xling[c(2:81)], na.rm = T, dims = 1)
+ML.df = as.data.frame(ML)
+ML.df$language = as.character(tolower(lapply(str_split(rownames(ML.df),"_"),function(x) {x[1]}))) # clean up names
+
+# sort by length
+ML.df$language = reorder(ML.df$language, ML.df$ML, mean)
+ML.df$language = factor(ML.df$language, levels = rev(levels(ML.df$language)))
+
+# add check information
+coded_languages = c("english", "spanish", "welsh", "vietnamese", "russian", "portuguese", "persian", "bosnian", "french", "hebrew", "italian", "korean", "polish" )
+ML.df$checked = as.factor(ifelse(is.element(ML.df$language, coded_languages), "yes", "no"))
+
+ggplot(ML.df, aes(language, ML, fill = checked)) + 
+  geom_bar(stat = "identity") + 
+  geom_hline(y=mean(ML.df$ML), lty=2) +
+  ylab("mean length (characters)") +
+  xlab("Language") + 
+  ggtitle("Mean number of characters by language") +
+ theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'),
+        legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
+   scale_fill_manual(values=c("pink", "red"))
+```
+
+```{r, include = F}
+## get correlations with complexity by language
 lens = c(which(grepl("LEN",names(xling)))) # get length column indices
-xlingCORR = xling[c(lens, which(names(xling)== "subt.log.freq"), which(names(xling)== "complexity"), which(names(xling)== "clx.morph"), which(names(xling)== "class"))] 
+xlingCORR = xling[c(lens, which(names(xling) == "subt.log.freq"), which(names(xling)== "complexity"), which(names(xling) == "clx.morph"), which(names(xling) == "class")  )] 
 
 # get correlations with for all 499 words bootstrapped CIs
 if (doSlow) {
   c_l = data.frame (language = character(), lower.ci = numeric(0), corr = numeric(0), upper.ci = numeric(0))
   levels(c_l$language) = names(xlingCORR)
-  complexity_i = which(names(xlingCORR)== "complexity")
+  complexity_i = which(names(xlingCORR) == "complexity")
   
+  # for each language, calculate correlation between length and complexity norm
   for (i in 1:length(lens)){
-    c_l[i, 2:4] = boot.cor(xlingCORR[,i], xlingCORR[,complexity_i])
+    c_l[i, 2:4] = boot.cor(xlingCORR[,i], xlingCORR[ ,complexity_i])
     c_l[i, "language"] = names(xlingCORR)[i]
     }
   write.csv(c_l, "data/corpus/xling_corrs.csv")
@@ -1773,8 +1818,9 @@ if (doSlow) {
 c_l = read.csv("data/corpus/xling_corrs.csv")
 
 # now do correlations, partialling out frequency
-cmat.p = partial.r(xlingCORR[,1:82],c(1:80, which(names(xlingCORR) == "complexity")), which(names(xlingCORR) == "subt.log.freq"))
-cxl = as.data.frame(cmat.p[which(row.names(cmat.p) == "complexity"),1:80])
+cmat.p = partial.r(xlingCORR[,1:82], c(1:80, which(names(xlingCORR) == "complexity")), 
+                   which(names(xlingCORR) == "subt.log.freq"))
+cxl = as.data.frame(cmat.p[which(row.names(cmat.p) == "complexity"), 1:80])
 cxl$lang = row.names(cxl)
 names(cxl) = c("corr", "lang")
 
@@ -1783,8 +1829,8 @@ index <- match(c_l$language, cxl$lang)
 c_l$p.corr<- cxl$corr[index]
 
 # get correlations for mono only
-mono_cor = data.frame (language = character(), mono.cor = numeric(0))
-complexity_i = which(names(xlingCORR)== "complexity")
+mono_cor = data.frame(language = character(), mono.cor = numeric(0))
+complexity_i = which(names(xlingCORR) == "complexity")
 levels(mono_cor$language) = names(xlingCORR)
 
 for (i in 1:length(lens)){
@@ -1799,73 +1845,76 @@ c_l$mono.cor<- mono_cor$mono.cor[index]
 
 # get correlations for open only
 open_cor = data.frame(language = character(), open.cor = numeric(0))
-complexity_i = which(names(xlingCORR)== "complexity")
+complexity_i = which(names(xlingCORR) == "complexity")
 levels(open_cor$language) = names(xlingCORR)
 
 for (i in 1:length(lens)){
-  open_cor[i, "open.cor"] = cor(xlingCORR[xlingCORR$class != 0, i], 
-                                xlingCORR[xlingCORR$class != 0, complexity_i], use = "complete")
+  open_cor[i, "open.cor"] = cor(xlingCORR[xlingCORR$class == 1, i], 
+                                xlingCORR[xlingCORR$class == 1, complexity_i], use = "complete")
   open_cor[i, "language"] = names(xlingCORR)[i]
 }
-
 # merge in open
 index <- match(c_l$language, open_cor$language)
 c_l$open.cor<- open_cor$open.cor[index]
 
 # prep for plotting
-c_l = c_l[order(c_l$corr),] # sort by correlation
 c_l$language=  as.character(tolower(lapply(str_split(c_l$language,"_"),function(x) {x[1]}))) # clean up names
+c_l$language = reorder(c_l$language, c_l$corr, mean)
+c_l$language= factor(c_l$language, levels = rev(levels(c_l$language)))
+
+
 #c_l$language <- factor(c_l$language, levels =  rev(as.character(c_l$language))) #orders by magnitude of correlation
 
 # add check information
-coded_languages = c("english", "spanish", "welsh", "vietnamese", "russian", "portuguese", "persian", "bosnian", "french", "hebrew", "italian", "korean", "polish" )
 c_l$checked = as.factor(ifelse(is.element(c_l$language, coded_languages), "yes", "no"))
 ```
 
+Variability in word length within languages was positively correlated with complexity ratings. Below the correlation coefficients are plotted for each language. Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages. The dashed line indicates the grand mean correlation across langauges. Triangles indicate the correlation between complexity and length, partialling out spoken frequency in English. Circles indicate the correlation between complexity and length for the subset of words that are monomorphemic in English. Squares indicate the correlation between complexity and length for the subset of open class words. 
 
-```{r, include = F, eval = F}
+```{r, echo = F, fig.width = 10, fig.height = 5}
 ## plot correlations by language
 
 # fix one label 
 levels(c_l$language)[levels(c_l$language)=="haitian.creole"] <- "haitian creole"
 
-c_lb = c_l
-c_lb$corr = 0
-
+#c_lb = c_l
+#c_lb$corr = 0
 
 #if (savePlots) {pdf("figure/xling.pdf", height = 6, width = 12)}
 
-#ggplot(c_l, aes(language, corr, fill = checked)) + 
-ggplot(c_l, aes(language, corr, fill = "grey")) + 
+#ggplot(c_l, aes(language, corr, fill = "grey")) + 
+ggplot(c_l, aes(language, corr, fill = checked)) + 
   geom_bar(stat = "identity") + 
   geom_linerange(aes(ymax=upper.ci, ymin=lower.ci)) +
-  #geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
-  #geom_point(data=c_l, mapping=aes(x=language, y=mono.cor), size=2, shape = 16) +
-  #geom_point(data=c_l, mapping=aes(x=language, y=open.cor), size=2, shape = 15) +
+  geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
+  geom_point(data=c_l, mapping=aes(x=language, y=mono.cor), size=2, shape = 16) +
+  geom_point(data=c_l, mapping=aes(x=language, y=open.cor), size=2, shape = 15) +
   geom_hline(y=mean(c_l$corr), lty=2) +
-  #geom_hline(y=0, lty=1) +
+  geom_hline(y=0, lty=1) +
   ylab("Pearson's r") +
   xlab("Language") + 
-  theme(plot.background = element_blank(),
-   panel.grid.major = element_blank(),
-   panel.grid.minor = element_blank(),
-   panel.border = element_blank())  +
-  theme(axis.text.x= element_text(angle=90,hjust=1,vjust=0.5, size = 11)) +
-  theme(axis.title = element_text(size=20)) +
-  theme(axis.line = element_line(color = 'black'))+
-  scale_fill_manual(values=c("red")) +
-  theme(legend.position="none") +
-  scale_y_continuous(limits = c(-.75, .75), expand = c(0,.007))+
-  #scale_y_continuous(limits = c(-.03, .75), expand = c(0,.007))+
-  scale_x_discrete( labels=c("")) 
+  ggtitle("Correlation between complexity ratings and length") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black'),
+        legend.position="none",
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
+  scale_fill_manual(values=c("pink", "red")) +
+  #scale_y_continuous(limits = c(-.75, .75), expand = c(0,.007))+
+  scale_y_continuous(limits = c(-.08, .75), expand = c(0,.007)) 
+  #scale_x_discrete( labels=c("")) 
 #if(savePlots){dev.off()}
 ```
 
-```{r, include = F, , eval = F}
+```{r, include = F, }
 c_l <- c_l[order(c_l$language),]
 ```
 
-```{r, include = F, , eval = F}
+```{r, include = F, }
 ## grand mean correlation between complexity and length
 
 # grand mean correlation between complexity and length
@@ -1974,5 +2023,7 @@ chisq.test(table(d_sequential$responseValue, d_sequential$Answer.lang_condition)
 Baayen, R., R. Piepenbrock, and L. Gulikers. CELEX2 LDC96L14. Web Download. Philadelphia: Linguistic Data Consortium, 1995. 
 
 Brysbaert, M., & New, B. (2009). Moving beyond Kucera and Francis: A critical evaluation of current word frequency norms and the introduction of a new and improved word frequency measure for American English. _Behavior Research Methods_, _41_, 977–990.
+
+Crump MJC., McDonnell J., Gureckis TM. (2013). Evaluating Amazon's Mechanical Turk as a Tool for Experimental Behavioral Research. _PLoS ONE_, 8(3).
 
 Wilson, M. (1988). MRC psycholinguistic database: Machine-usable dictionary, version 2.00. _Behavior Research Methods, Instruments, & Computers_, _20_, 6–10.
