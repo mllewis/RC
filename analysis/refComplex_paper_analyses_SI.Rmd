@@ -1726,7 +1726,7 @@ Native speakers evaluated the accuracy of these langauges for 12 of the language
 
 ```{r 11:google_xling, echo = F, fig.width = 4, fig.height = 4}
 ## translation accuracy
-checksR = read.csv("data/corpus/translation_accuracy.csv")[1:499,]
+checksR = read.csv("data/corpus/xling_translation_accuracy.csv")[1:499,]
 
 accuracy = colSums(checksR[,2:13], dims = 1)/ dim(checksR[,])[1]
 accuracy.df = as.data.frame(accuracy)
@@ -1752,7 +1752,7 @@ qplot(accuracy.df$language, accuracy.df$accuracy, fill = I("red"),
 
 ```{r, include = F}
 ## read in xling data and merge with English complexity norms
-xling = read.csv("data/corpus/xling_csv.csv") 
+xling = read.csv("data/corpus/xling_lens.csv") 
 index <- match(xling$ENGLISH, xling.eng$word)
 
 xling$complexity <- xling.eng$complexity[index]
