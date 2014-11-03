@@ -1791,7 +1791,7 @@ ggplot(ML.df, aes(language, ML, fill = checked)) +
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         axis.line = element_line(color = 'black'),
-        legend.position="none",
+        legend.position= "none",
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
    scale_fill_manual(values=c("pink", "red"))
 ```
@@ -1860,9 +1860,7 @@ c_l$open.cor<- open_cor$open.cor[index]
 c_l$language=  as.character(tolower(lapply(str_split(c_l$language,"_"),function(x) {x[1]}))) # clean up names
 c_l$language = reorder(c_l$language, c_l$corr, mean)
 c_l$language= factor(c_l$language, levels = rev(levels(c_l$language)))
-
-
-#c_l$language <- factor(c_l$language, levels =  rev(as.character(c_l$language))) #orders by magnitude of correlation
+#c_l$language <- factor(c_l$language, levels =  rev(as.character(c_l$language))) 
 
 # add check information
 c_l$checked = as.factor(ifelse(is.element(c_l$language, coded_languages), "yes", "no"))
@@ -1879,20 +1877,21 @@ levels(c_l$language)[levels(c_l$language)=="haitian.creole"] <- "haitian creole"
 #c_lb = c_l
 #c_lb$corr = 0
 
-#if (savePlots) {pdf("figure/xling.pdf", height = 6, width = 12)}
+#if (savePlots) { 
+pdf("figure/FIG_3.pdf", height = 6, width = 12)}
 
 #ggplot(c_l, aes(language, corr, fill = "grey")) + 
 ggplot(c_l, aes(language, corr, fill = checked)) + 
   geom_bar(stat = "identity") + 
   geom_linerange(aes(ymax=upper.ci, ymin=lower.ci)) +
   geom_point(data=c_l, mapping=aes(x=language, y=p.corr), size=2, shape = 17) +
-  geom_point(data=c_l, mapping=aes(x=language, y=mono.cor), size=2, shape = 16) +
-  geom_point(data=c_l, mapping=aes(x=language, y=open.cor), size=2, shape = 15) +
+ # geom_point(data=c_l, mapping=aes(x=language, y=mono.cor), size=2, shape = 16) +
+  #geom_point(data=c_l, mapping=aes(x=language, y=open.cor), size=2, shape = 15) +
   geom_hline(y=mean(c_l$corr), lty=2) +
   geom_hline(y=0, lty=1) +
   ylab("Pearson's r") +
   xlab("Language") + 
-  ggtitle("Correlation between complexity ratings and length") +
+  #ggtitle("Correlation between complexity ratings and length") +
   theme(text = element_text(size=fs),
         plot.title=element_text(size=ts, face = "bold"),
         plot.background = element_blank(),
