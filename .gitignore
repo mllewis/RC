@@ -2,7 +2,7 @@ writeup/misc/
 
 analysis/figure/
 analysis/refComplex_paper_analyses_SI.md
-analysis/refComplex_paper_analyses_SI.Rmd
+analysis/refComplex_paper_analyses_SI.html
 analysis/.RData
 analysis/.Rhistory
 analysis/.Rprofile
