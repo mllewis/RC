@@ -4,6 +4,9 @@ writeup/nature/figs/misc/
 analysis/figure/
 analysis/refComplex_paper_analyses_SI.md
 analysis/refComplex_paper_analyses_SI.html
+analysis/refComplex_paper_analyses.Rmd
+analysis/refComplex_paper_analyses.md
+analysis/refComplex_paper_analyses.html
 analysis/.RData
 analysis/.Rhistory
 analysis/.Rprofile
