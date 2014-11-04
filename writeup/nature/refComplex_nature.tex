@@ -10,6 +10,9 @@
 % reference calls and reference-list numbers.
 
 \usepackage[super]{scicite}
+\usepackage{hyperref}
+
+
 
 % Use times if you have the font installed; otherwise, comment out the
 % following line.
@@ -107,24 +110,25 @@
 {\bf Are the forms of words systematically related to their meaning? The arbitrariness of the sign has long been a foundational part of our understanding of human language \cite{saussure,hockett1960}. Yet the lengths of words show systematic patterning: Longer words are less frequent and less predictable \cite{zipf1936,piantadosi2011a}. Theories of communication predict a second relationship between length and meaning, however: Longer descriptions should be not just less predictable but also more complex \cite{horn1984,jaeger2006}. Here we show that both the lexicons of human languages and individual speakers encode the relationship between linguistic and cognitive complexity. Experimentally, participants mapped longer words to more complex objects in comprehension and production tasks and across a range of stimuli. Explicit judgments of complexity were also highly correlated with implicit measures of study time in a memory task, suggesting that complexity is directly related to basic cognitive processes. Observationally, judgements of complexity for a sample of real words correlate highly with their length across 80 languages, even controlling for frequency, familiarity, imageability, and concreteness. These results point to a general regularity in the design of lexicons and suggest the importance of communicative and cognitive constraints on language evolution \cite{christiansen2008,lieberman2007}.}
 
 
+
 In a classic example of pragmatic reasoning \cite{horn1984}, the utterance ``Lee got the car to stop'' seems to imply an unusual state of affairs. Had the speaker wished to convey that Lee simply applied the brakes, the shorter and less exceptional ``Lee stopped the car'' would be a better description. The use of a longer utterance licenses the inference that there was some problem in stopping---perhaps the brakes failed---and that the situation is more complex. Does this same reasoning apply to the meanings of words? Is a ``tupabugorn'' more likely to be a complex, unusual object than a ``bugorn''? 
 
-\begin{figure}[ht!]
+\begin{figure}[t!]
 \begin{center}
-\includegraphics[scale = 1]{figs/FIG_1.pdf}
-\caption{(a) Schema of a 1 vs. 5 geon trial and the corresponding data point. One referential alternative contains one geon and the other contains five geons. (b) Artificial ``geon" stimuli. Each row shows a different level of complexity, determined by the number of geon parts in the objects. (c, d) Experimental results from task in which participants were asked to map a novel word of varying length to one of two possible referents. Effect size between the long and short language conditions is plotted against the complexity ratio of the two referent alternatives. Fig.\ 1c shows the referents plotted in terms of explicit complexity judgements, and Fig.\ 1d shows the referents plotted in terms of reaction time. Error bars show 95\% confidence intervals.}
+\includegraphics{figs/FIG_1.pdf}
+\caption{(a) Schema of a 1 vs.\ 5 geon trial and the corresponding data point. One referential alternative contains one geon and the other contains five geons. (b) Artificial ``geon" stimuli. Each row shows a different level of complexity, determined by the number of geon parts in the objects. (c, d) Experimental results from a task in which participants were asked to map a novel word of varying length to one of two possible referents. Effect size between the long and short language conditions is plotted against the complexity ratio of the two referent alternatives. Fig.\ 1c shows the referents plotted in terms of explicit complexity judgements, and Fig.\ 1d shows the referents plotted in terms of reaction time. Error bars show 95\% confidence intervals.}
 \end{center}
 \label{fig:geons}
 \end{figure}
 
-We tested this hypothesis by asking whether speakers would be biased to interpret a long novel word as being more likely to refer to a more complex novel referent. We presented participants on Amazon Mechanical Turk (Study 1: $N=750$) with a novel word of either 2 or 4 syllables and two possible objects as referents (Fig.\ 1a). Possible referents were novel artificial objects whose complexity we manipulated by varying the number of parts the object contained (1 - 5 ``geons'' \cite{biederman1987}; Fig.\ 1b; these judgements were highly correlated with explicit complexity judgments, Study 2: $r = .93$, $p < .0001$). Participants were asked to select which object the word named for every unique combination of object complexities (1 vs.\ 2 geons, 1 vs.\ 3 geons, 1 vs.\ 4 geons, etc.).
+We tested this hypothesis by asking whether speakers would be biased to interpret a long novel word as being more likely to refer to a more complex novel referent. We presented participants on Amazon Mechanical Turk (Study 1: $N=750$) with a novel word of either 2 or 4 syllables and two possible objects as referents (Fig.\ 1a). Possible referents were novel artificial objects whose complexity we manipulated by varying the number of parts the object contained (1 - 5 ``geons'' \cite{biederman1987}; Fig.\ 1b; these judgements were highly correlated with explicit complexity judgments, Study 2: $N = 60$, $r = .93$, $p < .0001$). Participants were asked to select which object the word named for every unique combination of object complexities (1 vs.\ 2 geons, 1 vs.\ 3 geons, 1 vs.\ 4 geons, etc.).
 
-Across conditions, the more complex object was more likely to be judged the referent of the longer word. For each condition (e.g., 1 vs.\ 2 geons), we calculated the effect size for participants' complexity bias---the degree to which the complex object was more likely to be chosen as the referent of a long word, compared to the short word.  Effect size was highly correlated with the ratio of object complexities: The greater the mismatch in object complexity, the more the longer word was paired with the more complex object ($r = -.87$, $p < .0001$; Fig.\ 1c). In a control experiment, we also found this bias with words that were composed of randomly concatenated syllables: participants were more likely to select a five geon object compared to a single geon object as the number of syllables in the word increased (Study 3: $N=200$; $\beta=-.44$, $p <.0001$).
+Across conditions, the more complex object was more likely to be judged the referent of the longer word. For each object condition (e.g., 1 vs.\ 2 geons), we calculated the effect size for participants' complexity bias---the degree to which the complex object was more likely to be chosen as the referent of a long word, compared to the short word.  Effect size was highly correlated with the ratio of object complexities: The greater the mismatch in object complexity, the more the longer word was paired with the more complex object ($r = -.87$, $p < .0001$; Fig.\ 1c). In a control experiment, we also found this bias with words that were composed of randomly concatenated syllables: participants were more likely to select a five geon object compared to a single geon object as the number of syllables in the word increased (Study 3: $N=200$; $\beta=-.44$, $p <.0001$).
 					
 \begin{figure}[ht!]
 \begin{center}
-\includegraphics[scale = 1]{figs/FIG_2.pdf}
-\caption{(a) Naturalistic, novel stimuli. Each row corresponds to a quintile determined by the explicit complexity judgements (top: least complex; bottom: most complex). (b, c) Experimental results from task in which participants were asked to map a novel word of varying length to one of two possible referents. Effect size between the long and short language conditions is plotted against the complexity ratio of the two referent alternatives. Fig.\ 2b shows the referents plotted in terms of explicit complexity judgements, and Fig.\ 2c shows the referents plotted in terms of reaction time. Error bars show 95\% confidence intervals.}
+\includegraphics{figs/FIG_2.pdf}
+\caption{(a) Naturalistic, novel stimuli. Each row corresponds to a quintile determined by the explicit complexity judgements (top: least complex; bottom: most complex). (b, c) Experimental results from a task in which participants were asked to map a novel word of varying length to one of two possible referents. Effect size between the long and short language conditions is plotted against the complexity ratio of the two referent alternatives. Fig.\ 2b shows the referents plotted in terms of explicit complexity judgements, and Fig.\ 2c shows the referents plotted in terms of reaction time. Error bars show 95\% confidence intervals.}
 \end{center}
 \label{fig:real_objs}
 \end{figure}
@@ -139,22 +143,22 @@ Together, these experiments point to a complexity bias in interpreting novel lab
 
 \begin{figure}[ht!]
 \begin{center}
-\includegraphics[scale = .53]{figs/xling.pdf}
+\includegraphics[scale = .53]{figs/FIG_3.pdf}
 \caption{Correlations between conceptual complexity norms and word lengths, across languages. Dark red bars indicate languages for which translations were checked by native speakers; all other bars show translations obtained via Google Translate. Error bars show 95\% confidence intervals obtained via non-parametric bootstrap. Triangles indicate correlation value partialling out English log frequency. The dashed line indicates the grand mean correlation across languages.} 
 \end{center}
 \label{fig:real_objs}
 \end{figure}
 
-We collected ratings of meaning complexity for 499 English words  in a rating procedure similar to Studies 2 and 4 (Study 10: $N = 250$). Complexity judgements were positively correlated with word length, measured in phonemes, syllables, and morphemes ($r_{phonemes} = .66$, $r_{syllables} = .63$, $r_{morphemes} = .42$, all $p$s $< .0001$), even when closed-class words were excluded ($N = 438$; $r_{phonemes} = .65$, $r_{syllables} = .62$, $r_{morphemes} = .42$, all $p$s $< .0001$). Importantly, these relationships also remained reliable after controlling for the word's concreteness, imageability, and familiarity. 
+We collected ratings of meaning complexity for 499 English words  in a rating procedure similar to the objects in Studies 2 and 4 (Study 10: $N = 246$). Complexity judgements were positively correlated with word length, measured in phonemes, syllables, and morphemes ($r_{phonemes} = .67$, $r_{syllables} = .63$, $r_{morphemes} = .43$, all $p$s $< .0001$), even when closed-class words were excluded ($N = 438$; $r_{phonemes} = .65$, $r_{syllables} = .63$, $r_{morphemes} = .42$, all $p$s $< .0001$). Importantly, these relationships also remained reliable after controlling for the word's concreteness, imageability, and familiarity. 
 						
 If the complexity bias relies on a universal cognitive process, it should generalize to lexicons beyond English. We explored this prediction in 79 additional languages, using Google Translate to translate our word set (Study 11). Native speakers checked the accuracy of these translations for 12 of the 79 languages, finding an accuracy of .92 within this sample. For each language, we calculated the correlation between word length in terms of number of characters (to allow comparison between languages for which no phonetic dictionary was available) and mean complexity rating. All 79 languages showed a positive correlation between length and complexity ratings (Fig. 3). The grand mean correlation across languages was .34. 
 					
-Word length is strongly related to linguistic predictability, operationalized via simple frequency \cite{zipf1936} or using a language model \cite{piantadosi2011a}. But the regularity we describe---a relationship between conceptual complexity and word length---holds even when controlling for frequency. In English, the correlation was only slightly reduced when controlling for log frequency ($r = .56$, $p < .0001$). Across languages, partialling out log frequency (estimated in English), the grand mean correlation was .22. In addition, in a number of experiments, when we manipulated the observed frequencies of novel objects, we found no effects on judgments of word length (Studies 12--13). 
+
+Word length is strongly related to linguistic predictability, operationalized via simple frequency \cite{zipf1936} or using a language model \cite{piantadosi2011a}. But the regularity we describe---a relationship between conceptual complexity and word length---holds even when controlling for frequency. In English, the correlation was only slightly reduced when controlling for log frequency ($r = .57$, $p < .0001$). Across languages, partialling out log frequency (estimated in English), the grand mean correlation was .22. In addition, in a number of experiments, when we manipulated the observed frequencies of novel objects, we found no effects on judgments of word length (Studies 12--13). 
 
 Languages also show phonological iconicity effects, such that semantic features \cite{maurer2006shape} and even particular form classes \cite{farmer2006phonological} are marked by particular sound patterns. Our findings could be due to some broad iconic relationship between abstract measures of complexity and amount of verbal or orthographic effort---indeed this is precisely the relationship that Horn originally noticed. But specific iconic hypotheses that posit a parallel between an object's parts and the number of phonemes, morphemes, or syllables in its label do not account for the patterns in the English lexicon, which hold even more strongly for the words below the median in concreteness ($r_{phonemes}  = .73$, $r_{syllables} = .72$, $r_{morphemes} = .47$, all $p$s $< .0001$). 
 
-% FIXME
-Greenberg\cite{greenberg1966} noted that some forms are more complex, or \emph{marked}, where markedness is denoted by morphological structure. For example, on this account, plurals are considered more complex than singulars because they are marked morphologically (by the -s morpheme). Although such morphological structure could in principle contribute to the broader trend we observed, it also does not explain the pattern in our data. First, the morphological history of a word varies across languages, but our data suggest that complexity correlations are present in languages from widely varying families. Second, in English, the correlations we observed hold for monomorphemic words alone ($N = 387$; $r_{phonemes} = .53$, $r_{syllables} = .46$, all $p$s $< .0001$).
+Greenberg\cite{greenberg1966} noted that some forms are more complex, or \emph{marked}, where markedness is denoted by morphological structure. For example, on this account, plurals are considered more complex than singulars because they are marked morphologically (by the -s morpheme). Although such morphological structure could in principle contribute to the broader trend we observed, it also does not explain the pattern in our data. First, the morphological history of a word varies across languages, but our data suggest that complexity correlations are present in languages from widely varying families. Second, in English, the correlations we observed hold for monomorphemic words alone ($N = 387$; $r_{phonemes} = .53$, $r_{syllables} = .47$, all $p$s $< .0001$).
 
 % What are the origins of structure in human language? 
 % This sentence sounded like grammar to me. 
@@ -162,8 +166,6 @@ Our findings reveal a broad systematicity in the design of  languages---a bias f
 
 
 \paragraph*{Methods}
-All participants in the experimental studies were recruited on Amazon Mechanical Turk and paid \$0.15-0.30 for their participation, depending on the length of the task. 
-
 In Studies 1 and 5, we manipulated word length (2 vs.\ 4 syllables) and the relative complexity of the referent alternatives within participants.  There were 15 complexity conditions, corresponding to every possible combination of object quintiles. In Study 1, the quintiles were determined by the number of geons in the object. In Study 5, the quintiles were determined by the norms obtained in Study 4. Each participant completed 4 short and 4 long trials in a random order, where each word was randomly associated with one of the complexity conditions. No participant saw the same complexity condition twice and no word or object was repeated across trials. 
 
 In Studies 2 and 4, we presented participants with 12 objects from the the full stimulus set one at a time. For each object, we asked ``How complicated is this object?,'' and participants responded using a slider scale, anchored at ``simple'' and ``complicated.'' The first two objects were an image of a ball and a motherboard to anchor participants on the scale.
@@ -174,22 +176,22 @@ In Study 7, participants were presented 10 objects from the set of objects norme
 
 In Studies 8 and 9, participants were told they were going to view some objects and their memory of those exact objects would later be tested. In the study phase, participants were presented with half of the full stimulus set one at a time (20 geon objects and 30 naturalistic objects) and allowed to click a ``next'' button when they were done studying each object. After the training phase, we presented participants with each object in the full stimulus set  (40 geon object and 60 naturalistic objects), and asked ``Have you seen this object before?.'' Participants responded by clicking a ``yes'' or ``no'' button.
 
-In Study 10, we selected 499 relatively high-frequency English words. For each word, we asked ``How complex is the meaning of this word?," and participants indicated their response on a 7-pt Likert scale, anchored at ``simple" and ``complex." Each participant rated 30 words.
+In Study 10, we selected 499 relatively high-frequency English words. For each word, we asked ``How complex is the meaning of this word?," and participants indicated their response on a 7-pt Likert scale, anchored at ``simple" and ``complex." The first two words were always ``ball" and ``motherboard" to anchor participants on the scale. Each participant rated a sample of 32 words.
 
-In Study 12 (N = 477), we presented participants with 10 objects on a single screen. The objects were composed of a single geon. There were two different types of objects. One object type appeared nine times (``high frequency object") and the second object type appeared once (``low frequency object"). After this training period, participants completed a forced choice mapping task, as in Studies 1 and 5. We presented a word that was either 2 or 4 syllables long and asked participants to make a judgment about whether the word referred to the low or high frequency object. Each participant completed a single mapping trial, and word length was manipulated between participants. There was no difference between the long and short word conditions ($\chi ^2(1) = 0.02$,  $p = .89$).
+In Study 12 ($N = 477$), we presented participants with 10 objects on a single screen. The objects were composed of a single geon. There were two different types of objects. One object type appeared nine times and the second object type appeared once. After this training period, participants completed a forced choice mapping task, as in Studies 1 and 5. We presented a word that was either 2 or 4 syllables long and asked participants to make a judgment about whether the word referred to the low or high frequency object. Each participant completed a single mapping trial, and word length was manipulated between participants. There was no difference between the long and short word conditions ($\chi ^2(1) = 0.02$,  $p = .89$).
 
-In Study 13 (N = 97), we manipulated object frequency by sequentially presenting objects. Participants saw 60 objects from the  set of normed real objects one at a time. One object was presented 10 times and a second object was presented 40 times. Ten additional objects were included as fillers. After this training phase, participants completed a single mapping trial as in Study 12. Word length was manipulated between participants. There was no difference between the long and short word conditions ($\chi ^2(1) = 0.01$,  $p = .92$).
+In Study 13 ($N = 97$), we manipulated object frequency by sequentially presenting objects. Participants saw 60 objects from the  set of normed real objects one at a time. One object was presented 10 times and a second object was presented 40 times. Ten additional objects were included as fillers. After this training phase, participants completed a single mapping trial as in Study 12. Word length was manipulated between participants. There was no difference between the long and short word conditions ($\chi ^2(1) = 0.01$,  $p = .92$).
 
 \renewcommand{\refname}{\normalsize References}
 \bibliography{biblibrary}
 \bibliographystyle{Science}
 
-\paragraph*{Supplementary Information}
+\paragraph*{Supplementary Information}\mbox{}\\
+Supplementary Information can be found at \url{http://rpubs.com/mll/33927}.
 
 \paragraph*{Acknowledgements}
 
-\paragraph*{Author Contributions}
-
+\paragraph*{Author Contributions} \mbox{}\\
 MLL and MCF designed research. MLL conducted research. MLL and MCF wrote the paper. 
 
 \paragraph*{Author Information}
@@ -214,7 +216,6 @@ MLL and MCF designed research. MLL conducted research. MLL and MCF wrote the pap
 % instructions.
 
 %Our findings point to a previously undescribed regularity in the design of human languages --- a bias for longer words to map to more complex meanings.  This bias is found in both novel judgements about word meanings and in the structure of real lexicons. Importantly, the notion of complexity underlying this systematicity appears to be related to a basic cognitive process (as indexed by reaction time), suggesting that properties of the cognitive system may play a role in shaping the structure of language. More generally, our results reveal a broad systematicity between form and meaning in language that fundamentally challenges the long held assumption that lexicons are arbitrary.
-
 
 \clearpage
 
