@@ -20,6 +20,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 13: [Sequential frequency task](#12)**<br/>
   
 This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/RC/blob/master/analysis/refComplex_paper_analyses_SI.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/analysis/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
+
 ***
 ***
 
@@ -75,8 +76,8 @@ p.fc <- function(d, dv){
   # get bootstrapped 95% CIs
   if (!is.na(complex_proport_c)) { 
     # bootstrap across subjects proportion responses for each category
-    b <- boot(d$responseValue, function(u,i) table(u[i])[dv]/length(u), R = 1000) 
-    ci <- boot.ci(b, type =  "basic")  
+    b <- boot(d$responseValue, function(u, i) table(u[i])[dv]/length(u), R = 1000) 
+    ci <- boot.ci(b, type = "basic")  
     ciwl = ci$basic[4]
     ciwu = ci$basic[5]
     
@@ -89,7 +90,7 @@ p.fc <- function(d, dv){
     es <- data.frame(p_c = NA,
                      ciwl = NA,
                      ciul = NA,
-                     n=NA)
+                     n = NA)
     
   }
   return (es)
@@ -133,7 +134,7 @@ All experimental studies (Studies 1-10 and 12-13) were completed on Amazon Mecha
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment38/ref_complex_38.html" target="_blank"> here</a>. 
 
-The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "gronan," "ralex," "vatrus." The long word items were:  "tupabugorn," "gaburatum," "fepolopus," "pakuwugnum," "mipatorun," "kibagronan," "tiburalex," "binivatrus."
+The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "gronan," "ralex," "vatrus." The long word items were: "tupabugorn," "gaburatum," "fepolopus," "pakuwugnum," "mipatorun," "kibagronan," "tiburalex," "binivatrus."
 
 Across all experiments, some participants completed more than one study. The results presented here include the data from all participants, but all reported results remain reliable when excluding participants who completed more than one study. Participants were counted as a repeat participant if they completed a study using the same stimuli (e.g., completed both Studies 1 and 2 with geons).
 
@@ -252,7 +253,7 @@ geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
         panel.border = element_blank(),
         axis.line = element_line(color = 'black')) 
 
-#png("figure/geons_plot3.png", height = 6, width = 12, units = "in", res=500)
+#png("figure/FIG_1cd.png", height = 6, width = 12, units = "in", res=500)
 multiplot(geon_c_plot, geon_rt_plot, cols = 2)
 #dev.off()
 ```
@@ -327,7 +328,7 @@ ggplot(cg_norms, aes(y=meanRating, x=jitter(obj_class))) +
   annotate("text", x=4, y=.25, color = "red", size=rs,
            label=paste("r=",round(cor(cg_norms$obj_class, cg_norms$meanRating), 2))) +
   xlab("Object condition") +
-  ylab("Complexity Rating") +
+  ylab("Complexity rating") +
   ggtitle("complexity rating vs. # of geons") +
   theme(text = element_text(size=fs),
         plot.title=element_text(size=ts, face = "bold"),
@@ -363,7 +364,7 @@ md$variable <- matrix(lapply(str_split(md$variable,"Answer."),function(x) {x[2]}
 md <- colwise(as.character)(md)
 md <- colwise(as.factor)(md)
 
-md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
+md$seq <- with(md, ave(value, workerid, variable, trial, FUN = seq_along))
 dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
 dc$seq <- NULL
 
@@ -461,8 +462,8 @@ if (processNorms){
   four = all_ms[which(all_ms$meanRating>q[4] & all_ms$meanRating<q[5]), "ratingNum"]
   five = all_ms[which(all_ms$meanRating>q[5]), "ratingNum"]
   
-  one # 13 15 19 20 28 29  3 44 46 54 57 59
-  two # 10 17  2 22 34 37  4 49  5 55  6  9
+  one # 13 15 19 20 28 29 3 44 46 54 57 59
+  two # 10 17 2 22 34 37 4 49 5 55 6 9
   three # 12 50 7 8 48 16 1 39 40 56 24 60
   four # 26 18 11 47 42 30 23 31 51 58 41 45
   five # 14 21 25 27 32 33 35 36 38 43 52 53
@@ -636,7 +637,7 @@ obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
         axis.line = element_line(color = 'black')) +
         scale_y_continuous(limits = c(-.34, .66)) 
   
-#png("figure/obj_plo5.png", height = 6, width = 12, units = "in", res=500)
+#png("figure/FIG_2bc.png", height = 6, width = 12, units = "in", res=500)
 multiplot(obj_c_plot, obj_rt_plot, cols = 2)
 #dev.off()
 ```
@@ -719,7 +720,7 @@ There were 26 productions (4%) that included more than one word. These productio
 
 For each object, we analyzed the log length of the production in characters as a function of the complexity norms (Study 4, left below). Length of production was correlated with the complexity norms: Longer labels were coined for objects that were rated as more complex (_r_=.17, _p_<.0001). 
 
-We also analyzed the log length of the production (in characters) as a function of study times (Study 9, right below). Length of production was correlated with study times: Longer labels were coined for objects that were studied longer (_r_=.16, _p_<.001). 
+We also analyzed the log length of the production in characters as a function of study times (Study 9, right below). Length of production was correlated with study times: Longer labels were coined for objects that were studied longer (_r_=.16, _p_<.001). 
 
 ```{r 7:objects_production_labels, warning = F, message = F, output = F, include = F}
 ## read in data and get into long form
@@ -801,8 +802,8 @@ obj_c_p_plot = ggplot(ms, aes(c.norms,log.length)) +
   geom_point() + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
   geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2) +
-  xlab("Object Complexity Norms") +
-  ylab("Log Word Length (characters)") +
+  xlab("Object complexity norms") +
+  ylab("Log word length (characters)") +
   annotate("text", x=.755, y=1.7, color = "red", size = rs,
     label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
   ggtitle('Label length vs. Complicated norms') +
@@ -836,8 +837,8 @@ obj_rt_p_plot = ggplot(ms, aes(rt.norms,log.length)) +
   geom_point() + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
   geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2) +
-  xlab("Object Study Time") +
-  ylab("Log Word Length (characters)") +
+  xlab("Object study time") +
+  ylab("Log word length (characters)") +
   annotate("text", x=7.5, y=1.7, color = "red", size = rs,
     label=paste("r=",round(cor(md$log.length,md$rt.norms), 2))) +
   ggtitle('Label length vs. Study time') +
@@ -865,7 +866,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 We excluded subjects who performed at or below chance on the memory task (20 or fewer correct out of 40). A response was counted as correct if it was a correct rejection or a hit. This excluded 9 subjects (4%). With these participants excluded, the mean correct was 72%. 
 
-Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below (after exclusions). The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. Below is a histogram of study times after these exclusions. The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
 ```{r 8:geon_rt_norms, include = F}
 ## get data into long form (accuracy and RT df) and do exclusions
@@ -955,7 +956,7 @@ if (processNorms) {
                color="red", linetype="dashed", size=.5) +
     geom_vline(aes(xintercept=mean(log.rt, na.rm=T)+2*sd), 
                color="red", linetype="dashed", size=.5) +
-  xlab("Log Study Time (ms)") +
+  xlab("Log study time (ms)") +
   ylab("Frequency") +
   ggtitle('Histogram of study time') +
   theme(text = element_text(size=fs),
@@ -1029,7 +1030,7 @@ ggplot(rg_norms, aes(y=log.rt, x=jitter(as.numeric(obj_class)))) +
   annotate("text", x=4.5, y=7.1, color = "red", size=rs,
            label=paste("r=",round(cor(as.numeric(rg_norms$obj_class), rg_norms$log.rt), 2))) +
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  xlab("Object Condition") +
+  xlab("Object condition") +
   ylab("Log study time (ms)") +
   ggtitle("Study time vs. # of geons") +
   theme(text = element_text(size=fs),
@@ -1069,7 +1070,7 @@ ggplot(cg_norms, aes(meanRating, rt_meanRating))+
                                       use = "complete"), 2)), col="red", size = 6) +
   ylim(7,7.7) +
   xlim(0,1) +
-  xlab("Complexity Norms") +
+  xlab("Complexity norms") +
   ylab("Log study time (ms)") +
   ggtitle("Study time vs. Complexity norms") +
   theme(text = element_text(size=fs),
@@ -1095,7 +1096,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 We excluded subjects who performed at or below chance on the memory task (30 or fewer correct out of 60). A response was counted as correct if it was a correct rejection or a hit. This excluded 6 subjects (1%). With these participants excluded, the mean correct was 84%.
 
-Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. A histogram of study times is presented below (after exclusions). The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. Below is a histogram of study times after these exclusions. The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
 ```{r 9:objects_rt_norms, warning = F, echo = F, message = F}
 ## get data into long form (accuracy and RT df) and do exclusions
@@ -1109,7 +1110,7 @@ if (processNorms){
   # accuracy dataframe
   n <- names(raw)
   cols = c( n[grepl("test",n)])
-  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols,na.rm=TRUE)
+  mda <- melt(raw,id.vars=c("workerid"), measure.vars=cols, na.rm=TRUE)
   mda$trial <-as.numeric(matrix(lapply(str_split(mda$variable,"_"),function(x) {x[3]})))
   mda$var1 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[1]}))
   mda$var2 <- matrix(lapply(str_split(mda$variable,"_"),function(x) {x[2]}))
@@ -1170,7 +1171,7 @@ if (processNorms){
                color="red", linetype="dashed", size=.5) +
     geom_vline(aes(xintercept=mean(log.rt, na.rm=T)+2*sd), 
                color="red", linetype="dashed", size=.5) +
-  xlab("Log Study Time (ms)") +
+  xlab("Log study time (ms)") +
   ylab("Frequency") +
   ggtitle('Histogram of study time') +
   theme(text = element_text(size=fs),
@@ -1247,7 +1248,7 @@ ggplot(co_norms, aes(meanRating, log.rt))+
                                       use = "complete"), 2)), col="red", size = 6) +
   ylim(7,7.7) +
   xlim(0,1) +
-  xlab("Complexity Norms") +
+  xlab("Complexity norms") +
   ylab("Log study time (ms)") +
   ggtitle("Study times vs. Complexity norms") +
   theme(text = element_text(size=fs),
@@ -1352,7 +1353,7 @@ if (processNorms) {
 eng = read.csv("data/corpus/english_complexity_norms.csv")
 ```
 
-We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database (Wilson, 1988). We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database (Baayen, Piepenbrock, & Gulikers, 1995). Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with each other (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11(phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
+We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database (Wilson, 1988). We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database (Baayen, Piepenbrock, & Gulikers, 1995). Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with each other (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11 (phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
 
 ```{r, include = F}
 ## aggregate across participants
@@ -1435,7 +1436,7 @@ sc <- aggregate(mrc.syl ~ nchars + word, data=eng, mean)
 cor.test(sc$mrc.syl, sc$nchars)
 ```
 
-246 participants completed the rating task. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2%). Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to avoid over-plotting.
+246 participants completed the rating task. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2%). Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to limit over-plotting.
 
 ```{r, echo = F, fig.width = 12, fig.height = 4}
 ## plot complexity norms vs word length for each of the three metrics
@@ -1753,7 +1754,7 @@ xling.eng$clx.morph = as.factor(xling.eng$clx.morph)
 <a name="11"/>
 <h3> Study 11: Cross-linguistic analysis</h3> 
 
-We translated all 499 words from Study 10 into 79 languages using <a href="http://www.translate.google.com" target="_blank">Google translate</a> (retrieved March 2014). We translated the set of words into all languages available in Google translate. Words that were translated as English words were removed from the data set.
+We translated all 499 words from Study 10 into 79 languages using <a href="http://www.translate.google.com" target="_blank">Google translate</a> (retrieved March 2014). We translated the set of words into all languages available in Google translate. Words that were translated as English words were removed from the data set. We also removed words that were translated into a script that was different from the target language (e.g. an English word listed for Japanese).
 
 Native speakers evaluated the accuracy of these translations for 12 of the 79 languages. Native speakers were told to look at the translations provided by Google, and in cases where the translation was bad or not given, provide a "better translation." Translations were not marked as inaccurate if the translation was missing. Plotted below is the proportion native speaker agreement with the Google translations across all 499 words. The dashed line indicates the mean (_M_ = .92).
 
@@ -1814,10 +1815,10 @@ ML.df$checked = as.factor(ifelse(is.element(ML.df$language, coded_languages), "y
 ggplot(ML.df, aes(language, ML, fill = checked)) + 
   geom_bar(stat = "identity") + 
   geom_hline(y=mean(ML.df$ML), lty=2) +
-  ylab("mean length (characters)") +
+  ylab("Mean length (characters)") +
   xlab("Language") + 
   ggtitle("Mean number of characters by language") +
- theme(text = element_text(size=fs),
+ theme(text = element_text(size=fs - 5),
         plot.title=element_text(size=ts, face = "bold"),
         plot.background = element_blank(),
         panel.grid.major = element_blank(),
@@ -1979,8 +1980,8 @@ ms_simult$Answer.lang_condition = c("long", "short")
 qplot(Answer.lang_condition, p_complex, fill = Answer.lang_condition,
       ylim = c(0,1), position=position_dodge(),
       data = ms_simult, geom="bar", 
-      ylab = "Prop. selection low freq. object", xlab="Language condition", 
-      main = "Low freq. selections vs. language", stat="identity")  +
+      ylab = "Prop. selection low freq. object", xlab = "Language condition", 
+      main = "Low freq. selections vs. language", stat = "identity")  +
   geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
   geom_abline(intercept = .5, slope = 0, linetype = 2) +
   theme(text = element_text(size=fs),
