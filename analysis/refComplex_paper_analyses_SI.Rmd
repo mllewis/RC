@@ -149,7 +149,7 @@ d.fc <- function(d) {
   }
 ```
 
-```{r}
+```{r, include = F}
 ## checking parametric vs. non-parametrics CIs
 # get effect sizes and CIS
 de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
@@ -171,6 +171,13 @@ p3 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
   scale_y_continuous(limits = c(-.33, 1.25)) 
 
 multiplot(p1, p2, p3, cols = 3)
+
+ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
+  geom_pointrange(aes(x = rt.Mratio+.0005, ymax = cill, ymin=ciul), size = 1, color = "red") +
+  geom_pointrange(aes(ymax = cill_b, ymin=ciul_b), size = 1, color = "blue") +
+  geom_pointrange(aes(x = rt.Mratio-.0005, ymax = cill_b2, ymin=ciul_b2), size = 1, color = "green")  +
+  scale_colour_manual(name="CI sources",values=c("Non-paramtric SE" = "green", "Non-parametric boot.ci" = "blue", "parametric" = "red"))
+  
 ```
 
 
