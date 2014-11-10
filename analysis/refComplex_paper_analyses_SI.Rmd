@@ -109,23 +109,70 @@ d.fc <- function(d) {
     effect_size = log(or) * cf # calculate d
     
     # calculate 95 CI
+    ## parametrically
     var_lor = (1/ns[1]) + (1/ns[2]) + (1/ns[3]) + (1/ns[4]) # sampling variance of lor
     var_d  = (3/(pi^2)) * var_lor # sampling variance of d
     d_err = sqrt(var_d) * 1.96
     
+    ## non-parametrically
+    d.fun <- function(u, i, lang_cond) {
+          ns = table(lang_cond, u[i])
+          or = (ns["\"long\"", "\"complex\""] * ns["\"short\"", "\"simple\""]) / 
+              (ns["\"short\"", "\"complex\""] * ns["\"long\"", "\"simple\""])
+          cf = sqrt(3)/pi
+          effect_size = log(or) * cf 
+          return(effect_size)
+     }
+    
+    b <- boot(d$responseValue, d.fun, R = 1000, lang_cond = d$langCondition)
+    ci <- boot.ci(b, type = "basic")  
+
     cill = effect_size - d_err
     ciul = effect_size + d_err
+    cill_b = ci$basic[4]
+    ciul_b = ci$basic[5]
+    cill_b2 = b[1]$t0 - (1.96 * sd(b$t))
+    ciul_b2 = b[1]$t0 + (1.96 * sd(b$t))
     rt.Mratio = mean(d$rt.ratio, na.rm = TRUE)
     c.Mratio = mean(d$c.ratio, na.rm = TRUE)
     
     es <- data.frame(effect_size=effect_size,
                      cill = cill,
                      ciul = ciul,
+                     cill_b = cill_b,
+                     ciul_b = ciul_b,
+                     cill_b2 = cill_b2,
+                     ciul_b2 = ciul_b2,
                      rt.Mratio = rt.Mratio,
                      c.Mratio = c.Mratio)
   return (es)
   }
 ```
+
+```{r}
+## checking parametric vs. non-parametrics CIs
+# get effect sizes and CIS
+de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
+
+# plot
+p1 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
+  geom_pointrange(aes(ymax = cill, ymin=ciul), size = 1) +
+  ggtitle("parametric") +
+  scale_y_continuous(limits = c(-.33, 1.25)) 
+
+p2 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
+  geom_pointrange(aes(ymax = cill_b, ymin=ciul_b), size = 1) +
+  ggtitle("non-parametric (boot.ci)") +
+  scale_y_continuous(limits = c(-.33, 1.25)) 
+
+p3 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
+  geom_pointrange(aes(ymax = cill_b2, ymin=ciul_b2), size = 1) +
+  ggtitle("non-parametric") +
+  scale_y_continuous(limits = c(-.33, 1.25)) 
+
+multiplot(p1, p2, p3, cols = 3)
+```
+
 
 All experimental studies (Studies 1-10 and 12-13) were completed on Amazon Mechanical Turk (AMT). AMT is an online crowdsourcing platform that provides a reliable subject pool for web-based studies (Crump, McDonnell, & Gureckis, 2013). Participants were paid US$0.15-0.30 for their participation, depending on the length of the task. 
 
@@ -478,7 +525,7 @@ if (processNorms){
   all_ms <- all_ms[order(all_ms$meanRating),]
   
   # write to csv (use write.table to can exclude headers, so matlab can read for figure)
-  #write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
+  # write.table(all_ms, file="data/complicatedNormsObjs_BYITEM-m.csv", 
            # row.names=FALSE, col.names=FALSE, sep=",")
   
   # write to csv
