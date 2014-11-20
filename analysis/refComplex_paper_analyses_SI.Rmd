@@ -1,7 +1,6 @@
 <h2> The length of words reflects their conceptual complexity </h2>
 <h3>Supplementary Information </h3>
 
-output: pdf_document
 
 ***
 ***
@@ -44,6 +43,7 @@ library(boot)
 library(rmarkdown)
 library(wordcloud)
 library(xtable)
+library(overlap)
 source("useful.R")
 
 # stuff for rendering to html in R markdown 
@@ -68,7 +68,6 @@ boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){
   n.r = c("value"); n.c = c("lower_bound", "correlation", "upper_bound") 
   matrix(vec,1,3,dimnames = list(n.r,n.c)) 
   }
-
 
 # proportions and CIs for forced choice tasks
 p.fc <- function(d, dv){ 
@@ -128,6 +127,8 @@ d.fc <- function(d) {
     
     b <- boot(d$responseValue, d.fun, R = 1000, lang_cond = d$langCondition)
     ci <- boot.ci(b, type = "basic")  
+    ci2 = bootCI(b$t0, b$t, conf = 0.95)["basic0",]
+
 
     cill = effect_size - d_err
     ciul = effect_size + d_err
@@ -135,6 +136,8 @@ d.fc <- function(d) {
     ciul_b = ci$basic[5]
     cill_b2 = b[1]$t0 - (1.96 * sd(b$t))
     ciul_b2 = b[1]$t0 + (1.96 * sd(b$t))
+    cill_b3 = ci2[1]
+    ciul_b3 = ci2[2]
     rt.Mratio = mean(d$rt.ratio, na.rm = TRUE)
     c.Mratio = mean(d$c.ratio, na.rm = TRUE)
     
@@ -145,13 +148,15 @@ d.fc <- function(d) {
                      ciul_b = ciul_b,
                      cill_b2 = cill_b2,
                      ciul_b2 = ciul_b2,
+                     cill_b3 = cill_b3,
+                     ciul_b3 = ciul_b3,
                      rt.Mratio = rt.Mratio,
                      c.Mratio = c.Mratio)
   return (es)
   }
 ```
 
-```{r, eval = F}
+```{r, eval = F, include = F}
 ## checking parametric vs. non-parametrics CIs
 # get effect sizes and CIS
 de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
@@ -172,16 +177,21 @@ p3 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
   ggtitle("non-parametric") +
   scale_y_continuous(limits = c(-.33, 1.25)) 
 
-multiplot(p1, p2, p3, cols = 3)
 
+p4 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
+  geom_pointrange(aes(ymax = cill_b3, ymin=ciul_b3), size = 1) +
+  ggtitle("non-parametric") +
+  scale_y_continuous(limits = c(-.33, 1.25)) 
+
+multiplot(p1, p2, p3 , p4, cols = 2)
+
+cols <- c("parametric"="black","non-param. 1.96 * se"= "blue","non-param (boot.ci)"="green", "non-param (BOOTCI basic0)" = "red")
 ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
-  geom_pointrange(aes(x = rt.Mratio+.0005, ymax = cill, ymin=ciul), size = 1, color = "red") +
-  geom_pointrange(aes(ymax = cill_b, ymin=ciul_b), size = 1, color = "blue") +
-  geom_pointrange(aes(x = rt.Mratio-.0005, ymax = cill_b2, ymin=ciul_b2), size = 1, color = "green")  +
-  scale_colour_manual(name="CI sources", 
-                      values=c("Non-paramtric SE" = "green", 
-                               "Non-parametric boot.ci" = "blue", "parametric" = "red"))
-  
+  geom_pointrange(aes(x = rt.Mratio+.0005, ymax = cill, ymin=ciul,  color = "parametric"), size = 1) +
+  geom_pointrange(aes(ymax = cill_b, ymin=ciul_b,  color = "non-param (boot.ci)"), size = 1) +
+  geom_pointrange(aes(x = rt.Mratio-.0005, ymax = cill_b2, ymin=ciul_b2, color = "non-param. 1.96 * se"), size = 1)  +
+  geom_pointrange(aes(x = rt.Mratio-.001, ymax = cill_b3, ymin=ciul_b3, color = "non-param (BOOTCI basic0)"), size = 1)  
+d = dc[dc$objCondition ==  "\"1-5\"",]
 ```
 
 
@@ -327,7 +337,7 @@ cor.test(de$rt.Mratio, de$effect_size)
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment34/ref_complex_34.html" target="_blank"> here</a>.
 
-The relationship between number of geons and complexity rating is plotted below. Each point corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting. The confidence intervals are calculated via non-parametric bootstrapping.
+The relationship between number of geons and complexity rating is plotted below (_M_ = .47, _SD_ = .18). Each point corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting. The confidence intervals are calculated via non-parametric bootstrapping.
 
 ```{r 2:geon_complexity_norms, warning = F, include = F}
 ## read in data and pre-process
@@ -468,7 +478,7 @@ summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment9/ref_complex_9.html" target="_blank"> here</a>.
 
-Plotted below is the correlation between the two samples (_N_ = 60 each) of complexity norms. Each point corresponds to an object (_n_ = 60). 
+Plotted below is the correlation between the two samples (_N_ = 60 each, _M1_ = .49, _SD1_ = .18, _M2_ = .44, _SD2_ = .18) of complexity norms. Each point corresponds to an object (_n_ = 60). 
 ```{r 4:objects_complexity_norms, include = FALSE}
 ## get data into long form, compute correlations between 2 samples, figure out quintiles, and remove dupliate subjects
 if (processNorms){
@@ -778,7 +788,7 @@ There were 26 productions (4%) that included more than one word. These productio
 
 For each object, we analyzed the log length of the production in characters as a function of the complexity norms (Study 4, left below). Length of production was correlated with the complexity norms: Longer labels were coined for objects that were rated as more complex (_r_=.17, _p_<.0001). 
 
-We also analyzed the log length of the production in characters as a function of study times (Study 9, right below). Length of production was correlated with study times: Longer labels were coined for objects that were studied longer (_r_=.16, _p_<.001). 
+We also analyzed the log length of the production in characters (_M_ = 1.89, _SD_ = .26) as a function of study times (Study 9, right below). Length of production was correlated with study times: Longer labels were coined for objects that were studied longer (_r_ = .16, _p_<.001). 
 
 ```{r 7:objects_production_labels, warning = F, message = F, output = F, include = F}
 ## read in data and get into long form
@@ -924,7 +934,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 We excluded subjects who performed at or below chance on the memory task (20 or fewer correct out of 40). A response was counted as correct if it was a correct rejection or a hit. This excluded 9 subjects (4%). With these participants excluded, the mean correct was 72%. 
 
-Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. Below is a histogram of study times after these exclusions. The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. Below is a histogram of study times after these exclusions (_M_ = 7.40, _SD_ = .66). The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
 ```{r 8:geon_rt_norms, include = F}
 ## get data into long form (accuracy and RT df) and do exclusions
@@ -1058,8 +1068,11 @@ if (processNorms) {
   ## stats: paired t-test
    t.test(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"],
           D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"], paired = TRUE)
-   mean(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"])
-   mean(D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"])
+  mean(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"])
+  sd(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"])
+  mean(D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"])
+  sd(D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"])
+
 
   # rt by item
   ms_all <- aggregate(log.rt  ~ obj, data=d, mean)
@@ -1145,7 +1158,7 @@ ggplot(cg_norms, aes(meanRating, rt_meanRating))+
 cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
 ```
 
-Study times did not predict memory performance. The study times for hits (correct "yes" responses; _M_ = 7.33) did not differ from misses (correct "no" responses; _M_ = 7.34; _t_(223) = .61, _p_=.54).
+Study times did not predict memory performance. The study times for hits (correct "yes" responses; _M_ = 7.33, _SD_ = .52) did not differ from misses (correct "no" responses; _M_ = 7.34, _SD_ = .59; _t_(223) = .61, _p_=.54).
 
 <a name="9"/>
 <h3> Study 9: Real object study time task</h3> 
@@ -1154,7 +1167,7 @@ The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/
 
 We excluded subjects who performed at or below chance on the memory task (30 or fewer correct out of 60). A response was counted as correct if it was a correct rejection or a hit. This excluded 6 subjects (1%). With these participants excluded, the mean correct was 84%.
 
-Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. Below is a histogram of study times after these exclusions. The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
+Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. Below is a histogram of study times after these exclusions (_M_ = 7.36, _SD_ = .72). The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
 ```{r 9:objects_rt_norms, warning = F, echo = F, message = F}
 ## get data into long form (accuracy and RT df) and do exclusions
@@ -1267,7 +1280,10 @@ if (processNorms){
    t.test(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"],
         D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"], paired = TRUE)
    mean(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"])
+   sd(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"])
    mean(D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"])
+   sd(D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"])
+
 
   # aggregate
   ms <- aggregate(log.rt  ~ Answer.train_image, data=d, mean)
@@ -1322,7 +1338,7 @@ ggplot(co_norms, aes(meanRating, log.rt))+
 ## stats: correlation between between complexity rating and RT
 cor.test(co_norms$meanRating, co_norms$log.rt)
 ```
-For the real objects, study times predicted memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24) were greater than for misses (correct “no” responses; _M_ = 7.11; _t_(393) = 9.74, _p_<.0001).
+For the real objects, study times predicted memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24, _SD_ = .60) were greater than for misses (correct “no” responses; _M_ = 7.11, _SD_ = .66; _t_(393) = 9.74, _p_<.0001).
 
 <a name="10"/>
 <h3> Study 10: English complexity norms</h3> 
@@ -1494,7 +1510,7 @@ sc <- aggregate(mrc.syl ~ nchars + word, data=eng, mean)
 cor.test(sc$mrc.syl, sc$nchars)
 ```
 
-246 participants completed the rating task. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2%). Complexity ratings were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to limit over-plotting.
+246 participants completed the rating task. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2%). Complexity ratings (_M_ = 3.36, _SD_ = 1.14) were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to limit over-plotting.
 
 ```{r, echo = F, fig.width = 12, fig.height = 4}
 ## plot complexity norms vs word length for each of the three metrics
