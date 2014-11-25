@@ -114,88 +114,22 @@ d.fc <- function(d) {
     var_lor = (1/ns[1]) + (1/ns[2]) + (1/ns[3]) + (1/ns[4]) # sampling variance of lor
     var_d  = (3/(pi^2)) * var_lor # sampling variance of d
     d_err = sqrt(var_d) * 1.96
-    
-    ## non-parametrically
-    d.fun <- function(u, i, lang_cond) {
-          ns = table(lang_cond, u[i])
-          or = (ns["\"long\"", "\"complex\""] * ns["\"short\"", "\"simple\""]) / 
-              (ns["\"short\"", "\"complex\""] * ns["\"long\"", "\"simple\""])
-          cf = sqrt(3)/pi
-          effect_size = log(or) * cf 
-          return(effect_size)
-     }
-    
-    b <- boot(d$responseValue, d.fun, R = 1000, lang_cond = d$langCondition)
-    ci <- boot.ci(b, type = "basic")  
-    ci2 = bootCI(b$t0, b$t, conf = 0.95)["basic0",]
-
 
     cill = effect_size - d_err
     ciul = effect_size + d_err
-    cill_b = ci$basic[4]
-    ciul_b = ci$basic[5]
-    cill_b2 = b[1]$t0 - (1.96 * sd(b$t))
-    ciul_b2 = b[1]$t0 + (1.96 * sd(b$t))
-    cill_b3 = ci2[1]
-    ciul_b3 = ci2[2]
     rt.Mratio = mean(d$rt.ratio, na.rm = TRUE)
     c.Mratio = mean(d$c.ratio, na.rm = TRUE)
     
     es <- data.frame(effect_size=effect_size,
                      cill = cill,
                      ciul = ciul,
-                     cill_b = cill_b,
-                     ciul_b = ciul_b,
-                     cill_b2 = cill_b2,
-                     ciul_b2 = ciul_b2,
-                     cill_b3 = cill_b3,
-                     ciul_b3 = ciul_b3,
                      rt.Mratio = rt.Mratio,
                      c.Mratio = c.Mratio)
   return (es)
   }
 ```
 
-```{r, eval = F, include = F}
-## checking parametric vs. non-parametrics CIs
-# get effect sizes and CIS
-de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
-
-# plot
-p1 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
-  geom_pointrange(aes(ymax = cill, ymin=ciul), size = 1) +
-  ggtitle("parametric") +
-  scale_y_continuous(limits = c(-.33, 1.25)) 
-
-p2 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
-  geom_pointrange(aes(ymax = cill_b, ymin=ciul_b), size = 1) +
-  ggtitle("non-parametric (boot.ci)") +
-  scale_y_continuous(limits = c(-.33, 1.25)) 
-
-p3 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
-  geom_pointrange(aes(ymax = cill_b2, ymin=ciul_b2), size = 1) +
-  ggtitle("non-parametric") +
-  scale_y_continuous(limits = c(-.33, 1.25)) 
-
-
-p4 = ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
-  geom_pointrange(aes(ymax = cill_b3, ymin=ciul_b3), size = 1) +
-  ggtitle("non-parametric") +
-  scale_y_continuous(limits = c(-.33, 1.25)) 
-
-multiplot(p1, p2, p3 , p4, cols = 2)
-
-cols <- c("parametric"="black","non-param. 1.96 * se"= "blue","non-param (boot.ci)"="green", "non-param (BOOTCI basic0)" = "red")
-ggplot(de, aes(x = rt.Mratio, y = effect_size)) +
-  geom_pointrange(aes(x = rt.Mratio+.0005, ymax = cill, ymin=ciul,  color = "parametric"), size = 1) +
-  geom_pointrange(aes(ymax = cill_b, ymin=ciul_b,  color = "non-param (boot.ci)"), size = 1) +
-  geom_pointrange(aes(x = rt.Mratio-.0005, ymax = cill_b2, ymin=ciul_b2, color = "non-param. 1.96 * se"), size = 1)  +
-  geom_pointrange(aes(x = rt.Mratio-.001, ymax = cill_b3, ymin=ciul_b3, color = "non-param (BOOTCI basic0)"), size = 1)  
-d = dc[dc$objCondition ==  "\"1-5\"",]
-```
-
-
-All experimental studies (Studies 1-10 and 12-13) were completed on Amazon Mechanical Turk (AMT). AMT is an online crowdsourcing platform that provides a reliable subject pool for web-based studies (Crump, McDonnell, & Gureckis, 2013). Participants were paid US$0.15-0.30 for their participation, depending on the length of the task. 
+All experimental studies (Studies 1-10 and 12-13) were completed on Amazon Mechanical Turk (AMT). AMT is an online crowdsourcing platform that provides a reliable subject pool for web-based studies [17]. Participants were paid US$0.15-0.30 for their participation, depending on the length of the task. 
 
 <a name="1"/>
 <h3> Study 1: Geon mapping task</h3>
@@ -206,7 +140,7 @@ The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "grona
 
 Across all experiments, some participants completed more than one study. The results presented here include the data from all participants, but all reported results remain reliable when excluding participants who completed more than one study. Participants were counted as a repeat participant if they completed a study using the same stimuli (e.g., completed both Studies 1 and 2 with geons).
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative is from the first quintile and the other is from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio (Sanchez-Meca, Marin-Martinez, & Chacon-Moscoso, 2003). In this and all subsequent plots, errors bars reflect  95% confidence intervals.
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative is from the first quintile and the other is from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio [18]. In this and all subsequent plots, errors bars reflect  95% confidence intervals.
 
 ```{r 1:geon_mapping, warning=F, include=F}
 ## get data into long form
@@ -1427,7 +1361,7 @@ if (processNorms) {
 eng = read.csv("data/corpus/english_complexity_norms.csv")
 ```
 
-We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database (Wilson, 1988). We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database (Baayen, Piepenbrock, & Gulikers, 1995). Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with each other (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11 (phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
+We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database [19]. We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database [16]. Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with each other (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11 (phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
 
 ```{r, include = F}
 ## aggregate across participants
@@ -1581,7 +1515,7 @@ textplot(ms.phon$mrc.phon, ms.phon$complexity, ms.phon$word,
          ylab = "Complexity rating", xlab="# of phonemes", cex = .45)
 ```
 
-The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and monomorphemic. The subset of low-concreteness words was determined by a median split based on the concreteness norms in the MRC corpus (Wilson, 1988). Word class was coded by the authors. Plotted below are complexity ratings versus number of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
+The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and monomorphemic. The subset of low-concreteness words was determined by a median split based on the concreteness norms in the MRC corpus [19]. Word class was coded by the authors. Plotted below are complexity ratings versus number of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
 
 ```{r, echo = F, fig.width = 12, fig.height = 4}
 ## plot complexity norms vs. word length (phonemes) for open class and monomorphemic
@@ -1750,7 +1684,7 @@ ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph ==
 cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
 ```
 
-Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus (Wilson, 1988), and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; Brysbaert & New, 2009). All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (phonemes: _r_ = -.53, _p_ <.0001). 
+Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus [19], and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; [20]). All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (phonemes: _r_ = -.53, _p_ <.0001). 
 
 ```{r, include = F}
 ## complexity between different psycholinguistics variables and complexity
@@ -1869,9 +1803,9 @@ xling$subt.log.freq  <- xling.eng$subt.log.freq[index]
 xling$X <- NULL
 ```
 
-We counted the number of unicode characters for each translation. Plotted below is the  mean number of characters for all 499 words for all 80 languages. The dashed line indicates the grand mean across languages (_M_ = 9.97). Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages.
 
-```{r, echo = F, fig.width = 10, fig.height = 5}
+```{r, echo = F, fig.width = 10, fig.height = 5, include = F}
+#Plotted below is the  mean number of characters for all 499 words for all 80 languages. The dashed line indicates the grand mean across languages (_M_ = 9.97). Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages.
 # get mean length by language
 ML = colMeans(xling[c(2:81)], na.rm = T, dims = 1)
 ML.df = as.data.frame(ML)
@@ -1981,13 +1915,15 @@ c_l$language= factor(c_l$language, levels = rev(levels(c_l$language)))
 c_l$checked = as.factor(ifelse(is.element(c_l$language, coded_languages), "yes", "no"))
 ```
 
-Variability in word length within languages was positively correlated with complexity ratings. Below the correlation coefficients are plotted for each language. Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages. The dashed line indicates the grand mean correlation across languages. Triangles indicate the correlation between complexity and length, partialling out spoken frequency in English. Circles indicate the correlation between complexity and length for the subset of words that are monomorphemic in English. Squares indicate the correlation between complexity and length for the subset of open class words. 
+We counted the number of unicode characters for each translation. Variability in word length within languages was positively correlated with complexity ratings. Below the correlation coefficients are plotted for each language. Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages. The dashed line indicates the grand mean correlation across languages. Triangles indicate the correlation between complexity and length, partialling out log spoken frequency in English. Circles indicate the correlation between complexity and length for the subset of wordskk that are monomorphemic in English. Squares indicate the correlation between complexity and length for the subset of open class words. 
 
 ```{r, echo = F, fig.width = 10, fig.height = 5}
 ## plot correlations by language
 
-# fix one label 
+# fix several label s
 levels(c_l$language)[levels(c_l$language)=="haitian.creole"] <- "haitian creole"
+levels(c_l$language)[levels(c_l$language)=="espernto"] <- "esperanto"
+
 
 #pdf("figure/FIG_3.pdf", height = 6, width = 12)
 
@@ -2122,14 +2058,10 @@ chisq.test(table(d_sequential$responseValue, d_sequential$Answer.lang_condition)
 ***
 ***
 <h3> References </h3>
+[17] Crump, M., McDonnell, J., & Gureckis, T. Evaluating Amazon's Mechanical Turk as a tool for experimental behavioral research. _PLoS ONE_ **8**, (2013).
 
-Baayen, R., Piepenbrock, R., & Gulikers, L. (1995). CELEX2 LDC96L14. Web Download. Philadelphia: Linguistic Data Consortium. 
+[18] Sanchez-Meca J., Marin-Martinez, F., & Chacon-Moscoso, S. Effect-size indices for dichotomized outcomes in meta-analysis. _Psychological Methods_ **8**, 448-467 (2003).
 
-Brysbaert, M., & New, B. (2009). Moving beyond Kucera and Francis: A critical evaluation of current word frequency norms and the introduction of a new and improved word frequency measure for American English. _Behavior Research Methods_, _41_, 977–990.
+[19] Wilson, M. MRC psycholinguistic database: Machine-usable dictionary, version 2.00. _Behavior Research Methods, Instruments, & Computers_ **20**, 6–10 (1988).
 
-Crump, M., McDonnell, J., & Gureckis, T.(2013). Evaluating Amazon's Mechanical Turk as a tool for experimental behavioral research. _PLoS ONE_, 8(3).
-
-Sanchez-Meca J., Marin-Martinez, F., & Chacon-Moscoso, S. (2003). Effect-size indices for dichotomized outcomes
-in meta-analysis. _Psychological Methods_, 8(4), 448-467.
-
-Wilson, M. (1988). MRC psycholinguistic database: Machine-usable dictionary, version 2.00. _Behavior Research Methods, Instruments, & Computers_, _20_, 6–10.
+[20] Brysbaert, M., & New, B.  Moving beyond Kucera and Francis: A critical evaluation of current word frequency norms and the introduction of a new and improved word frequency measure for American English. _Behavior Research Methods_ **41**, 977–990 (2009).
