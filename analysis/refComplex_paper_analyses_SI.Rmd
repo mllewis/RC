@@ -1,3 +1,6 @@
+---
+output: pdf_document
+---
 <h2> The length of words reflects their conceptual complexity </h2>
 <h3>Supplementary Information </h3>
 
