@@ -1368,7 +1368,7 @@ if (processNorms) {
 eng = read.csv("data/corpus/english_complexity_norms.csv")
 ```
 
-We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database [19]. We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database [16]. Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with each other (phonemes and syllables: _r_ = .88; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11 (phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
+We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database [19]. We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database [16]. Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with each other (phonemes and syllables: _r_ = .89; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11 (phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
 
 ```{r, include = F}
 ## aggregate across participants
@@ -1451,7 +1451,7 @@ sc <- aggregate(mrc.syl ~ nchars + word, data=eng, mean)
 cor.test(sc$mrc.syl, sc$nchars)
 ```
 
-246 participants completed the rating task. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2%). Complexity ratings (_M_ = 3.36, _SD_ = 1.14) were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to limit over-plotting.
+246 participants completed the rating task. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2%). Complexity ratings (_M_ = 3.36, _SD_ = 1.93) were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to limit over-plotting.
 
 ```{r, echo = F, fig.width = 3*ps1, fig.height = ps1}
 ## plot complexity norms vs word length for each of the three metrics
@@ -1632,7 +1632,6 @@ pcor.test(ms.freq.phon$complexity,ms.freq.phon$mrc.phon,ms.freq.phon$subt.log.fr
 ms.freq.nchars = aggregate(complexity ~ word + nchars + subt.log.freq, data=eng, mean)
 pcor.test(ms.freq.nchars$complexity,ms.freq.nchars$nchars,ms.freq.nchars$subt.log.freq)
 
-
 ## correlations for three subsets of words
 ## SUBSET 1: open class
 ms_open.syl = aggregate(complexity ~ word + mrc.syl, data=eng[eng$class != 0,], mean)
@@ -1659,7 +1658,7 @@ pcor.test(ms_open.freq.phon$complexity,ms_open.freq.phon$mrc.phon,
 cor.test(ms.phon.concL$mrc.phon, ms.phon.concL$complexity)
 
 # partial out frequency 
-ms.phon.conc <- aggregate(complexity ~ word + mrc.phon + mrc.conc + subt.log.freq, data=eng, mean) # do this again without freq because drops missing words
+ms.phon.conc <- aggregate(complexity ~ word + mrc.phon + mrc.conc + subt.log.freq, data=eng, mean) 
 ms.phon.conc$conc.split = ifelse(ms.phon.conc$mrc.conc < median(ms.phon.conc$mrc.conc), 1, 2) # get median split
 ms.phon.concL = ms.phon.conc[ms.phon.conc$conc.split == 1,] 
 pcor.test(ms.phon.concL$complexity, ms.phon.concL$mrc.phon, ms.phon.concL$subt.log.freq)
