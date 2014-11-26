@@ -1,8 +1,8 @@
 ---
-output: pdf_document
+output: html_document
 ---
 <h2> The length of words reflects their conceptual complexity </h2>
-<h3>Supplementary Information </h3>
+<h3> Supplementary Information </h3>
 
 
 ***
@@ -33,9 +33,11 @@ This document was created from an R Markdown file. The R Markdown file can be fo
 rm(list=ls())
 processNorms = TRUE # process norms or load norms? (process to see study time histograms)
 doSlow = FALSE # do very time-consuming pre-processing steps?
-fs = 15 # set graphical params
-ts = 15
-rs = 6
+fs = 11 # set graphical params
+ts = 11
+rs = 5
+ps1 = 3
+ps2 = 4
 
 ## SET WORKING DIRECTORY
 setwd('/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/analysis/')
@@ -50,10 +52,13 @@ library(overlap)
 source("useful.R")
 
 # stuff for rendering to html in R markdown 
-library('RCurl')
-library('bitops')
+library(RCurl)
+library(bitops)
+library(knitr)
 
-# bootstrap CIs on CI (http://dodonovs.com/R/002-r.htm)
+opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, cache=FALSE)
+
+# bootstrap CIs for correlations (http://dodonovs.com/R/002-r.htm)
 boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){ 
   w = length(x); x.r = x; y.r = y 
   sm = 1:w; cor.b = 1:n 
@@ -196,7 +201,7 @@ if (doSlow){
 dc <- read.csv('data/experiment/RC38_long.csv')
 ```
 
-```{r, warning = F, echo = F, fig.height = 5, fig.width = 10}
+```{r, warning = F, echo = F, fig.height = ps2, fig.width = 2*ps2}
 ## plot complexity ratios as a function of effect size
 # get effect sizes
 de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
@@ -221,7 +226,6 @@ geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   ylab("Linguistic complexity bias (effect size)") +
   xlab("Complexity rating ratio") + 
   ggtitle("Effect size vs. complexity ratio") +
-  theme(text = element_text(size=fs))  +
   scale_y_continuous(limits = c(-.33, .76)) +
   scale_x_continuous(limits = c(.25, 1.29)) +
   geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
@@ -316,7 +320,7 @@ if (processNorms) {
 cg_norms = read.csv("data/experiment/complicatedNormsGeons_BYITEM.csv")
 ```
 
-```{r, echo = F, fig.width=4, fig.height=4}
+```{r, echo = F, fig.width=ps1, fig.height=ps1}
 ## plot complexity norm by number of geons
 # remove quotes from norms
 cg_norms$obj = as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
@@ -382,7 +386,7 @@ dc$len[dc$langCondition=='"three"'] <- 3
 dc$len[dc$langCondition=='"five"'] <- 5
 ```
 
-```{r, warning = F, message = F, echo = F, fig.width = 4, fig.height = 4}
+```{r, warning = F, message = F, echo = F, fig.width = ps1, fig.height = ps1}
 ## plot by length condition
 # get props
 ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")})
@@ -493,7 +497,7 @@ if (processNorms){
 co_norms = read.csv("data/experiment/complicatedNormsObjs_BYITEM.csv")
 ```
 
-```{r echo = F, fig.width = 4, fig.height = 4, warning = FALSE, message = FALSE, output = FALSE}
+```{r echo = F, fig.width = ps1, fig.height = ps1, warning = FALSE, message = FALSE, output = FALSE}
 ## plot correlation between two samples
 qplot(rating_1,rating_2, position=position_dodge(),
       data=co_norms, geom="point", ylab="Sample #2", xlab="Sample #1") +
@@ -580,7 +584,7 @@ dc$c.ratio = dc$criticalSimple_c.norms/dc$criticalComplicated_c.norms
 dc$rt.ratio = dc$criticalSimple_rt.norms/dc$criticalComplicated_rt.norms
 ```
 
-```{r, warning = F, echo = F, fig.height = 5, fig.width = 10}
+```{r, warning = F, echo = F, fig.height = ps2, fig.width = 2*ps2}
 ## plot complexity ratios by effect sizes
 # get effect sizes
 de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
@@ -688,7 +692,7 @@ dc$len[dc$langCondition =='"three"'] <- 3
 dc$len[dc$langCondition =='"five"'] <- 5
 ```
 
-```{r, warning = F, message = F, output = F, echo=F, fig.width = 4, fig.height = 4}
+```{r, warning = F, message = F, output = F, echo=F, fig.width = ps1, fig.height = ps1}
 ## plot proportion complex selections by length condition
 # get props
 ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")})
@@ -827,7 +831,7 @@ cor.test(md$log.length, md$c.norms)
 summary(lmer(scale(log.length)~scale(c.norms) + (1+log.trial|workerid), md))
 ```
 
-```{r, echo = F, fig.width = 8, fig.height = 4}
+```{r, echo = F, fig.width = 2*ps1, fig.height = ps1}
 ## look at relationship between study time and label length
 # merge and aggregate
 index <- match(md$picture, rto_norms$Answer.train_image)
@@ -949,7 +953,7 @@ if (processNorms) {
   }
 ```
 
-```{r, echo = F, fig.width = 4, fig.height = 4, warning = F, message = F}
+```{r, echo = F, fig.width = ps1, fig.height = ps1, warning = F, message = F}
 if (processNorms) {
   # plot histogram
   sd = sd(d$log.rt)
@@ -1026,7 +1030,7 @@ rg_norms = read.csv("data/experiment/rtNormsGeons_BYITEM.csv")
 
 Like for the complexity norms, study times were highly correlated with the number of geons in each object (_r_=.93, _p_<.0001; see plot below, x-coordinates jittered to avoid over-plotting). Objects that contained more geons tended to be studied longer. 
 
-```{r, echo = F, fig.width = 4, fig.height = 4}
+```{r, echo = F, fig.width = ps1, fig.height = ps1}
 ## plot RT by condition
 rg_norms$obj <- as.factor(as.numeric(gsub("[[:punct:]]", "", rg_norms$obj)))
 rg_norms$obj_class = substr(rg_norms$obj, 1, 1)
@@ -1057,7 +1061,7 @@ cor.test(as.numeric(rg_norms$obj_class), rg_norms$log.rt)
 
 Study times were also highly correlated with complexity norms. Objects that were rated as more complex tended to be studied longer.
 
-```{r, echo = F, fig.width = 4, fig.height = 4, warning = F}
+```{r, echo = F, fig.width = ps1, fig.height = ps1, warning = F}
 ## plot RT by complexity rating
 # merge
 index <- match(cg_norms$obj, rg_norms$obj)
@@ -1073,9 +1077,9 @@ ggplot(cg_norms, aes(meanRating, rt_meanRating))+
                      xmax=meanRating+cih), size=0.2, colour="black") +
   geom_errorbar(aes(ymin=rt_meanRating-rt_meanRating_cil, 
                     ymax=rt_meanRating+rt_meanRating_cih), size=0.2, colour="black") +
-  annotate("text", x=.9, y=7.1, 
+  annotate("text", x=.7, y=7.1, 
            label=paste("r=",round(cor(cg_norms$rt_meanRating, cg_norms$meanRating, 
-                                      use = "complete"), 2)), col="red", size = 6) +
+                                      use = "complete"), 2)), col="red", size = rs) +
   ylim(7,7.7) +
   xlim(0,1) +
   xlab("Complexity norms") +
@@ -1167,7 +1171,7 @@ if (processNorms){
 }
 ```
 
-```{r, echo = F, fig.width = 4, fig.height = 4, warning = F, message = F}
+```{r, echo = F, fig.width = ps1, fig.height = ps1, warning = F, message = F}
 if (processNorms){
   # plot histogram
   sd = sd(d$log.rt)
@@ -1238,7 +1242,7 @@ rto_norms = read.csv("data/experiment/rtNormsObjs_BYITEM.csv")
 
 The plot below shows the correlation between study times and explicit complexity norms for each object. Like for the geons, objects that were rated as more complex were studied longer.
 
-```{r, echo = F, fig.width = 4, fig.height = 4, warning = F}
+```{r, echo = F, fig.width = ps1, fig.height = ps1, warning = F}
 ## plot complexity ratings vs RTs
 # merge
 index <- match(co_norms$ratingNum, rto_norms$Answer.train_image)
@@ -1254,9 +1258,9 @@ ggplot(co_norms, aes(meanRating, log.rt))+
                      xmax=meanRating+cih), size=0.2, colour="black") +
   geom_errorbar(aes(ymin=log.rt-rt_meanRating_cil, 
                     ymax=log.rt+rt_meanRating_cih), size=0.2, colour="black") +
-  annotate("text", x=.9, y=7.1, 
+  annotate("text", x=.8, y=7.1, 
            label=paste("r=",round(cor(co_norms$meanRating, co_norms$log.rt,
-                                      use = "complete"), 2)), col="red", size = 6) +
+                                      use = "complete"), 2)), col="red", size = rs) +
   ylim(7,7.7) +
   xlim(0,1) +
   xlab("Complexity norms") +
@@ -1375,7 +1379,7 @@ ms.morph <- aggregate(complexity ~ word + clx.morph, data=eng, mean)
 ms.chars <- aggregate(complexity ~ word + nchars + subt.log.freq + mrc.conc, data=eng, mean)
 ```
 
-```{r, echo = F, fig.width = 12, fig.height = 4}
+```{r, echo = F, fig.width = 3*ps1, fig.height = ps1}
 ## plot histogram of words by phonemes, syllables, morphemes
 
 p_phon = ggplot(ms.phon, aes(x=mrc.phon)) + 
@@ -1398,7 +1402,7 @@ p_syl = ggplot(ms.syl, aes(x=mrc.syl)) +
   xlab("Word length (syllables)") +
   ylab("Frequency") +
   ggtitle('Word length (syllables)') +
-  annotate("text", x=5, y=200, color = "red", size = rs,
+  annotate("text", x=4.5, y=200, color = "red", size = rs,
     label=paste("n=",dim(ms.syl)[1])) +
   theme(text = element_text(size=fs),
         plot.title=element_text(size=ts, face = "bold"),
@@ -1449,7 +1453,7 @@ cor.test(sc$mrc.syl, sc$nchars)
 
 246 participants completed the rating task. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2%). Complexity ratings (_M_ = 3.36, _SD_ = 1.14) were highly correlated with length. Below we plot complexity as a function of each of the three length metrics. Each point corresponds to a word. The x-coordinates have been jittered to limit over-plotting.
 
-```{r, echo = F, fig.width = 12, fig.height = 4}
+```{r, echo = F, fig.width = 3*ps1, fig.height = ps1}
 ## plot complexity norms vs word length for each of the three metrics
 # get CIs
 ms.phon$cih <- aggregate(complexity ~ word + mrc.phon, data=eng, ci.high)$complexity
@@ -1512,7 +1516,7 @@ cm = ggplot(ms.morph, aes(y=complexity, x=jitter(clx.morph))) +
 multiplot(cp, cs, cm, cols = 3)
 ```
 
-```{r, echo = F, fig.width = 8, fig.height = 6, include = F}
+```{r, echo = F, fig.width = 2*ps1, fig.height = 2*(.75*ps1), include = F}
 # The plot below shows the relationship between complexity and word length in terms phonemes, where each point is labeled by its word.
 textplot(ms.phon$mrc.phon, ms.phon$complexity, ms.phon$word, 
          ylab = "Complexity rating", xlab="# of phonemes", cex = .45)
@@ -1520,7 +1524,7 @@ textplot(ms.phon$mrc.phon, ms.phon$complexity, ms.phon$word,
 
 The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and monomorphemic. The subset of low-concreteness words was determined by a median split based on the concreteness norms in the MRC corpus [19]. Word class was coded by the authors. Plotted below are complexity ratings versus number of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
 
-```{r, echo = F, fig.width = 12, fig.height = 4}
+```{r, echo = F, fig.width = 3*ps1, fig.height = ps1}
 ## plot complexity norms vs. word length (phonemes) for open class and monomorphemic
 
 # aggregate
@@ -1769,7 +1773,7 @@ We translated all 499 words from Study 10 into 79 languages using <a href="http:
 
 Native speakers evaluated the accuracy of these translations for 12 of the 79 languages. Native speakers were told to look at the translations provided by Google, and in cases where the translation was bad or not given, provide a "better translation." Translations were not marked as inaccurate if the translation was missing. Plotted below is the proportion native speaker agreement with the Google translations across all 499 words. The dashed line indicates the mean (_M_ = .92).
 
-```{r 11:google_xling, echo = F, fig.width = 4, fig.height = 4}
+```{r 11:google_xling, echo = F, fig.width = ps1, fig.height = ps1}
 ## translation accuracy
 checksR = read.csv("data/corpus/xling_translation_accuracy.csv")[1:499,]
 
@@ -1807,7 +1811,7 @@ xling$X <- NULL
 ```
 
 
-```{r, echo = F, fig.width = 10, fig.height = 5, include = F}
+```{r, echo = F, fig.width = 2*ps2, fig.height = ps2, include = F}
 #Plotted below is the  mean number of characters for all 499 words for all 80 languages. The dashed line indicates the grand mean across languages (_M_ = 9.97). Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages.
 # get mean length by language
 ML = colMeans(xling[c(2:81)], na.rm = T, dims = 1)
@@ -1829,7 +1833,7 @@ ggplot(ML.df, aes(language, ML, fill = checked)) +
   ylab("Mean length (characters)") +
   xlab("Language") + 
   ggtitle("Mean number of characters by language") +
- theme(text = element_text(size=fs - 5),
+ theme(text = element_text(size=fs - 2),
         plot.title=element_text(size=ts, face = "bold"),
         plot.background = element_blank(),
         panel.grid.major = element_blank(),
@@ -1920,7 +1924,7 @@ c_l$checked = as.factor(ifelse(is.element(c_l$language, coded_languages), "yes",
 
 We counted the number of unicode characters for each translation. Variability in word length within languages was positively correlated with complexity ratings. Below the correlation coefficients are plotted for each language. Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages. The dashed line indicates the grand mean correlation across languages. Triangles indicate the correlation between complexity and length, partialling out log spoken frequency in English. Circles indicate the correlation between complexity and length for the subset of wordskk that are monomorphemic in English. Squares indicate the correlation between complexity and length for the subset of open class words. 
 
-```{r, echo = F, fig.width = 10, fig.height = 5}
+```{r, echo = F, fig.width = 2*ps2, fig.height = ps2}
 ## plot correlations by language
 
 # fix several label s
@@ -1982,7 +1986,7 @@ Plotted below is the proportion of low frequency object selections as a function
 d_simultaneous <- read.csv("data/experiment/RefComplex6_all.results_A.csv")
 ```
 
-```{r, echo = F, fig.width = 4, fig.height = 4}
+```{r, echo = F, fig.width = ps1, fig.height = ps1}
 ## plot proportion low freq by language condition
 # get proportions by condition
 ms_simult = ddply(d_simultaneous ,.(Answer.lang_condition), 
@@ -2028,7 +2032,7 @@ levels(d_sequential$Answer.crit_selection) = c("\"high_freq\"", "\"low_freq\"")
 names(d_sequential)[35] = "responseValue"
 ```
 
-```{r 13:sequential_freq, echo = F, fig.width = 4, fig.height = 4}
+```{r 13:sequential_freq, echo = F, fig.width = ps1, fig.height = ps1}
 ## plot proportion low freq by language condition
 # get proportions by condition
 ms_seq = ddply(d_sequential,.(Answer.lang_condition), 
