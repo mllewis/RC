@@ -24,7 +24,7 @@ output: html_document
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 12: [Simultaneous frequency task](#12)**<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 13: [Sequential frequency task](#13)**<br/>
   
-This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/RC/blob/master/analysis/refComplex_paper_analyses_SI.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/analysis/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
+This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/RC/blob/master/analysis/refComplex_paper_analyses_SI_science.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/analysis/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
 
 ***
 ***
