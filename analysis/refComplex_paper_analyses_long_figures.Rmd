@@ -735,6 +735,14 @@ obj_control_plot = qplot(len,p_complex, position=position_dodge(),
 summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 ```
 
+
+
+```{r include = F}
+#### Obj PLOTS 
+png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study2_plots.png", height = 6, width = 14, units = "in", res=500)
+multiplot(objs_norms_plot, obj_c_plot, obj_control_plot, cols = 3)
+dev.off()
+```
 <a name="7"/>
 <h3> Study 7: Real object production task</h3> 
 
@@ -806,8 +814,13 @@ md.agg$good = ifelse(is.element(md.agg$workerid, goodIDs), 1, 0)
 md.agg = md.agg[md.agg$good == 1,]
 
 ## stats: paired t-test of length between simple and complex conditions 
-t.test(md.agg[md.agg$condition == '"complex"',"log.length"],
-       md.agg[md.agg$condition == '"simple"',"log.length"], paired = TRUE)
+complex = md.agg[md.agg$condition == '"complex"',"log.length"]
+simple = md.agg[md.agg$condition == '"simple"',"log.length"]
+t.test(complex, simple, paired = TRUE)
+mean(complex)
+sd(complex)
+mean(simple)
+sd(simple)
 summary(lmer(log.length~condition + (1+log.trial|workerid), md))
 ```
 
