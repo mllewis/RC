@@ -649,7 +649,8 @@ obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   annotate("text", x=1, y=.5, col = "red",
            label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)),
            size = rs) +  
-  ggtitle("Effect size vs. study time ratio") +
+  #ggtitle("Effect size vs. study time ratio") +
+  ggtitle("Experiment 3b") +
   theme(text = element_text(size=fs), 
         plot.title = element_text(size=ts, face = "bold"),
         plot.background = element_blank(),
@@ -668,6 +669,13 @@ multiplot(obj_c_plot, obj_rt_plot, cols = 2)
 ## stats: correlation between effect size and complexity ratios
 cor.test(de$effect_size, de$c.Mratio)
 cor.test(de$effect_size, de$rt.Mratio)
+```
+
+```{r, warning = F, echo = F, fig.height = ps2, fig.width = 2*ps2}
+### STUDY 3 PLOTS
+png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study3_plots.png", height = 6, width = 14, units = "in", res=500)
+multiplot(geon_rt_plot, obj_rt_plot, cols = 2)
+dev.off()
 ```
 
 <a name="6"/>
@@ -1542,6 +1550,28 @@ cm = ggplot(ms.morph, aes(y=complexity, x=jitter(clx.morph))) +
         axis.line = element_line(color = 'black')) 
 
 multiplot(cp, cs, cm, cols = 3)
+```
+
+```{r}
+### STUDY 4 PLOT###
+png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study4a_plot.png", height = 6, width = 6, units = "in", res=500)
+ggplot(ms.phon, aes(y=complexity, x=jitter(mrc.phon))) +
+  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  annotate("text", x=10, y=2, color = "red", size=rs,
+           label=paste("r=",round(cor(ms.phon$complexity, ms.phon$mrc.phon), 2))) +
+  xlab("# of phonemes") +
+  ylab("Complexity rating") +
+  theme(text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
+dev.off()
+```
+
 ```
 
 ```{r, echo = F, fig.width = 2*ps1, fig.height = 2*(.75*ps1), include = F}

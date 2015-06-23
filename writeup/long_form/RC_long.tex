@@ -112,8 +112,6 @@ The prediction of a complexity bias at the pragmatic timescale falls more direct
 
 At the timescale of language evolution, there is some indirect evidence that this same bias is present in the lexicon. These approaches use the linguistic context of a word as an indirect measure the complexity of meaning. The idea is that words that are highly predictable, given the linguistic context, have more complex meanings, while words that are less predictable given the linguistic context, have less complex meanings. \citeA{piantadosi2011a} measured  the relationship between the predictability of words in context and the length of words. Across 10 languages, these two measures were highly correlated: words that were longer were less predictable in their linguistic context on average. This result held true even controlling for the frequency of words. Additional evidence for this relationship comes from examining pairs of words that  have  very similar meaning, but differ in length \cite<e.g. ``exam" vs.\ ``examination;">{mahowald2012info}. Through corpus analyses, they find that the longer forms are used in less predicable linguistic contexts. They also find  in a behavioral experiment that  speakers are more likely to select the longer word in unsupportive contexts. This body of work points to a systematic relationship between word length and meaning, when complexity is operationalized as predictability in the linguistic context.
 
-[should frequency be talked about anywhere as a correlate of language length at the language evolution timescale (in light of the Piantadosi result)?]
-
 [TO DO: paragraph on markedness]
 
 Thus, at the pragmatic timescale, there is a well-motivated prediction that less predictable meanings should be described with longer utterances. At the language evolution timescale, there is some indirect evidence that longer words refer to less predictable meanings, but no work directly tests this prediction. This was the goal of the present studies. In the set of four studies described below, we test the hypothesis that longer words refer to less predictable or complex meanings---a complexity bias---and find evidence for this bias both experimentally with novel words (Studies 1-3) and observationally in the lexicons of 80 natural languages (Study 4).
@@ -224,13 +222,12 @@ We collected a set of 60 objects that were real objects but that did not have ca
 \subsubsection{Participants} 1500 participants completed the experiment.
 \subsubsection{Stimuli} The linguistic stimuli were identical to Experiment 1b. The object stimuli were the 60 naturalistic objects normed in Experiment 2a. Five complexity conditions were determined by dividing the objects into quintiles based on the norms.
 
-\subsubsection{Procedure} The procedure was identical to Experiment 1b, except for the use of naturalistic rather than the artificial geon objects. 
+\subsubsection{Procedure} The procedure was identical to Experiment 1b, except for the use of naturalistic rather than  artificial geon objects. 
 
 \subsection{Results and Discussion}
 As with the artificial objects, effect size was negatively correlated with the complexity rating ratio between the referent alternatives ($r = .70, p < .005$; Fig. \ref{fig:study2_plots}b).  This suggests  that the complexity bias observed with artificial objects extends to more naturalistic objects, consistent with the proposal that  a complexity bias is a characteristic on natural language more generally. 
 
 The effect size in Experiment 2b is smaller than in Experiment 1b, however. This may be due to the fact that some of the effect in Experiment 1c was due to task demands associated with the transparent complexity manipulation. Nonetheless, Experiment 2b reveals a robust complexity bias with naturalistic objects.
-
 
 \subsection{\textbf{Experiment 2c: Control mapping task}}
 \subsection{Methods}
@@ -316,16 +313,38 @@ Participants were first presented with instructions describing the norming task:
 In this experiment, you will be asked to decide how complex the meaning of a word is. A wordÕs meaning is simple if it is easy to understand and has few parts. An example of a simple meaning is ``brick." A wordÕs meaning is complex if it is difficult to understand and has many parts. An example of a more complex meaning is ``engine."
 \end{quote}
 For each word, we then asked ``How complex is the meaning of this word?," and participants indicated their response on a 7-pt Likert scale anchored at ÒsimpleÓ and Òcomplex.Ó The first two words were always ÒballÓ and ÒmotherboardÓ to anchor participants on the scale. Each participant rated a sample of 30 words English words. After the 17th word, participants were asked to complete a simple math problem to ensure they were engaged in the task.
+
 \subsection{Results and Discussion}
 
-%We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database. Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with each other (phonemes and syllables: r = .89; phonemes and morphemes: r = .65; morphemes and syllables: r = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11 (phonemes: r = .92; morphemes: r = .69; syllables: r = .87).
+We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus \cite{wilson1988mrc}  and measures of morphemes were taken from CELEX2 database \cite{baayen1995celex2}.  All three metrics were highly correlated with each other (phonemes and syllables: $r = .89$; phonemes and morphemes: $r = .65$; morphemes and syllables: $r = .67$). All three metrics were also highly correlated with number of characters, the unit of length with use in Experiment 4b below (phonemes: $r = .92$; morphemes: $r = .69$; syllables: $r = .87$).
 
-direction of causality (long -> rated as more complex)
+Given these measures of word length, we  considered how length related to judgements of meaning complexity. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2\%). Critically, we found that complexity ratings ($M = 3.36$, $SD = 1.93$) were positively correlated with word length, measured in phonemes, syllables, and morphemes ($r_{phonemes} = .67$, $r_{syllables} = .63$, $r_{morphemes} = .43$, all $p$s $< .0001$). This relationship held for the subset of only open class words ($n = 438$; $r_{phonemes} = .65$, $r_{syllables} = .63$, $r_{morphemes} = .42$, all $p$s $< .0001$). Word class was coded by the authors. 
 
-\subsection{\textbf{Experiment 4b: Cross-linguistic corpus analysis}}
-[not really an experiment?]
-google xling
+ \begin{figure} 
+  \begin{center} 
+    \includegraphics[width=4in]{figures/study4a_plot.png} 
+    \caption{\label{fig:study4a_plot} Complexity norms collected in Experiment 4a as a function of word length in terms of number of phonemes. Words rated as more complex tend to be longer. Error bars show bootstrapped 95\% confidence intervals.} 
+  \end{center} 
+\end{figure}	
+Word length is strongly related to linguistic predictability, operationalized via simple frequency \cite{zipf1936} or using a language model \cite{piantadosi2011b}. But the regularity we describe---a relationship between conceptual complexity and word length---holds even when controlling for frequency. In English, the correlation was only slightly reduced when controlling for log frequency ($r = .57$, $p < .0001$). Word frequency was estimated from a corpus of transcripts of American English movies \cite<Subtlex-us database; >{brysbaert2009moving}. 
+
+Complexity and length are intuitively related to a number of other psycholinguistic variables. All of these variables were reliably correlated with complexity (concreteness: $r = -.27$; familiarity: $r = -.43$; imageability: $r = -.21$). Nonetheless, the relationship between word length and complexity remained reliable controlling for all  of these factors. We created an additive linear model predicting word length in terms of phonemes with complexity, controlling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below. This pattern held for the other two metrics of word length (morphemes and syllables).
+
+Greenberg\cite{greenberg1966} noted that some forms are more complex, or \emph{marked}, where markedness is denoted by morphological structure. For example, on this account, plurals are considered more complex than singulars because they are more marked morphologically (by the -s morpheme). Although this difference in the complexity of morphological structure could in principle contribute to conceptual complexity judgments, it does not explain the pattern in our data. The correlations we observed hold for words with no obvious derivational morphology (CELEX2 monomorphemes \cite{baayen1995celex2}, $n = 387$; $r_{phonemes} = .53$, $r_{syllables} = .47$, all $p$s $< .0001$). 
+
+
+Languages also show phonological iconicity effects, such that semantic features \cite{maurer2006shape} and even particular form classes \cite{farmer2006phonological} are marked by particular sound patterns. However, the type of iconicity explored here is broader---a systematic relationship between abstract measures of complexity and amount of verbal or orthographic effort. Specific iconic hypotheses that posit a parallel between an object's parts and the number of phonemes, morphemes, or syllables in its label do not account for the patterns in the English lexicon: The length-complexity correlation holds even more strongly for words below the median in concreteness, those words whose part structure is presumably much less obvious ($r_{phonemes}= .73$, $r_{syllables} = .72$, $r_{morphemes} = .47$, all $p$s $< .0001$). 
+
+*direction of causality (long -> rated as more complex)
+
+\subsection{\textbf{Experiment 4b: Cross-linguistic corpus analysis}} [not really an experiment?]
+
+If the complexity bias relies on a universal cognitive process, it should generalize to lex- icons beyond English. We explored this prediction in 79 additional languages though a corpus analysis, and found a complexity bias across all the languages we examined. , 
+
 \subsection{Methods}
+% Google Translate to translate our word set (Study 11)Native speakers checked the accuracy of these translations for 12 of the 79 languages, finding an accuracy of .92 within this sample. For each language, we calculated the correlation between word length in terms of number of characters (to allow comparison between languages for which no phonetic dictionary was available) and mean complexity rating. All 79 languages showed a positive correlation between length and complexity ratings (Fig. 3). The grand mean correlation across languages was .34
+
+% We translated all 499 words from Study 10 into 79 languages using Google translate (retrieved March 2014). We translated the set of words into all languages available in Google translate. Words that were translated as English words were removed from the data set. We also removed words that were translated into a script that was different from the target language (e.g. an English word listed for Japanese).%Native speakers evaluated the accuracy of these translations for 12 of the 79 languages. Native speakers were told to look at the translations provided by Google, and in cases where the translation was bad or not given, provide a Òbetter translation.Ó Translations were not marked as inaccurate if the translation was missing. Plotted below is the proportion native speaker agreement with the Google translations across all 499 words. The dashed line indicates the mean (M = .92).
 \subsection{Results and Discussion}
 
 \section{General Discussion}
