@@ -1,12 +1,5 @@
-library(grid)
-library(ggplot2)
+
 library(bootstrap)
-library(lme4)
-library(stringr)
-library(plotrix)
-library(reshape2)
-library(plyr)
-library(car)
 
 ## add some style elements for ggplot2
 theme_set(theme_bw())

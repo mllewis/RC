@@ -49,6 +49,10 @@ library(rmarkdown)
 library(wordcloud)
 library(xtable)
 library(overlap)
+library(ggplot2)
+library(plyr)
+library(stringr)
+library(reshape2)
 source("useful.R")
 
 # stuff for rendering to html in R markdown 
@@ -135,6 +139,14 @@ d.fc <- function(d) {
                      c.Mratio = c.Mratio)
   return (es)
   }
+
+  themeML = text = element_text(size=fs),
+        plot.title=element_text(size=ts, face = "bold"),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = 'black')) 
 ```
 
 All experimental studies (Studies 1-10 and 12-13) were completed on Amazon Mechanical Turk (AMT). AMT is an online crowdsourcing platform that provides a reliable subject pool for web-based studies [17]. Participants were paid US$0.15-0.30 for their participation, depending on the length of the task. 
@@ -226,7 +238,7 @@ geon_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
   ylab("Linguistic complexity bias (effect size)") +
   xlab("Complexity rating ratio") + 
   #ggtitle("Effect size vs. Complexity ratio") +
-  ggtitle("Experiment 1b") +
+  ggtitle("Experiment 2") +
   scale_y_continuous(limits = c(-.33, .76)) +
   scale_x_continuous(limits = c(.25, 1.29)) +
   geom_text(aes(c.Mratio + .05, effect_size, label=objCondition2)) +
@@ -246,23 +258,16 @@ geon_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
   #geom_pointrange(aes(ymax = cill, ymin=ciul), size = 1)+
   geom_hline(yintercept=0, lty=2) +
   #ggtitle("Effect size vs. study time ratio") +
-  ggtitle("Experiment 3a") +
+  ggtitle("Experiment 8a") +
   stat_smooth(method="lm") +
   ylab("Linguistic complexity bias (effect size)") +
   xlab("Study time ratio") + 
-  theme(text = element_text(size=fs)) +  
   scale_y_continuous(limits = c(-.33, .76)) +
   scale_x_continuous(limits = c(.949, 1.005)) +
   geom_text(aes(rt.Mratio + .0025, effect_size, label=objCondition2)) +
   annotate("text", x=.997, y=.6, color = "red", size = rs,
            label=paste("r=", round(cor(de$effect_size, de$rt.Mratio), 2))) +
-  theme(text = element_text(size = fs),
-        plot.title = element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), 
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  themeML
 
 ```
 
@@ -338,14 +343,8 @@ geon_norms_plot = ggplot(cg_norms, aes(y=meanRating, x=jitter(obj_class))) +
   xlab("Object condition") +
   ylab("Complexity rating") +
   #ggtitle("Complexity rating vs. # of geons") +
-  ggtitle("Experiment 1a") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  ggtitle("Experiment 1") +
+  themeML
 ```
 
 ```{r, include = F}
@@ -400,15 +399,8 @@ geon_control_plot = qplot(len,p_complex, position=position_dodge(),
   geom_abline(intercept = .5, slope = 0, linetype = 2) + #
   ylim(0,1) +
   #ggtitle("Complex choices vs. # of syllables") +
-  ggtitle("Experiment 1c") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
-```
+  ggtitle("Experiment 3") +
+  themeML
 
 ```{r include = F}
 ## stats: predict selections with word length
@@ -418,7 +410,7 @@ summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 
 ```{r include = F}
 #### GEON PLOTS 
-png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study1_plots.png", height = 6, width = 14, units = "in", res=500)
+png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study1_plots.png", height = 5, width = 15, units = "in", res=500)
 multiplot(geon_norms_plot, geon_c_plot, geon_control_plot, cols = 3)
 dev.off()
 ```
@@ -516,18 +508,11 @@ objs_norms_plot = qplot(rating_1,rating_2, position=position_dodge(),
   ylim(0,1) +
   xlim(0,1) +
   #ggtitle("Complexity rating samples") +
-  ggtitle("Experiment 2a") +
+  ggtitle("Experiment 4") +
 
   annotate("text", x=.75, y=.2, color = "red", size = rs,
            label=paste("r=", round(cor(co_norms$rating_1, co_norms$rating_2), 2))) +
-  theme(text = element_text(size=fs),
-          plot.title=element_text(size=ts, face = "bold"),
-          plot.background = element_blank(),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.border = element_blank(),
-          axis.line = element_line(color = 'black'))
-```
+  themeML
 
 ```{r, include = F}
 ## stats: correlation between sample #1 and #2
@@ -628,14 +613,9 @@ obj_c_plot = ggplot(de, aes(y=effect_size, x=c.Mratio)) +
            label=paste("r=",round(cor(de$effect_size, de$c.Mratio, use = "complete"), 2)),
            size = rs) +
   #ggtitle("Effect size vs. complexity ratio") +
-  ggtitle("Experiment 2b") + 
-  theme(text = element_text(size=fs), 
-        plot.title = element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  ggtitle("Experiment 5") + 
+  themeML
+
 
 # RT ratio plot
 obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
@@ -650,15 +630,9 @@ obj_rt_plot = ggplot(de, aes(y=effect_size, x=rt.Mratio)) +
            label=paste("r=",round(cor(de$effect_size, de$rt.Mratio, use = "complete"), 2)),
            size = rs) +  
   #ggtitle("Effect size vs. study time ratio") +
-  ggtitle("Experiment 3b") +
-  theme(text = element_text(size=fs), 
-        plot.title = element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) +
-        scale_y_continuous(limits = c(-.34, .66)) 
+  ggtitle("Experiment 8b") +
+  themeML+
+  scale_y_continuous(limits = c(-.34, .66)) 
   
 #png("figure/FIG_2bc.png", height = 6, width = 12, units = "in", res=500)
 multiplot(obj_c_plot, obj_rt_plot, cols = 2)
@@ -673,7 +647,7 @@ cor.test(de$effect_size, de$rt.Mratio)
 
 ```{r, warning = F, echo = F, fig.height = ps2, fig.width = 2*ps2}
 ### STUDY 3 PLOTS
-png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study3_plots.png", height = 6, width = 14, units = "in", res=500)
+png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study3_plots.png", height = 6, width = 12, units = "in", res=500)
 multiplot(geon_rt_plot, obj_rt_plot, cols = 2)
 dev.off()
 ```
@@ -727,15 +701,8 @@ obj_control_plot = qplot(len,p_complex, position=position_dodge(),
   geom_abline(intercept = .5, slope = 0, linetype = 2) + #
   ylim(0,1) +
   #ggtitle("Complex choices vs. # of syllables") +
-  ggtitle("Experiment 2c") +
-
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
+  ggtitle("Experiment 6") +
+  themeML
 ```
 
 ```{r, include = F}
@@ -747,7 +714,7 @@ summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 
 ```{r include = F}
 #### Obj PLOTS 
-png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study2_plots.png", height = 6, width = 14, units = "in", res=500)
+png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study2_plots.png", height = 5, width = 15, units = "in", res=500)
 multiplot(objs_norms_plot, obj_c_plot, obj_control_plot, cols = 3)
 dev.off()
 ```
@@ -852,14 +819,7 @@ obj_c_p_plot = ggplot(ms, aes(c.norms,log.length)) +
   annotate("text", x=.755, y=1.7, color = "red", size = rs,
     label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
   ggtitle('Label length vs. Complicated norms') +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
-```
+  themeML
 
 ```{r, include = F}
 ## stats: relationship between length and complexity norms
@@ -887,14 +847,8 @@ obj_rt_p_plot = ggplot(ms, aes(rt.norms,log.length)) +
   annotate("text", x=7.5, y=1.7, color = "red", size = rs,
     label=paste("r=",round(cor(md$log.length,md$rt.norms), 2))) +
   ggtitle('Label length vs. Study time') +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
-  
+  themeML
+
 multiplot(obj_c_p_plot, obj_rt_p_plot, cols = 2)
 ```
 
@@ -1004,13 +958,7 @@ if (processNorms) {
   xlab("Log study time (ms)") +
   ylab("Frequency") +
   ggtitle('Histogram of study time') +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
+  themeML
   }
 ```
 
@@ -1081,13 +1029,7 @@ ggplot(rg_norms, aes(y=log.rt, x=jitter(as.numeric(obj_class)))) +
   xlab("Object condition") +
   ylab("Log study time (ms)") +
   ggtitle("Study time vs. # of geons") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  themeML
 ```
 
 ```{r, include = F}
@@ -1121,13 +1063,7 @@ ggplot(cg_norms, aes(meanRating, rt_meanRating))+
   xlab("Complexity norms") +
   ylab("Log study time (ms)") +
   ggtitle("Study time vs. Complexity norms") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
+  themeML
 ```
 
 ```{r, include = F}
@@ -1222,13 +1158,7 @@ if (processNorms){
   xlab("Log study time (ms)") +
   ylab("Frequency") +
   ggtitle('Histogram of study time') +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
+  themeML
   }
 ```
 
@@ -1302,13 +1232,7 @@ ggplot(co_norms, aes(meanRating, log.rt))+
   xlab("Complexity norms") +
   ylab("Log study time (ms)") +
   ggtitle("Study times vs. Complexity norms") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
+  themeML
 ```
 
 ```{r include = F}
@@ -1425,13 +1349,7 @@ p_phon = ggplot(ms.phon, aes(x=mrc.phon)) +
   ggtitle('Word length (phonemes)') +
   annotate("text", x=10, y=100, color = "red", size = rs,
     label=paste("n=",dim(ms.phon)[1])) +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
+  themeML
 
 p_syl = ggplot(ms.syl, aes(x=mrc.syl)) + 
     geom_histogram(fill = "black", alpha = .6 , binwidth = 1, origin = -0.5) +
@@ -1440,13 +1358,7 @@ p_syl = ggplot(ms.syl, aes(x=mrc.syl)) +
   ggtitle('Word length (syllables)') +
   annotate("text", x=4.5, y=200, color = "red", size = rs,
     label=paste("n=",dim(ms.syl)[1])) +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
+  themeML
 
 p_morph = ggplot(ms.morph, aes(x=clx.morph)) + 
     geom_histogram(fill = "black", alpha = .6 , binwidth = 1,  origin = -0.5) +
@@ -1455,13 +1367,7 @@ p_morph = ggplot(ms.morph, aes(x=clx.morph)) +
   ggtitle('Word length (morphemes)') +
   annotate("text", x=4, y=300, color = "red", size = rs,
     label=paste("n=",dim(ms.morph)[1])) +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black'))
+  themeML
 
 multiplot(p_phon, p_syl, p_morph, cols = 3)
 ```
@@ -1509,13 +1415,7 @@ cp = ggplot(ms.phon, aes(y=complexity, x=jitter(mrc.phon))) +
   xlab("# of phonemes") +
   ylab("Complexity rating") +
   ggtitle("Complexity Rating vs. # of phonemes") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  themeML
 
 cs = ggplot(ms.syl, aes(y=complexity, x=jitter(mrc.syl))) +
   geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
@@ -1525,13 +1425,7 @@ cs = ggplot(ms.syl, aes(y=complexity, x=jitter(mrc.syl))) +
   xlab("# of syllables") +
   ylab("Complexity rating") +
   ggtitle("Complexity Rating vs. # of syllables") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  themeML
 
 cm = ggplot(ms.morph, aes(y=complexity, x=jitter(clx.morph))) +
   geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
@@ -1541,13 +1435,7 @@ cm = ggplot(ms.morph, aes(y=complexity, x=jitter(clx.morph))) +
   xlab("# of morphemes") +
   ylab("Complexity rating") +
   ggtitle("Complexity Rating vs. # of morphemes") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  themeML
 
 multiplot(cp, cs, cm, cols = 3)
 ```
@@ -1561,14 +1449,10 @@ ggplot(ms.phon, aes(y=complexity, x=jitter(mrc.phon))) +
   annotate("text", x=10, y=2, color = "red", size=rs,
            label=paste("r=",round(cor(ms.phon$complexity, ms.phon$mrc.phon), 2))) +
   xlab("# of phonemes") +
+  ggtitle("Experiment 9") +
   ylab("Complexity rating") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  scale_x_continuous(breaks=seq(0, 13, 2)) + 
+  themeML
 dev.off()
 ```
 
@@ -1602,13 +1486,7 @@ cp_o = ggplot(ms_open.phon, aes(y=complexity, x=jitter(mrc.phon))) +
   xlab("# of phonemes") +
   ylab("Complexity rating") +
   ggtitle("Open Class:\nComplexity Rating vs. # of phonemes") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  themeML
 
 ## plot complexity norms vs word length (phonemes) for low concreteness words
 # aggregate
@@ -1633,13 +1511,7 @@ cp_c = ggplot(ms.phon.concL, aes(y=complexity, x=jitter(mrc.phon))) +
   xlab("# of phonemes") +
   ylab("Complexity rating") +
   ggtitle("Low Concretenesss:\nComplexity Rating vs. # of phonemes") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  themeML
 
 ## plot complexity norms vs word length (phonemes) for monomorphemic only
 # aggregate
@@ -1659,13 +1531,7 @@ cp_m = ggplot(ms_mono.phon, aes(y=complexity, x=jitter(mrc.phon))) +
   xlab("# of phonemes") +
   ylab("Complexity rating") +
   ggtitle("Monomorphemic:\nComplexity Rating vs. # of phonemes") +
-  theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+  themeML
 
 multiplot(cp_o, cp_c, cp_m, cols = 3)
 ```

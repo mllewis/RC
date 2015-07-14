@@ -5,6 +5,9 @@
 \usepackage{color}
 \usepackage{covington}
 \usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{hyperref}
+
+
 
 \title{The length of words reflects their conceptual complexity}
 
@@ -16,7 +19,7 @@
 
 ~\\
 
-Keywords: communication, lexicon, language evolution }
+Keywords: communication, lexicon, language evolution}
 
 \shorttitle{The length of words reflects their conceptual complexity}
 \rightheader{The length of words reflects their conceptual complexity}
@@ -34,36 +37,22 @@ Keywords: communication, lexicon, language evolution }
 
 \section{Introduction}
 
+
 Human languages are systems for encoding information about the world. A defining feature of a symbolic coding system is that there is no inherent mapping between the form of the code and what the code denotes  \cite{peirce}---the color red holds no natural relationship to the meaning `stop', the numeral {\it 3} holds no natural relationship to three units, and in language, the word `horse' looks or sounds nothing like the four-legged mammal it denotes.  The arbitrariness of the linguistic sign has long been observed as a fundamental and universal property of natural language \cite{saussure, hockett1960}. And, despite the growing number of cases suggesting instances of non-arbitrariness in the lexicon \cite[for a review]{schmidtke2014phonological}, there is clear evidence for at least some degree of arbitrariness in language based only on the observation that different languages use different words to denote the same meaning  (e.g. the word for horse in English is ``horse" but is ``at" in Turkish). 
 
-%2 consequences - word learning and catgorical/flexibility. 
+Importantly, however, the arbitrary property of language is true only from the perspective of the analyst observing a language system from the outside. In contrast, from the perspective of a language speaker, language is highly non-arbitrary; there are strong constraints on how language is used in particular instances of communication.  A rich body of theoretical work has explored communicative regularities in the use of  particular forms to refer to particular  types of meanings in context---the study of {\it pragmatics} \cite{grice1975logic, horn1984, clark1996using}. Broadly, this work argues that  language users assume certain regularities in how speakers refer to meanings, and through these shared assumptions, the symmetry of the otherwise arbitrary character of language is broken. For example, consider a speaker who intends to refer to a particular apple on a table. Because language is {\it a priori} arbitrary, there are a range of  ways the speaker could convey this meaning (e.g, ``the apple," ``the banana," ``the green apple,"``the green apple next to the plate," etc.), but the speaker is constrained by pragmatic pressures of the communicative context. If the listener also speaks English, the phrase ``the banana" will be an  unhelpful way to refer to the apple. Furthermore, if there is only one apple on the table, the phrase ``the green apple" will be unnecessarily verbose given the referential context. These constraints might lead a speaker to select ``the apple" as the referential phrase, because it both allows the listener to correctly identify the intended referent while also minimizing effort on the part of the speaker. 
 
-Importantly, however, the arbitrary property of language is true only from the perspective of the outside analyst. From the perspective of the language user, language is highly non-arbitrary; there are strong constraints on how language is used in particular instances of communication.  A rich body of theoretical work has explored regularities in the use of  particular forms to refer to particular  types of meanings in context---the study of {\it pragmatics} \cite{grice1975logic,horn1984, clark1996using}. Broadly, this work argues that  language users assume certain regularities in how speakers refer to meanings, and through these shared assumptions, the symmetry of the otherwise arbitrary character of language is broken. For example, consider a speaker who intends to refer to a particular apple on a table. Because language is {\it a priori} arbitrary, there are a range of  ways the speaker could convey this meaning (e.g, ``the apple," ``the banana," ``the green apple,"``the green apple next to the plate," etc.), but the speaker is constrained by pragmatic pressures of the communicative context. If the listener also speaks English, the phrase ``the banana" will be an  unhelpful way to refer to the apple. Furthermore, if there is only one apple on the table, the phrase ``the green apple" will be unnecessarily verbose given the referential context. These constraints might lead a speaker to select ``the apple" as the referential phrase, because it both allows the listener to correctly identify the intended referent while also minimizing effort on the part of the speaker. 
+In the present paper, we examine whether principles of communication influence the otherwise arbitrary mappings between words and meanings in the lexicon. This hypothesis is motivated by a regularity first observed by \citeA{horn1984}, who noted that pragmatic language users tend to consider the effort that speakers have exerted to convey a meaning. For example, the utterance ``Lee got the car to stop" seems to imply an unusual state of affairs. Had the speaker wished to convey that Lee simply applied the brakes, the shorter and less exceptional ``Lee stopped the car" would be a better description. The use of a longer utterance licenses the inference that there was some problem in stopping---perhaps the brakes failed---and that the situation is more complex. We ask whether speakers reason the same way about the meanings of words, breaking the symmetry between two unknown meanings by reference to length---is a ``tupabugorn" more likely to be a complex, unusual object than a ``ralex"?  In particular, we test the following hypothesis: \begin{quote}
+{\it Complexity Hypothesis}: Languages encode conceptually more complex meanings with longer linguistic forms. 
+\end{quote} 
 
-In the present paper, we examine whether principles of communication influence the otherwise arbitrary mappings between words and meanings in the lexicon. In particular, we explore a communicative regularity first observed by \citeA{horn1984}: pragmatic language users tend to consider the effort that speakers have exerted to convey a meaning. For example, the utterance ``Lee got the car to stop" seems to imply an unusual state of affairs. Had the speaker wished to convey that Lee simply applied the brakes, the shorter and less exceptional ``Lee stopped the car" would be a better description. The use of a longer utterance licenses the inference that there was some problem in stopping---perhaps the brakes failed---and that the situation is more complex. Do we reason the same way about the meanings of words, breaking the symmetry between two unknown meanings by reference to length? In other words, is a ``tupabugorn" more likely to be a complex, unusual object than a ``ralex"? We examine whether this  regularity---a {\it complexity bias}---is present in the lexicon.
+An important construct for our hypothesis is the notion  of conceptual complexity.  In the present experiments, we study conceptual complexity be measuring it---both directly through explicit norms and indirectly though a reaction time measure. Nonetheless, these measures are only proxies for an underlying cognitive construct. One possible theoretical framework for understanding this construct is through semantic primitives. Semantic primitives can be thought of as the building blocks of meaning, similar to the notion of geons in the study of object recognition \cite{biederman1987}. The space of possible meanings could then be described in terms of sets of semantic primitives. In this framework, a more complex meaning would be one with more primitives in it. (In a probabilistic framework, having more units would also be correlated with having a lower overall probability). While certainly not the only possible theoretical formulation, this framework provides a possible way to understand the notion of conceptual complexity that we appeal to in the experiments below.
 
-The present hypothesis is motivated by the possibility that language dynamics take place over different timescales, and these different dynamics may be causally related to each other.  Minimally, two timescales are relevant to the present hypothesis. At the shorter timescale are the minutes of a single communicative interaction---{\it the pragmatic timescale}. At the longer timescale is language change, which takes place over many years---{\it the language evolution timescale}. We consider the possibility that communicative pressures at the pragmatic timescale may, over time, influence the structure of the lexicon at the language evolution timescale. There are other reasons why a regularity like a complexity bias might emerge in the structure of the lexicon, however, and we consider some of these alternative possibilities in the General Discussion.
-
-An important construct for our hypothesis is the notion  of conceptual complexity. In Studies 1 and 2, we appeal to an intuitive notion of complexity by manipulating conceptual complexity indirectly in terms of visual complexity. We find that our visual manipulations are highly correlated with explicit measures of complexity and reliable across participants. Nonetheless, these manipulations are likely only proxies for an underlying cognitive construct.  We could imagine a space of possible meanings as compositional semantic primitives, as a opposed to visual primitives. In this space, a more complex meaning would be one with more primitives in it. (In a probabilistic framework, having more units would also be correlated with having a lower overall probability). [these two sentences are from the cogsci paper] In Study 3, we try to more directly examine the cognitive correlates of conceptual complexity through reaction time. 
-
-The plan of the paper is as follows. We first review prior work suggesting that communicative principles are reflected in the structure of the lexicon. We then review work related to accounts of our particular linguistic feature of interest---variability in the length of forms. Next, we   present four sets of studies that explore a complexity bias in the lexicon. In Studies 1 and 2, we  experimentally test whether participants are biased to map a relatively long novel word onto a relatively more complex object, using artificial objects (Study 1) and novel, real objects (Study 2). In Study 3, we explore the underlying cognitive construct of complexity in a reaction time task. Finally, in Study 4, we examine a complexity bias in natural language through a corpus analysis of 80 languages.
-
-%they are inherently symmetric at all levels. There is no reason to associate a particular form---whether an utterance, a word, or a phoneme---with a particular meaning. arbitrariness of the linguistic sign A 
-%Natural language, however, is a special kind of coding system: it is {\it hierarchical}. Many proposals have been made about constraints that govern the types of forms that refer to proposals have been made about the However, as a communicative system for signaling information, at the level of phrase there are a number of constraints on arbitrariness communicative stuff
-
- %They are That is, they are used by a group of of speakers who interact with each other with the intention of sharing information. A large body of theoretical work has examined the regularities that govern what language forms are used 
-% Broadly, this work suggests that, while language is entirely symmetric a priori, there are a number of communicative constraints that break the symmetry.
-
- %For example, if a speaker wants to refer to a horse, and says `banana,' the speaker will fail at conveying her intended meaning, despite the fact that a priori both `banana' and `horse' are equally good words for the meaning horse. 
-
-
-%Importantly, however, coding systems denote meaning in two different ways. 
-
-%natural languages have a second defining characteristic as a coding system: they are hierarchical. Languages contain units of meanings---words---that can be combined into larger units---phrases, sentences, and discourse---to flexibly express complex ideas. At the level of these larger units, a rich body of theoretical work has explored regularities in the use of particular forms to refer to particular types of meanings --- the study of {\it pragmatics} \cite{horn, grice, clark}. For example, using the phrase 'green one' instead of the `the green su' { Broadly, this work suggests that, while language is entirely symmetric at the level of words, at the level of the phrase and beyond, there are a number of communicative constraints that break the symmetry.
-
-%*timescales communicative and hierarchical * signals
+The plan of the paper is as follows. We first review prior work suggesting that communicative principles are reflected in the structure of the lexicon. We then review work related to accounts of our particular linguistic feature of interest---variability in the length of forms. Next, we  present nine studies that explore a complexity bias in the lexicon. In Experiments 1-7, we  experimentally test whether participants are biased to map a relatively long novel word onto a relatively more complex object, using artificial objects (Experiment 1-3) and novel, real objects (Experiments 4-7). In Experiment 8, we explore the underlying cognitive construct of complexity in a reaction time task. Finally, in Experiment 9, we examine a complexity bias in natural language through a corpus analysis of 80 languages. We find a robust complexity bias for both novel words and natural language.
 
 \section{Pragmatic equilibria in the lexicon}
+
+The present hypothesis is motivated by the possibility that language dynamics take place over different timescales, and these different dynamics may be causally related to each other \cite{christiansen2015, mcmurray2012}. Minimally, two timescales are relevant to the present hypothesis. At the shorter timescale are the minutes of a single communicative interaction---{\it the pragmatic timescale}. At the longer timescale is language change, which takes place over many years---{\it the language evolution timescale}. We consider the possibility that communicative pressures at the pragmatic timescale may, over time, influence the structure of the lexicon at the language evolution timescale. There are other reasons why a regularity like a complexity bias might emerge in the structure of the lexicon, however, and we consider some of these alternative possibilities in the General Discussion.
 
 Several broad theories of pragmatics include a version of  two distinct pressures on communication: the desire to minimize effort in speaking ({\it speaker pressure}) and the desire to be informative \cite<{\it hearer pressure;}>{zipf1936, horn1984}. Importantly, these two pressures tradeoff with each other: the optimal solution to the speaker's pressure is a single word that can refer to all meanings, while the optimal solution to the hearer's pressure is a verbose, minimally ambiguous  phrase. The utterance that emerges is argued to be an equilibrium between these two tradeoffs.
 
@@ -88,13 +77,13 @@ As one kind of evidence for this one-to-one structure in the lexicon, \citeA{hor
 \end{quote}
 In both (a) and (b), forms that would be expected, given the inflectional morphology in English, are not permitted. This is due to the fact that they would have the same meaning as the existing form because they have the same root. Examples such as this provide some evidence for a one-to-one structure in language, but a one-to-one structure is a particularly difficult linguistic regularity to test empirically. Nonetheless, it is an important regularity because it licenses certain inferences in interpreting the meaning of words. In particular, the cognitive representation of a lexical one-to-one regularity---{\it mutual exclusivity}---has been posited as a powerful bias in children's word learning \cite{markman1988, markman2003}.
 
-Together these phenomena---semantic organization, ambiguity, and one-to-one structure---provide three cases in which equilibria  that are predicted by theories of communication at the pragmatic timescale are reflected in the structure of the lexicon at the language evolution timescale. While this commonality does not entail causality, it is suggestive of a causal relationship between the two timescales. Next, we turn to accounts at both the pragmatic and language evolution timescale for our particular phenomenon of interest: variability in language length.
+Together these phenomena---semantic organization, ambiguity, and one-to-one structure---provide three cases in which equilibria  that are predicted by theories of communication at the pragmatic timescale are reflected in the structure of the lexicon at the language evolution timescale. While this commonality does not entail causality, it is suggestive of a causal relationship between the two timescales. Next, we turn to accounts at both the pragmatic and language evolution timescale for our linguistic feature of interest: length.
 
-\section{Accounts of language length variability}
+\section{Accounts of language length}
 
-Language forms vary along many dimensions, but a salient dimension is length: words and entire utterances can have dramatically different phonetic lengths. At the pragmatic timescale, several theories of communication predict that  longer expressions should be associated with less predictable or typical meanings than their shorter counter parts.
+Language forms vary along many dimensions, but a salient dimension is length: words and entire utterances can have dramatically different phonetic lengths. [paragraph on zipf and frequency]
 
-One such theory is Horn's theory of communication (1984). A speaker often has the choice of using two different utterances to refer to the same meaning (in truth functional terms), and often these utterances differ in length. Horn presents the following example: 
+However, at the pragmatic timescale, several theories of communication predict that  longer expressions should be associated with less predictable or typical meanings than their shorter counter parts. One such theory is Horn's theory of communication (1984). A speaker often has the choice of using two different utterances to refer to the same meaning (in truth functional terms), and often these utterances differ in length. Horn presents the following example: 
 \begin{quote} 
  	(a) Lee stopped the car.\\
 	(b) Lee got the car to stop.
@@ -114,12 +103,12 @@ At the timescale of language evolution, there is some indirect evidence that thi
 
 [TO DO: paragraph on markedness]
 
-Thus, at the pragmatic timescale, there is a well-motivated prediction that less predictable meanings should be described with longer utterances. At the language evolution timescale, there is some indirect evidence that longer words refer to less predictable meanings, but no work directly tests this prediction. This was the goal of the present studies. In the set of four studies described below, we test the hypothesis that longer words refer to less predictable or complex meanings---a complexity bias---and find evidence for this bias both experimentally with novel words (Studies 1-3) and observationally in the lexicons of 80 natural languages (Study 4).
+Thus, at the pragmatic timescale, there is a well-motivated prediction that less predictable meanings should be described with longer utterances. At the language evolution timescale, there is some indirect evidence that longer words refer to less predictable meanings, but no work directly tests this prediction. This was the goal of the present studies. 
 
-\section{Study 1: Complexity bias with artificial objects} 
- As a first step in exploring a complexity bias, we manipulated the complexity of objects and asked participants to infer their names. Object complexity was manipulated by varying the number of primitive parts the objects were composed of. If participants have  a complexity bias, we predicted they should be more likely to map a longer novel word onto an object composed of more parts, compared to an object with fewer parts. In Experiment 1a, we first conducted a norming study to verify our intuitions that the number of object parts correlated with explicit judgements of complexity. In Experiment 1b, we  used these normed stimuli in a simple word mapping task, revealing a robust complexity bias. Experiment 1c replicated Experiment 1b with randomly concatenated syllables. 
+\section{Complexity bias in comprehension: Artificial objects} 
+ As a first step in exploring a complexity bias, we manipulated the complexity of objects and asked participants to infer their names. Object complexity was manipulated by varying the number of primitive parts the objects were composed of. If participants have  a complexity bias, we predicted they should be more likely to map a longer novel word onto an object composed of more parts, compared to an object with fewer parts. In Experiment 1, we first conducted a norming study to verify our intuitions that the number of object parts correlated with explicit judgements of complexity. In Experiment 2, we  used these normed stimuli in a simple word mapping task, revealing a robust complexity bias. Experiment 3 replicated Experiment 2 with randomly concatenated syllables. 
    
-\subsection{\textbf{Experiment 1a: Object complexity norms}}
+\subsection{\textbf{Experiment 1: Object complexity norms}}
 \subsection{Methods}
 
 \subsubsection{Participants} In this and all subsequent experiments, participants were recruited on Amazon Mechanical Turk and received US \$0.15-0.30 for their participation, depending on the length of the task. 60 participants completed this first experiment. 
@@ -127,7 +116,7 @@ Thus, at the pragmatic timescale, there is a well-motivated prediction that less
 Across all experiments, some participants completed more than one experiment. The results presented here include the data from all participants, but all reported results remain reliable when excluding participants who completed more than one study. Participants were counted as a repeat participant if they completed a study using the same stimuli (e.g., completed both Experiment 1a and 1b with geons).
 
 \subsubsection{Stimuli}
-As object primitives, we used ``geon" shapes which are argued to be primitives in the visual system under one theory of object recognition  \cite{biederman1987}. We created a set of 40 objects containing 1-5 geon primitives (Figure \ref{fig:geons})\footnote{All stimuli, experiments, raw data and analysis code can be found at REMOVED FOR BLIND REVIEW.}.
+As object primitives, we used ``geon" shapes which are argued to be primitives in the visual system under one theory of object recognition  \cite{biederman1987}. We created a set of 40 objects containing 1-5 geon primitives (Figure \ref{fig:geons})\footnote{All stimuli, experiments, raw data and analysis code can be found at \url{https://github.com/mllewis/RC}. Analyses can be found at: \url{http://rpubs.com/mll/50311}.} % fix this to reflect final organization of studies.
 
 \begin{figure} 
   \begin{center} 
@@ -137,33 +126,31 @@ As object primitives, we used ``geon" shapes which are argued to be primitives i
 \end{figure}	
 
 \subsubsection{Procedure}
-We presented participants 12 objects from the the full stimulus set one at a time. For each object, we asked ``How complicated is this object?,"  and participants responded using a slider scale anchored at ``simple" and ``complicated." Each participant saw two objects from each complexity condition, and the first two objects were images of a ball and a motherboard to anchor participants on the scale.
+We presented participants 12 objects from the the full stimulus set one at a time. For each object, we asked ``How complicated is this object?,"  and participants responded using a slider scale anchored at ``simple" and ``complicated" . Each participant saw two objects from each complexity condition, and the first two objects were images of a ball and a motherboard to anchor participants on the scale. The task can be viewed directly here: \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment34/ref_complex_34.html}
 
 \subsection{Results and Discussion}
-Number of object parts was highly correlated with explicit complexity judgement ($r = .93$, $p < .0001$; $M = .47$,  $SD = .18$). Figure \ref{fig:study1_plots}a shows the mean complexity rating for each of the  40 objects as a function of their complexity condition. This  suggests that we can use manipulations of visual complexity as a proxy for manipulations of conceptual complexity. 
+Number of object parts was highly correlated with explicit complexity judgement ($r = .93$, $p < .0001$; $M = .47$,  $SD = .18$): Objects with more parts tend to be related as more complex. Figure \ref{fig:study1_plots}a shows the mean complexity rating for each of the  40 objects as a function of their complexity condition. This  suggests that we can use manipulations of visual complexity as a proxy for manipulations of conceptual complexity. 
 
+%\begin{figure}[t]
+%  \begin{center} 
+%    \includegraphics[width=6in]{figures/study1_plots.png} 
+%    \caption{ \label{fig:study1_plots}  (a) The relationship between number of geons and complexity rating is plotted below. Each point corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting. (b) Effect size (bias to select complex alternative in long vs.\ short word condition) as a function of the complexity rating ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the number of geons of the two alternatives. For example, the ``1/5" condition corresponds to the condition in which one alternative contains 1 geon and the other contains 5 geons. (c) Proportion complex object selections as a function of the number of syllables in the target label. The dashed line reflects chance selection between the simple and complex alternatives. All errors bars reflect  95\% confidence intervals, calculated via non-paramedic bootstrapping in 1a and 1c, and parametrically in 1b.
+% } 
+%  \end{center} 
+%\end{figure}	
+%
 
-\begin{figure} 
-  \begin{center} 
-    \includegraphics[width=6.2in]{figures/study1_plots.png} 
-    \caption{\label{fig:study1_plots} (a) The relationship between number of geons and complexity rating is plotted below. Each point corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting. (b) Effect size (bias to select complex alternative in long vs.\ short word condition) as a function of the complexity rating ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the number of geons of the two alternatives. For example, the ``1/5" condition corresponds to the condition in which one alternative contains 1 geon and the other contains 5 geons. (c) Proportion complex object selections as a function of the number of syllables in the target label. The dashed line reflects chance selection between the simple and complex alternatives. All errors bars reflect  95\% confidence intervals, calculated via non-paramedic bootstrapping in 1a and 1c, and parametrically in 1b.
- } 
-  \end{center} 
-\end{figure}	
-
-
-\subsection{\textbf{Experiment 1b: Mapping task}}
+\subsection{\textbf{Experiment 2: Mapping task}}
 
 
 \subsection{Methods}
 \subsubsection{Participants} 750 participants completed the experiment.
 \subsubsection{Stimuli}
-The referent stimuli were the set of 40 objects normed in Experiment 1a. The linguistic stimuli were novel words either 2 or 4 syllables (e.g., ``bugorn" and ``tupabugorn") long. There were 8 items of each syllable length.
+The referent stimuli were the set of 40 objects normed in Experiment 1. The linguistic stimuli were novel words either 2 or 4 syllables (e.g., ``bugorn" and ``tupabugorn") long. There were 8 items of each syllable length.
 
 \subsubsection{Procedure}
 
-We presented participants with a novel word  and two possible objects as referents, and asked them to select which object the word named (``Imagine you just heard someone say {\it bugorn}. Which object do you think  {\it bugorn} refers to? Choose an object by clicking the button below it.").
-
+We presented participants with a novel word  and two possible objects as referents, and asked them to select which object the word named (``Imagine you just heard someone say {\it bugorn}. Which object do you think  {\it bugorn} refers to? Choose an object by clicking the button below it."; \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment38/ref_complex_38.html}).
 
 Within participants, we manipulated word length and the relative complexity of the referent alternatives.  We tested every unique combination of object complexities (1 vs.\ 2 geons, 1 vs.\ 3 geons, 1 vs.\ 4 geons, etc.), giving rise to 15 conditions in total. Each participant completed 4 short and 4 long trials in a random order, where each word was randomly associated with one of the complexity conditions. No participant saw the same complexity condition twice and no word or object was repeated across trials. 
 
@@ -173,27 +160,27 @@ Across conditions, the more complex object was more likely to be judged the refe
 This experiment provides initial evidence for a complexity bias in the lexicon: Given an artificial word and two objects of differing visual complexity, participants are more likely to map a longer word onto a more complex referent, relative to a shorter word.
 
 				
-\subsection{\textbf{Experiment 1c: Control mapping task}}
-One limitation of Experiment 1b is that it uses a small set of words as the linguistic stimuli (8 short and 8 long), making it possible that idiosyncratic properties of the words could be driving the complexity bias. In Experiment 1c, we sought to test this possibility by using words composed of randomly concatenated syllables rather than items selected from a small list of words.
+\subsection{\textbf{Experiment 3: Control mapping task}}
+One limitation of Experiment 2 is that it uses a small set of words as the linguistic stimuli (8 short and 8 long), making it possible that idiosyncratic properties of the words could be driving the complexity bias. In Experiment 3, we sought to test this possibility by using words composed of randomly concatenated syllables rather than items selected from a small list of words.
 
 \subsection{Methods}
 \subsubsection{Participants} 200 participants completed the experiment.
 \subsubsection{Stimuli} The referent stimuli were the geon objects composed of either 1 or 5 geons. The novel words were created by randomly concatenating 2, 4, or 6 consonant-vowel syllables (e.g., ``nur," ``nobimup," ``gugotobanid"). The last syllable of all words ended in a consonant to better approximate the phonology of English.
 
 \subsubsection{Procedure}
-Participants completed six forced-choice trials identical to Experiment 1b. We tested only the ``1/5" complexity condition (1-geon object vs. 5-geon object). Word length was manipulated within-participant such that each participant completed 2 trials for each of the three possible word lengths (2, 4, or 6 syllables).
+Participants completed six forced-choice trials identical to Experiment 1b ( \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment40/ref_complex_40.html}). We tested only the ``1/5" complexity condition (1-geon object vs. 5-geon object). Word length was manipulated within-participant such that each participant completed 2 trials for each of the three possible word lengths (2, 4, or 6 syllables).
 
 \subsection{Results and Discussion}
-Replicating the ``1/5" condition in Experiment 1b, we found that participants were more likely to select a five geon object compared to a single geon object as the number of syllables in the word increased ($\beta=-.44$, $p <.0001$). This suggests that the complexity bias observed in Experiment 1b is unlikely to be due to the particular set of words we selected.
+Replicating the ``1/5" condition in Experiment 1b, we found that participants were more likely to select a five geon object compared to a single geon object as the number of syllables in the word increased ($\beta=-.44$, $p <.0001$). This suggests that the complexity bias observed in Experiment 2 is unlikely to be due to the particular set of words we selected.
 
-\section{Study 2: Complexity bias with novel real objects} 
+\section{Complexity bias in comprehension: Novel real objects} 
 
-Study 1 provides evidence for a complexity bias using artificial objects. The complexity manipulation in these experiments was highly-transparent, however, making it possible that task demands influenced the effect. We next asked whether this bias extended to more naturalistic objects, where the variability in complexity might be less obvious to participants. In Study 2, we conducted the same set of 3 experiments as in Study 1 using a sample of real objects without canonical labels. We find that the complexity bias observed with artificial geon objects in Study 1 extends to naturalistic objects. In Experiment 2d, we also find the same bias in language production.
+Experiments 1-3 provide evidence for a complexity bias using artificial objects. The complexity manipulation in these experiments was highly-transparent, however, making it possible that task demands influenced the effect. We next asked whether this bias extended to more naturalistic objects, where the variability in complexity might be less obvious to participants. We conducted the same set of 3 experiments as above using a sample of real objects without canonical labels instead of artificial geon objects. We find that the complexity bias observed with geon objects extends to naturalistic objects. 
 
-\subsection{\textbf{Experiment 2a: Object complexity norms}}
+\subsection{\textbf{Experiment 4: Object complexity norms}}
 
 \subsection{Methods}
-\subsubsection{Participants} We recruited two samples of 60 participants to complete Experiment 2a.
+\subsubsection{Participants} We recruited two samples of 60 participants to complete Experiment 4.
 
 \subsubsection{Stimuli}
 We collected a set of 60 objects that were real objects but that did not have canonical labels associated with them (Figure  \ref{fig:realobjs}). 
@@ -201,106 +188,111 @@ We collected a set of 60 objects that were real objects but that did not have ca
 \begin{figure} 
   \begin{center} 
     \includegraphics[height=2in]{figures/realobjs_stimuli.png} 
-    \caption{\label{fig:realobjs} Study 2 stimuli: naturalistic objects without canonical labels. Each row corresponds to a quintile determined by the explicit complexity judgements obtained in Experiment 2a (top: least complex; bottom: most complex).} 
+    \caption{\label{fig:realobjs} Stimuli in Experiments 4-6: naturalistic objects without canonical labels. Each row corresponds to a quintile determined by the explicit complexity judgements obtained in Experiment 4 (top: least complex; bottom: most complex).} 
   \end{center} 
 \end{figure}	
 
-\subsubsection{Procedure} The procedure was identical to Experiment 1a. 
+\subsubsection{Procedure} The procedure was identical to Experiment 1 ( \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment9/ref_complex_9.html}).
 
 \subsection{Results and Discussion}
 
- \begin{figure} 
+ \begin{figure} [t]
   \begin{center} 
-    \includegraphics[width=6.2in]{figures/study2_plots.png} 
-    \caption{\label{fig:study2_plots} (a) The correlation between the two samples of complexity norms. Each point corresponds to an object ($n = 60$). (b) Effect size (bias to select complex alternative in long vs.\ short word condition) as a function of the complexity rating ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the complexity norm quintile of the two alternatives. (c) The proportion of complex object selections as a function of number of syllables. The dashed line reflects chance selection between the simple and complex alternatives. All errors bars reflect  95\% confidence intervals, calculated via non-paramedic bootstrapping in 2a and 2c, and parametrically in 2b.} 
+    \includegraphics[width=6in]{figures/study2_plots.png} 
+    \caption{\label{fig:study2_plots} (a) The correlation between the two samples of complexity norms. Each point corresponds to an object ($n = 60$). (b) Effect size (bias to select complex alternative in long vs.\ short word condition) as a function of the complexity rating ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the complexity norm quintile of the two alternatives. (c) The proportion of complex object selections as a function of number of syllables. The dashed line reflects chance selection between the simple and complex alternatives. All errors bars reflect  95\% confidence intervals, calculated via non-parametric bootstrapping in 4 and 6, and parametrically in 5.} 
   \end{center} 
 \end{figure}	
  Complexity judgements were highly reliable across two independent samples ($r = .93, p < .0001$; $M_1 = .49$, $SD_1 = .18, M_2 = .44$, $SD_2 = .18$). Figure  \ref{fig:study2_plots}a shows the relationship between the complexity judgment for each item across the two samples of participants. 
 
-\subsection{\textbf{Experiment 2b: Mapping task}}
+\subsection{\textbf{Experiment 5: Mapping task}}
 \subsection{Methods}
 \subsubsection{Participants} 1500 participants completed the experiment.
-\subsubsection{Stimuli} The linguistic stimuli were identical to Experiment 1b. The object stimuli were the 60 naturalistic objects normed in Experiment 2a. Five complexity conditions were determined by dividing the objects into quintiles based on the norms.
+\subsubsection{Stimuli} The linguistic stimuli were identical to Experiment 2. The object stimuli were the 60 naturalistic objects normed in Experiment 2a. Five complexity conditions were determined by dividing the objects into quintiles based on the norms.
 
-\subsubsection{Procedure} The procedure was identical to Experiment 1b, except for the use of naturalistic rather than  artificial geon objects. 
+\subsubsection{Procedure} The procedure was identical to Experiment 2, except for the use of naturalistic rather than  artificial geon objects (\url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment35/ref_complex_35.html}). 
 
 \subsection{Results and Discussion}
 As with the artificial objects, effect size was negatively correlated with the complexity rating ratio between the referent alternatives ($r = .70, p < .005$; Fig. \ref{fig:study2_plots}b).  This suggests  that the complexity bias observed with artificial objects extends to more naturalistic objects, consistent with the proposal that  a complexity bias is a characteristic on natural language more generally. 
 
-The effect size in Experiment 2b is smaller than in Experiment 1b, however. This may be due to the fact that some of the effect in Experiment 1c was due to task demands associated with the transparent complexity manipulation. Nonetheless, Experiment 2b reveals a robust complexity bias with naturalistic objects.
+The effect size in Experiment 5 is smaller than in Experiment 2, however. This may be due to the fact that some of the effect in Experiment 2 was due to task demands associated with the transparent complexity manipulation. Nonetheless, Experiment 5 reveals a robust complexity bias with naturalistic objects.
 
-\subsection{\textbf{Experiment 2c: Control mapping task}}
+\subsection{\textbf{Experiment 6: Control mapping task}}
 \subsection{Methods}
 \subsubsection{Participants} 200 participants completed the experiment. 
-\subsubsection{Stimuli} The objects were 12 objects from the first and fifth quintile of complexity norms. The linguistic stimuli were constructed as in Experiment 1c. 
+\subsubsection{Stimuli} The objects were 12 objects from the first and fifth quintile of complexity norms. The linguistic stimuli were constructed as in Experiment 3. 
 
 \subsubsection{Procedure}
-The procedure was identical to 1c, except for the different object stimuli.
+The procedure was identical to Experiment 3, except for the different object stimuli (\url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment41/ref_complex_41.html}).
 
 \subsection{Results and Discussion}
-Participants were more likely to select an object from the fifth quintile as opposed to the first quintile when the novel word contained more syllables ($\beta = -.34, p < .0001$; Fig. \ref{fig:study2_plots}c). This pattern replicates the complexity bias seen in 2b with randomly concatenated syllables.  
+Participants were more likely to select an object from the fifth quintile as opposed to the first quintile when the novel word contained more syllables ($\beta = -.34, p < .0001$; Fig. \ref{fig:study2_plots}c). This pattern replicates the complexity bias seen in Experiment 5 with randomly concatenated syllables.  
 
-In the present experiment, participants were overall less likely to select the complex object, compared to the same experiment with artificial objects (Experiment 1c; STATS).  One possible reason for this difference may be the fact that some of the simple artificial objects in Experiment 1c may be associated with canonical labels. For example, the sphere single-geon object may have evoked the label ``ball." If true, this might lead participants to appeal to mutual exclusivity in their object selections by selecting an object they do not already have a name for---in this case, the more complex object \cite{markman1988}. Independent of this intercept shift, however, we replicate the complexity bias with random syllables in both studies.
+In the present experiment, participants were overall less likely to select the complex object, compared to the same experiment with artificial objects (Experiment 5; STATS).  This may be due to the fact that some of the simple artificial objects in Experiment 3 are associated with canonical labels (e.g.\, the sphere single-geon object may have evoked the label ``ball."). This may have lead participants to appeal to mutual exclusivity in their object selections by selecting an object they do not already have a name for---in this case, the more complex object \cite{markman1988}. Alternatively, the novel artificial objects may be over all less conceptually complex than the geon objects. Regardless of this shift, however, the critical finding is that we replicate the complexity bias with random syllables in both Experiments 3 and 6.
 
-\subsection{\textbf{Experiment 2d: Production task}}
-Thus far we have observed the complexity bias only in comprehension tasks. In the next experiment, we ask whether  the bias extends to language production. In Experiment 2d, we  present participants with an object and asking them to produce a novel label to refer to it. Consistent with a complexity bias, we find that participants produce longer labels for more complex objects. [not sure how to motivate the extension to production]
+\section{Complexity bias in production}
+The previous set of experiments provide evidence for a complexity bias in a comprehension task with novel words. One limitation of the design, however, is the possible presence of task demands associated with making a forced choice between two contrasting alternatives. In  Experiment 7, we sought to minimize these demands by presenting participants with an object and asking them to produce a novel label to refer to it. Consistent with a complexity bias, we find that participants produce longer labels for more complex objects. 
+
+\subsection{\textbf{Experiment 7: Production task}}
 \subsection{Methods}
 \subsubsection{Participants} Fifty-nine participants completed the experiment.
-\subsubsection{Stimuli} The object were drawn from the set of 60 naturalistic objects used in Experiments 2a-c.
+\subsubsection{Stimuli} The object were drawn from the set of 60 naturalistic objects used in Experiments 4-6
 \subsubsection{Procedure}
-In each trial, we presented  with a single object and asked participants to generate a novel single-word label to refer to it. The instructions read: ``What do you think this object is called? For example, someone might call it a `tupa' or a `pakuwugnum.' In the box below, please make up your own name for the object. Your name should only be one word. It should not be a real English word." Each participant completed 10 trials---five objects from the bottom and top complexity norm quantiles each.  Order of objects was randomized.
+In each trial, we presented  with a single object and asked participants to generate a novel single-word label to refer to it. The instructions read: ``What do you think this object is called? For example, someone might call it a `tupa' or a `pakuwugnum.' In the box below, please make up your own name for the object. Your name should only be one word. It should not be a real English word" (\url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment27/ref_complex_27.html}).  Each participant completed 10 trials---five objects from the bottom and top complexity norm quantiles each.  Order of objects was randomized.
 
 \subsection{Results and Discussion}
 There were 26 productions (4\%) that included more than one word. These productions were excluded. Length was measured in terms of log number of characters.
 
-Participants produced novel coinages that were longer for the top quartile of objects  ($M = 1.94$, $SD = 0.18$) compared to the bottom quartile ($M = 1.85$, $SD = 0.17$; $t(57) = 3.92$,  $p < .001$). We also analyzed length as a function of the complexity norms for each object. Length of production was correlated with the complexity norms: Longer labels were coined for objects that were rated as more complex ($r=.17, p<.0001$). This suggests that the complexity bias extends to both language comprehension and production.
+Participants produced novel coinages that varied in length (e.g., ``keyo,"``plattle," ``scrupula," ``frillobite"). Critically, productions tended to be longer for the top quartile of objects  ($M = 1.94$, $SD = 0.18$) compared to the bottom quartile ($M = 1.85$, $SD = 0.17$; $t(57) = 3.92$,  $p < .001$). We also analyzed length as a function of the complexity norms for each object. Length of production was correlated with the complexity norms: Longer labels were coined for objects that were rated as more complex ($r=.17, p<.0001$).  This experiment provides a strong test of the complexity bias: Even with minimal task demands, participants prefer to use longer words to refer to more complex objects. 
 
+\section{Complexity as a cognitive construct}
+[these two sentences are from the cogsci paper] In Study 3, we try to more directly examine the cognitive correlates of conceptual complexity through reaction time. 
 
-\section{Study 3: Complexity as a cognitive construct}
-Studies 1 and 2 suggest that participants have a productive complexity bias when complexity is operationalized in terms of explicit norms. Next we sought to explore the cognitive construct of complexity. We reasoned that if complexity is related to a basic cognitive process, we should be able to measure it using an implicit task, not just via explicit ratings. In visual cognition, stimuli that contain more information require more processing time in search \cite{alvarez2004capacity, hyman}. To test this prediction, we measured participants' study time of objects in a memory task. Each participant studied half of the objects in the stimulus set, one at a time, and then made old/new judgments for the entire set. Critically, the study phase was self-paced, such that participants were allowed to study each object for as much time as they wanted. This study time provided an implicit measure of complexity. For both the artificial (Experiment 3a) and naturalistic  (Experiment 3b) objects, we found that participants studied objects that were rated as  more complex for longer.
+Experiments 1-7 suggest that participants have a productive complexity bias when complexity is operationalized in terms of explicit norms. Next we sought to explore the cognitive construct of complexity. We reasoned that if complexity is related to a basic cognitive process, we should be able to measure it using an implicit task, not just via explicit ratings. In visual cognition, stimuli that contain more information require more processing time in search \cite{alvarez2004capacity, hyman}. To test this prediction, we measured participants' study time of objects in a memory task. Each participant studied half of the objects in the stimulus set, one at a time, and then made old/new judgments for the entire set. Critically, the study phase was self-paced, such that participants were allowed to study each object for as much time as they wanted. This study time provided an implicit measure of complexity. For both the artificial (Experiment 8a) and naturalistic  (Experiment 8b) objects, we found that participants tended to study objects longer when they were rated as more complex.
 
 \subsection{Methods}
 \subsubsection{Participants} 750 participants completed the task. 250 participants were tested with artificial geon objects (Experiment 3a) and 500 were tested with naturalistic objects (Experiment 3b).
-\subsubsection{Stimuli}  The study objects were the set of 40 artificial geon objects (Experiment 3a) and 60 naturalistic objects (Experiment 3b). 
+\subsubsection{Stimuli}  The study objects were the set of 40 artificial geon objects (Experiment 8a) and 60 naturalistic objects (Experiment 8b). 
 
-\subsubsection{Procedure} Participants were told they were going to view some objects and their memory of those exact objects would later be tested. In the study phase, participants were presented with half of the full stimulus set one at a time (20 geon objects and 30 naturalistic objects) and allowed to click a ``next'' button when they were done studying each object. After the training phase, we presented participants with each object in the full stimulus set (40 geon object and 60 naturalistic objects), and asked ``Have you seen this object before?.'' Participants responded by clicking a ``yes'' or ``no'' button.
+\subsubsection{Procedure} Participants were told they were going to view some objects and their memory of those exact objects would later be tested. In the study phase, participants were presented with half of the full stimulus set one at a time (20 geon objects and 30 naturalistic objects) and allowed to click a ``next'' button when they were done studying each object. After the training phase, we presented participants with each object in the full stimulus set (40 geon object and 60 naturalistic objects), and asked ``Have you seen this object before?.'' Participants responded by clicking a ``yes'' or ``no'' button (8a: \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment37/ref_complex_37.html}, and 8b: \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment30/ref_complex_30.html}).
 
 \subsection{Results and Discussion } 
-\subsubsection{Experiment 3a: Geon objects} 
+\subsubsection{Experiment 8a: Geon objects} 
 We excluded subjects who performed at or below chance on the memory task (20 or fewer correct out of 40). A response was counted as correct if it was a correct rejection or a hit. This excluded 9 participants (4\%). With these participants excluded, the mean correct was 72\%. Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4\% of responses (final sample: $M = 7.40$, $SD = .66$). 
 
 Study times were highly correlated with the number of geons in each object ($r=.93$, $p<.0001$): objects that contained more geons tended to be studied longer. Study times were also highly correlated with the explicit complexity norms ($r = .89$, $p < .0001$): objects that were rated as more complex tended to be studied longer.
 
 Study times did not predict memory performance. The study times for hits (correct ``yes" responses; $M = 7.33, SD = .52$) did not differ from misses (correct ``no" responses; $M = 7.34$, $SD = .59$; $t(223) = .61$, $p=.54$).
 
-The critical question was whether or not mean study times for an object were related to the bias to assign a long or short word to that object. To explore this question, we reanalyzed the data from Experiment 1b in terms of study times instead of explicit complexity norms. The ratio of study times for the two object alternatives was correlated with the bias to choose a longer label ($r = .82$, $p < .001$; Fig.\ \ref{fig:study3_plots}a): Relatively longer study times predicted longer labels. 
+The critical question was whether or not mean study times for an object were related to the bias to assign a long or short word to that object. To explore this question, we reanalyzed the data from Experiment 2 in terms of study times instead of explicit complexity norms. The ratio of study times for the two object alternatives was correlated with the bias to choose a longer label ($r = .82$, $p < .001$; Fig.\ \ref{fig:study3_plots}a): Relatively longer study times predicted longer labels. 
 
  \begin{figure} 
   \begin{center} 
     \includegraphics[width=6in]{figures/study3_plots.png} 
-    \caption{\label{fig:study3_plots} Effect sizes in Experiment 1b and 2b replotted in terms of study times collected in Study 3. Objects that are studied relatively longer are more likely to be assigned a longer label, relative to a shorter label. Error bars show 95\% confidence intervals.} 
+    \caption{\label{fig:study3_plots} Effect sizes in Experiments 2 and 4 replotted in terms of study times collected in Experiment 8. Objects that are studied relatively longer are more likely to be assigned a longer label, relative to a shorter label. Error bars show 95\% confidence intervals.} 
   \end{center} 
 \end{figure}	
 
-\subsubsection{Experiment 3b: Naturalistic objects} 
-We excluded participants who performed at or below chance on the memory task (30 or fewer correct out of 60). A response was counted as correct if it was a correct rejection or a hit. This excluded 6 participants (1\%). With these participants excluded, the mean correct was 84\%. Participants were also excluded based on study times, using the same criteria as in Experiment 3a.  This led to the exclusion of 4\% of responses (final sample: $M = 7.36$, $SD = .72$). 
+\subsubsection{Experiment 8b: Naturalistic objects} 
+We excluded participants who performed at or below chance on the memory task (30 or fewer correct out of 60). A response was counted as correct if it was a correct rejection or a hit. This excluded 6 participants (1\%). With these participants excluded, the mean correct was 84\%. Participants were also excluded based on study times, using the same criteria as in Experiment 8a.  This led to the exclusion of 4\% of responses (final sample: $M = 7.36$, $SD = .72$). 
 
 Study times were highly correlated with explicit complexity norms for each object. Like for the geons, objects that were rated as more complex were studied longer ($r = .54$, $p < .0001$).
 
 Unlike for the geons, study times predicted memory performance. Study times for hits (correct ``yes" responses; $M = 7.24$, $SD = .60$) were greater than for misses (correct ``no” responses; $M = 7.11$, $SD = .66$; $t(393) = 9.74$, $p<.0001$).
 
-Critically, by reanalyzing data from Experiment 2b  in terms of study times, we find that the ratio of study times for the two objects was correlated with the bias to choose a longer label ($r = .71$, $p < .005$; Fig.\ \ref{fig:study3_plots}b).
+Critically, by reanalyzing data from Experiment 4  in terms of study times, we find that the ratio of study times for the two objects was correlated with the bias to choose a longer label ($r = .71$, $p < .005$; Fig.\ \ref{fig:study3_plots}b).
 
 Together, these findings suggest that label judgments are supported by basic cognitive processes related to the complexity or information content of a stimulus. 
 
 Together, these experiments point to a complexity bias in interpreting novel labels: Words
 that are longer tend to be associated with meanings that are more complex, as reflected in both explicit and implicit measures.
 
-\section{Study 4: Complexity bias in natural language} 
+\section{Complexity bias in natural language} 
 
-Studies 1-3  revealed a productive complexity bias when participants are faced with  novel words. Next we ask whether this bias extends to natural language. In Experiment 4a, we collected explicit complexity judgements on the meaning of 499 English words in a rating procedure similar to Experiments 1 and 2a above. Consistent with a complexity bias, we find that complexity ratings are highly correlated with word length in English: words with meanings that  are rated as more complex tend to be longer. We then ask whether these complexity ratings correlate with word length in a sample of 79 languages. We find a complexity bias in all 79 languages, suggesting that this bias is a pervasive property of natural language.
+Experiments 1-8  revealed a productive complexity bias in the case of  novel words. Next we ask whether this bias extends to natural language. In Experiment 9, we collected explicit complexity judgements on the meaning of 499 English words in a rating procedure similar to Experiments 1 and 4 above. Consistent with a complexity bias, we find that complexity ratings are highly correlated with word length in English: Words with meanings that  are rated as more complex tend to be longer. We then ask whether these complexity ratings correlate with word length in a sample of 79 languages. We find a complexity bias in all 79 languages, suggesting that this bias is a pervasive property of natural language.
 
-\subsection{\textbf{Experiment 4a: English complexity norms}}
+To measure conceptual complexity in natural language, we adopt a rating scale approach similar to that used in previous work to quantify other aspects meaning like how perceptible a referent is (concreteness) and how much experience speakers tend to have with a referent  \cite<familarity;>{wilson1988mrc} . In this work, participants are presented with a 5- or 7- point Likert scale anchored at both ends of the dimension of interest, and asked to make an explicit judgement about a word's meaning. This approach is not ideal because it requires that all participants conceptualize the dimension of interest in a similar way. Nonetheless, previous work has shown thesE measures to be easy to handle analytically and reliable, and so we adopt them here to quantify conceptual complexity.
+
+\subsection{\textbf{Experiment 9: English complexity norms}}
 
 \subsection{Methods}
 \subsubsection{Participants} 246 participants completed the norming procedure.
@@ -312,39 +304,41 @@ Participants were first presented with instructions describing the norming task:
 \begin{quote}
 In this experiment, you will be asked to decide how complex the meaning of a word is. A word’s meaning is simple if it is easy to understand and has few parts. An example of a simple meaning is ``brick." A word’s meaning is complex if it is difficult to understand and has many parts. An example of a more complex meaning is ``engine."
 \end{quote}
-For each word, we then asked ``How complex is the meaning of this word?," and participants indicated their response on a 7-pt Likert scale anchored at “simple” and “complex.” The first two words were always “ball” and “motherboard” to anchor participants on the scale. Each participant rated a sample of 30 words English words. After the 17th word, participants were asked to complete a simple math problem to ensure they were engaged in the task.
+For each word, we then asked ``How complex is the meaning of this word?," and participants indicated their response on a 7-pt Likert scale anchored at “simple” and “complex.” The first two words were always “ball” and “motherboard” to anchor participants on the scale. Each participant rated a sample of 30 words English words. After the 17th word, participants were asked to complete a simple math problem to ensure they were engaged in the task (\url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment26/ref_complex_26.html})
 
 \subsection{Results and Discussion}
 
 We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus \cite{wilson1988mrc}  and measures of morphemes were taken from CELEX2 database \cite{baayen1995celex2}.  All three metrics were highly correlated with each other (phonemes and syllables: $r = .89$; phonemes and morphemes: $r = .65$; morphemes and syllables: $r = .67$). All three metrics were also highly correlated with number of characters, the unit of length with use in Experiment 4b below (phonemes: $r = .92$; morphemes: $r = .69$; syllables: $r = .87$).
 
-Given these measures of word length, we  considered how length related to judgements of meaning complexity. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2\%). Critically, we found that complexity ratings ($M = 3.36$, $SD = 1.93$) were positively correlated with word length, measured in phonemes, syllables, and morphemes ($r_{phonemes} = .67$, $r_{syllables} = .63$, $r_{morphemes} = .43$, all $p$s $< .0001$, Fig. \ref{fig:study4a_plo). This relationship held for the subset of only open class words ($n = 438$; $r_{phonemes} = .65$, $r_{syllables} = .63$, $r_{morphemes} = .42$, all $p$s $< .0001$). Word class was coded by the authors. 
+Given these measures of word length, we  considered how length related to judgements of meaning complexity. We excluded participants who missed a simple math problem in the middle of the task that served as an attentional check. This excluded 6 participants (2\%). Critically, we found that complexity ratings ($M = 3.36$, $SD = 1.93$) were positively correlated with word length, measured in phonemes, syllables, and morphemes ($r_{phonemes} = .67$, $r_{syllables} = .63$, $r_{morphemes} = .43$, all $p$s $< .0001$, Fig. \ref{fig:study4a_plot}). This relationship held for the subset of only open class words ($n = 438$; $r_{phonemes} = .65$, $r_{syllables} = .63$, $r_{morphemes} = .42$, all $p$s $< .0001$). Word class was coded by the authors. 
 
  \begin{figure} 
   \begin{center} 
     \includegraphics[width=4in]{figures/study4a_plot.png} 
-    \caption{\label{fig:study4a_plot} Complexity norms collected in Experiment 4a as a function of word length in terms of number of phonemes. Words rated as more complex tend to be longer. Error bars show bootstrapped 95\% confidence intervals.} 
+    \caption{\label{fig:study4a_plot} Complexity norms collected in Experiment 9 as a function of word length in terms of number of phonemes. Words rated as more complex tend to be longer. Error bars show bootstrapped 95\% confidence intervals.} 
   \end{center} 
 \end{figure}	
-Word length is strongly related to linguistic predictability, operationalized via simple frequency \cite{zipf1936} or using a language model \cite{piantadosi2011b}. But the regularity we describe---a relationship between conceptual complexity and word length---holds even when controlling for frequency. In English, the correlation was only slightly reduced when controlling for log frequency ($r = .57$, $p < .0001$). Word frequency was estimated from a corpus of transcripts of American English movies \cite<Subtlex-us database; >{brysbaert2009moving}. 
+
+Word length is strongly related to linguistic predictability, operationalized via simple frequency \cite{zipf1936} or using a language model \cite{piantadosi2011b}. But the regularity we describe---a relationship between conceptual complexity and word length---holds even when controlling for frequency. In English, the correlation was only slightly reduced when controlling for log frequency ($r = .57$, $p < .0001$). Word frequency was estimated from a corpus of transcripts of American English movies \cite<Subtlex-us database; >{brysbaert2009moving}. 
 
 Complexity and length are intuitively related to a number of other psycholinguistic variables. All of these variables were reliably correlated with complexity (concreteness: $r = -.27$; familiarity: $r = -.43$; imageability: $r = -.21$). Nonetheless, the relationship between word length and complexity remained reliable controlling for all  of these factors. We created an additive linear model predicting word length in terms of phonemes with complexity, controlling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below. This pattern held for the other two metrics of word length (morphemes and syllables).
 
-Greenberg\cite{greenberg1966} noted that some forms are more complex, or \emph{marked}, where markedness is denoted by morphological structure. For example, on this account, plurals are considered more complex than singulars because they are more marked morphologically (by the -s morpheme). Although this difference in the complexity of morphological structure could in principle contribute to conceptual complexity judgments, it does not explain the pattern in our data. The correlations we observed hold for words with no obvious derivational morphology (CELEX2 monomorphemes \cite{baayen1995celex2}, $n = 387$; $r_{phonemes} = .53$, $r_{syllables} = .47$, all $p$s $< .0001$). 
+ \citeA{greenberg1966} noted that some forms are more complex, or \emph{marked}, where markedness is denoted by morphological structure. For example, on this account, plurals are considered more complex than singulars because they are more marked morphologically (by the -s morpheme). Although this difference in the complexity of morphological structure could in principle contribute to conceptual complexity judgments, it does not explain the pattern in our data. The correlations we observed hold for words with no obvious derivational morphology (CELEX2 monomorphemes \cite{baayen1995celex2}, $n = 387$; $r_{phonemes} = .53$, $r_{syllables} = .47$, all $p$s $< .0001$). 
 
 
 Languages also show phonological iconicity effects, such that semantic features \cite{maurer2006shape} and even particular form classes \cite{farmer2006phonological} are marked by particular sound patterns. However, the type of iconicity explored here is broader---a systematic relationship between abstract measures of complexity and amount of verbal or orthographic effort. Specific iconic hypotheses that posit a parallel between an object's parts and the number of phonemes, morphemes, or syllables in its label do not account for the patterns in the English lexicon: The length-complexity correlation holds even more strongly for words below the median in concreteness, those words whose part structure is presumably much less obvious ($r_{phonemes}= .73$, $r_{syllables} = .72$, $r_{morphemes} = .47$, all $p$s $< .0001$). 
 
 *direction of causality (long -> rated as more complex)
 
-\subsection{\textbf{Experiment 4b: Cross-linguistic corpus analysis}} [not really an experiment?]
+\subsection{\textbf{ Cross-linguistic corpus analysis}} 
 
-If the complexity bias relies on a universal cognitive process, it should generalize to lex- icons beyond English. We explored this prediction in 79 additional languages though a corpus analysis, and found a complexity bias across all the languages we examined. , 
+If the complexity bias relies on a universal cognitive process, it should generalize to lex- icons beyond English. We explored this prediction in 79 additional languages though a corpus analysis, and found a complexity bias across all the languages we examined. 
 
 \subsection{Methods}
 % Google Translate to translate our word set (Study 11)Native speakers checked the accuracy of these translations for 12 of the 79 languages, finding an accuracy of .92 within this sample. For each language, we calculated the correlation between word length in terms of number of characters (to allow comparison between languages for which no phonetic dictionary was available) and mean complexity rating. All 79 languages showed a positive correlation between length and complexity ratings (Fig. 3). The grand mean correlation across languages was .34
 
-% We translated all 499 words from Study 10 into 79 languages using Google translate (retrieved March 2014). We translated the set of words into all languages available in Google translate. Words that were translated as English words were removed from the data set. We also removed words that were translated into a script that was different from the target language (e.g. an English word listed for Japanese).%Native speakers evaluated the accuracy of these translations for 12 of the 79 languages. Native speakers were told to look at the translations provided by Google, and in cases where the translation was bad or not given, provide a “better translation.” Translations were not marked as inaccurate if the translation was missing. Plotted below is the proportion native speaker agreement with the Google translations across all 499 words. The dashed line indicates the mean (M = .92).
+% We translated all 499 words from Study 10 into 79 languages using Google translate (retrieved March 2014). We translated the set of words into all languages available in Google translate. Words that were translated as English words were removed from the data set. We also removed words that were translated into a script that was different from the target language (e.g. an English word listed for Japanese).
+%Native speakers evaluated the accuracy of these translations for 12 of the 79 languages. Native speakers were told to look at the translations provided by Google, and in cases where the translation was bad or not given, provide a “better translation.” Translations were not marked as inaccurate if the translation was missing. Plotted below is the proportion native speaker agreement with the Google translations across all 499 words. The dashed line indicates the mean (M = .92).
 \subsection{Results and Discussion}
 
 \section{General Discussion}
@@ -363,8 +357,5 @@ what is complexity??
 \theappendix 
 
 \section{}
-
-
-
 
 \end{document}
