@@ -53,6 +53,7 @@ library(ggplot2)
 library(plyr)
 library(stringr)
 library(reshape2)
+library(lme4)
 source("useful.R")
 
 # stuff for rendering to html in R markdown 
@@ -140,7 +141,7 @@ d.fc <- function(d) {
   return (es)
   }
 
-  themeML = text = element_text(size=fs),
+  themeML = theme(text = element_text(size=fs),
         plot.title=element_text(size=ts, face = "bold"),
         plot.background = element_blank(),
         panel.grid.major = element_blank(),
