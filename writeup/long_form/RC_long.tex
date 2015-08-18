@@ -5,6 +5,9 @@
 \usepackage{color}
 \usepackage{covington}
 \usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{booktabs}
+ \usepackage[table,xcdraw]{xcolor}
+
 %\usepackage{hypernat}
 %\usepackage{hyperref}
 
@@ -124,7 +127,34 @@ The goal of our work here is to test the complexity hypothesis given above.
 
 One theoretical framework for understanding this construct is through semantic primitives \cite<e.g.>{locke1847}. Semantic primitives can be thought of as the building blocks of meaning, similar to the notion of geons in the study of object recognition \cite{biederman1987}. The space of possible meanings could then be described in terms of sets of semantic primitives. In this framework, a more complex meaning would be one with more primitives in it. (In a probabilistic framework, having more units would also be correlated with having a lower overall probability). While our work here does not directly address the character of these underlying semantic primitives, it assumes that such a unit exists and  that meanings can vary in the number of their compositional primitives.
 
-TABLE HERE FOR EXPERIMENT OUTLINE
+
+% Please add the following required packages to your document preamble:
+% \usepackage{booktabs}
+% \usepackage[table,xcdraw]{xcolor}
+% If you use beamer only pass "xcolor=table" option, i.e. \documentclass[xcolor=table]{beamer}
+\begin{table}[]
+\centering
+\caption{My caption}
+\label{my-label}
+\begin{tabular}{@{}lllll@{}}
+\multicolumn{1}{c}{{\bf Experiment}} & \multicolumn{1}{c}{{\bf Description}} & \multicolumn{1}{c}{{\bf \begin{tabular}[c]{@{}c@{}}Complexity Hypothesis\\ Tested\end{tabular}}} & \multicolumn{1}{c}{{\bf Object Stimuli Type}}                                          & \multicolumn{1}{c}{{\bf Comprehension/Production}} \\
+\rowcolor[HTML]{EFEFEF} 
+1                                    & Explicit complexity norms             & 1                                                                                                & artificial objects                                                                     & NA                                                 \\
+2                                    & Mapping task                          & 1                                                                                                & artificial objects                                                                     & comprehension                                      \\
+\rowcolor[HTML]{EFEFEF} 
+3                                    & Mapping task (control)                & 1                                                                                                & artificial objects                                                                     & comprehension                                      \\
+4                                    & Explicit complexity norms             & 1                                                                                                & novel real objects                                                                     & NA                                                 \\
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{333333} 5}             & {\color[HTML]{333333} Mapping task}   & {\color[HTML]{333333} 1}                                                                         & {\color[HTML]{333333} novel real objects}                                              & {\color[HTML]{333333} comprehension}               \\
+6                                    & Mapping task (control)                & 1                                                                                                & novel real objects                                                                     & comprehension                                      \\
+\rowcolor[HTML]{EFEFEF} 
+7                                    & Production                            & 1                                                                                                & novel real objects                                                                     & production                                         \\
+8                                    & Memory task to elicit RTs             & 1                                                                                                & \begin{tabular}[c]{@{}l@{}}artifical objects (a)\\ novel real objects (b)\end{tabular} & NA                                                 \\
+\rowcolor[HTML]{EFEFEF} 
+9                                    & English complexity norms              & 2                                                                                                & NA                                                                                     & NA                                                 \\
+10                                   & Cross-linguistic corpus analysis      & 2                                                                                                & NA                                                                                     & NA                                                
+\end{tabular}
+\end{table}
 
 ENUMERATION OF STUDY PACKAGES
 
@@ -157,7 +187,7 @@ Analyses can be found at: \url{http://rpubs.com/mll/50311}.} % fix this to refle
 \end{figure}	
 
 \subsubsection{Procedure}
-We presented participants 12 objects from the the full stimulus set one at a time. For each object, we asked ``How complicated is this object?,''  and participants responded using a slider scale anchored at ``simple'' and ``complicated.'' Each participant saw two objects from each complexity condition, and the first two objects were images of a ball and a motherboard to anchor participants on the scale. The task can be viewed directly here: \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment34/ref\_complex\_34.html}
+We presented participants 12 objects from the the full stimulus set one at a time. For each object, we asked ``How complicated is this object?,''  and participants responded using a slider scale anchored at ``simple'' and ``complicated.'' Each participant saw two objects from each complexity condition, and the first two objects were images of a ball and a motherboard to anchor participants on the scale. This and all subsequent experimental paradigms can be viewed directly here: \url{https://mllewis.github.io/projects/RC/RCindex.html}.
 
 \subsection{Results and Discussion}
 Number of object parts was highly correlated with explicit complexity judgement ($r = .93$, $p < .0001$; $M = .47$,  $SD = .18$): Objects with more parts tend to be related as more complex. Figure \ref{fig:study1_plots}a shows the mean complexity rating for each of the  40 objects as a function of their complexity condition. This  suggests that we can use manipulations of visual complexity as a proxy for manipulations of conceptual complexity. 
@@ -181,7 +211,7 @@ The referent stimuli were the set of 40 objects normed in Experiment 1. The ling
 
 \subsubsection{Procedure}
 
-We presented participants with a novel word  and two possible objects as referents, and asked them to select which object the word named (``Imagine you just heard someone say {\it bugorn}. Which object do you think  {\it bugorn} refers to? Choose an object by clicking the button below it.''; \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment38/ref\_complex\_38.html}).
+We presented participants with a novel word  and two possible objects as referents, and asked them to select which object the word named (``Imagine you just heard someone say {\it bugorn}. Which object do you think  {\it bugorn} refers to? Choose an object by clicking the button below it.'').
 
 Within participants, we manipulated word length and the relative complexity of the referent alternatives.  We tested every unique combination of object complexities (1 vs.\ 2 geons, 1 vs.\ 3 geons, 1 vs.\ 4 geons, etc.), giving rise to 15 conditions in total. Each participant completed 4 short and 4 long trials in a random order, where each word was randomly associated with one of the complexity conditions. No participant saw the same complexity condition twice and no word or object was repeated across trials. 
 
@@ -192,14 +222,14 @@ This experiment provides initial evidence for a complexity bias in the lexicon: 
 
 				
 \subsection{Experiment 3: Control Mapping Task (Artificial Objects)}
-One limitation of Experiment 2 is that it uses a small set of words as the linguistic stimuli (8 short and 8 long), making it possible that idiosyncratic properties of the words could be driving the  observedcomplexity bias. In Experiment 3, we sought to test this possibility by using words composed of randomly concatenated syllables rather than items selected from a small list of words. The design was identical to Experiment 2, except that that we tested only the most extreme complexity condition, the ``1/5'' condition.
+One limitation of Experiment 2 is that it uses a small set of words as the linguistic stimuli (8 short and 8 long), making it possible that idiosyncratic properties of the words could be driving the  observed complexity bias. In Experiment 3, we sought to test this possibility by using words composed of randomly concatenated syllables rather than items selected from a small list of words. The design was identical to Experiment 2, except that that we tested only the most extreme complexity condition, the ``1/5'' condition.
 
 \subsection{Methods}
 \subsubsection{Participants} 200 participants completed the experiment.
 \subsubsection{Stimuli} The referent stimuli were the geon objects composed of either 1 or 5 geons. The novel words were created by randomly concatenating 2, 4, or 6 consonant-vowel syllables (e.g., ``nur,'' ``nobimup,'' ``gugotobanid''). The last syllable of all words ended in a consonant to better approximate the phonology of English.
 
 \subsubsection{Procedure}
-Participants completed six forced-choice trials identical to Experiment 1b ( \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment40/ref\_complex\_40.html}). 
+Participants completed six forced-choice trials identical to Experiment 1b. 
 
 We tested only the ``1/5'' complexity condition (1-geon object vs. 5-geon object). Word length was manipulated within-participant such that each participant completed 2 trials for each of the three possible word lengths (2, 4, or 6 syllables).
 
@@ -223,7 +253,7 @@ We collected a set of 60 objects that were real objects but that did not have ca
   \end{center} 
 \end{figure}	
 
-\subsubsection{Procedure} The procedure was identical to Experiment 1 ( \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment9/ref\_complex\_9.html}).
+\subsubsection{Procedure} The procedure was identical to Experiment 1.
 
 \subsection{Results and Discussion}
 
@@ -235,13 +265,13 @@ We collected a set of 60 objects that were real objects but that did not have ca
 \end{figure}	
  Complexity judgements were highly reliable across two independent samples ($r = .93, p < .0001$; $M_1 = .49$, $SD_1 = .18, M_2 = .44$, $SD_2 = .18$). Figure  \ref{fig:study2_plots}a shows the relationship between the complexity judgment for each item across the two samples of participants. 
 
-\section{Experiment 5: Mapping Task (Novel Objects)}
+\section{Experiment 5: Mapping Task (Novel Real Objects)}
 
 \subsection{Methods}
 \subsubsection{Participants} 1500 participants completed the experiment.
 \subsubsection{Stimuli} The linguistic stimuli were identical to Experiment 2. The object stimuli were the 60 naturalistic objects normed in Experiment 2. Five complexity conditions were determined by dividing the objects into quintiles based on the norms.
 
-\subsubsection{Procedure} The procedure was identical to Experiment 2, except for the use of naturalistic rather than  artificial geon objects (\url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment35/ref\_complex\_35.html}). 
+\subsubsection{Procedure} The procedure was identical to Experiment 2, except for the use of naturalistic rather than  artificial geon objects. 
 
 \subsection{Results and Discussion}
 As with the artificial objects, effect size was negatively correlated with the complexity rating ratio between the referent alternatives ($r = .70, p < .005$; Fig. \ref{fig:study2_plots}b).  This suggests  that the complexity bias observed with artificial objects extends to more naturalistic objects, consistent with the proposal that  a complexity bias is a characteristic on natural language more generally. 
@@ -254,7 +284,7 @@ The effect size in Experiment 5 is smaller than in Experiment 2, however. This m
 \subsubsection{Stimuli} The objects were 12 objects from the first and fifth quintile of complexity norms. The linguistic stimuli were constructed as in Experiment 3. 
 
 \subsubsection{Procedure}
-The procedure was identical to Experiment 3, except for the different object stimuli (\url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment41/ref\_complex\_41.html}).
+The procedure was identical to Experiment 3, except for the different object stimuli.
 
 \subsection{Results and Discussion}
 Participants were more likely to select an object from the fifth quintile as opposed to the first quintile when the novel word contained more syllables ($\beta = -.34, p < .0001$; Fig. \ref{fig:study2_plots}c). This pattern replicates the complexity bias seen in Experiment 5 with randomly concatenated syllables.  
@@ -271,7 +301,7 @@ The previous set of experiments provide evidence for a complexity bias in a comp
 \subsubsection{Participants} Fifty-nine participants completed the experiment.
 \subsubsection{Stimuli} The object were drawn from the set of 60 naturalistic objects used in Experiments 4-6
 \subsubsection{Procedure}
-In each trial, we presented  with a single object and asked participants to generate a novel single-word label to refer to it. The instructions read: ``What do you think this object is called? For example, someone might call it a {\it tupa} or a {\it pakuwugnum}. In the box below, please make up your own name for the object. Your name should only be one word. It should not be a real English word'' (\url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment27/ref\_complex\_27.html}).  
+In each trial, we presented  with a single object and asked participants to generate a novel single-word label to refer to it. The instructions read: ``What do you think this object is called? For example, someone might call it a {\it tupa} or a {\it pakuwugnum}. In the box below, please make up your own name for the object. Your name should only be one word. It should not be a real English word''.  
 Each participant completed 10 trials---five objects from the bottom and top complexity norm quantiles each.  Order of objects was randomized.
 
 \subsection{Results and Discussion}
@@ -290,7 +320,7 @@ To collect an implicit measure of complexity for our objects, we measured partic
 \subsubsection{Participants} 750 participants completed the task. 250 participants were tested with artificial geon objects (Experiment 8a) and 500 were tested with naturalistic objects (Experiment 8b).
 \subsubsection{Stimuli}  The study objects were the set of 40 artificial geon objects (Experiment 8a) and 60 naturalistic objects (Experiment 8b). 
 
-\subsubsection{Procedure} Participants were told they were going to view some objects and their memory of those exact objects would later be tested. In the study phase, participants were presented with half of the full stimulus set one at a time (20 geon objects and 30 naturalistic objects) and allowed to click a ``next'' button when they were done studying each object. After the training phase, we presented participants with each object in the full stimulus set (40 geon object and 60 naturalistic objects), and asked ``Have you seen this object before?.'' Participants responded by clicking a ``yes'' or ``no'' button (8a: \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment37/ref\_complex\_37.html}, and 8b: \url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment30/ref\_complex\_30.html}).
+\subsubsection{Procedure} Participants were told they were going to view some objects and their memory of those exact objects would later be tested. In the study phase, participants were presented with half of the full stimulus set one at a time (20 geon objects and 30 naturalistic objects) and allowed to click a ``next'' button when they were done studying each object. After the training phase, we presented participants with each object in the full stimulus set (40 geon object and 60 naturalistic objects), and asked ``Have you seen this object before?.'' Participants responded by clicking a ``yes'' or ``no'' button.
 
 \subsection{Results and Discussion } 
 \subsubsection{Experiment 8a: Geon objects} 
@@ -332,7 +362,7 @@ Participants were first presented with instructions describing the norming task:
 \begin{quote}
 In this experiment, you will be asked to decide how complex the meaning of a word is. A word's meaning is simple if it is easy to understand and has few parts. An example of a simple meaning is ``brick.'' A word's meaning is complex if it is difficult to understand and has many parts. An example of a more complex meaning is ``engine.''
 \end{quote}
-For each word, we then asked ``How complex is the meaning of this word?,'' and participants indicated their response on a 7-pt Likert scale anchored at ``simple'' and ``complex.'' The first two words were alway ``ball'' and ``motherboard'' to anchor participants on the scale. Each participant rated a sample of 30 words English words. After the 17th word, participants were asked to complete a simple math problem to ensure they were engaged in the task (\url{http://langcog.stanford.edu/expts/MLL/refComplex/Experiment26/ref\_complex\_26.html})
+For each word, we then asked ``How complex is the meaning of this word?,'' and participants indicated their response on a 7-pt Likert scale anchored at ``simple'' and ``complex.'' The first two words were alway ``ball'' and ``motherboard'' to anchor participants on the scale. Each participant rated a sample of 30 words English words. After the 17th word, participants were asked to complete a simple math problem to ensure they were engaged in the task.
 
 \subsection{Results and Discussion}
 
@@ -347,7 +377,8 @@ Given these measures of word length, we  next considered how length related to j
   \end{center} 
 \end{figure}	
 
-This result points to a relationship between conceptual complexity and word length, but tointerpret this relationship, it is important to also control for other known correlates of word length and complexity. Linguistic predictability is highly correlated with word length, operationalized via simple frequency \cite{zipf1936} or using a language model \cite{piantadosi2011b}. We estimated word frequency  from a corpus of transcripts of American English movies \cite<Subtlex-us database; >{brysbaert2009moving}. Importantly, the regularity we describe---a relationship between conceptual complexity and word length---holds even when controlling for frequency. In English, the correlation was only slightly reduced when controlling for log frequency ($r = .57$, $p < .0001$). 
+This result points to a relationship between conceptual complexity and word length, but to
+interpret this relationship, it is important to also control for other known correlates of word length and complexity. Linguistic predictability is highly correlated with word length, operationalized via simple frequency \cite{zipf1936} or using a language model \cite{piantadosi2011b}. We estimated word frequency  from a corpus of transcripts of American English movies \cite<Subtlex-us database; >{brysbaert2009moving}. Importantly, the regularity we describe---a relationship between conceptual complexity and word length---holds even when controlling for frequency. In English, the correlation was only slightly reduced when controlling for log frequency ($r = .57$, $p < .0001$). 
 
 Complexity is reliably correlated with concreteness, familiarity, and imageability (concreteness: $r = -.27$; familiarity: $r = -.43$; imageability: $r = -.21$). Nonetheless, the relationship between word length and complexity remained reliable controlling for these factors. We created an additive linear model predicting word length in terms of phonemes with complexity, controlling for concreteness, imageability, familiarity, and frequency. Model parameters are presented in Table~\ref{exp9model}.This pattern held for the other two metrics of word length (morphemes and syllables).
 
