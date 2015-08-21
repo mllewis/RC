@@ -16,14 +16,14 @@ output: html_document
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 5: [Real object mappping task](#5)**<br/> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 6: [Real object mapping task control (random syllables)](#6)** <br/> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 7: [Real object production task](#7)**<br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 8: [Geon study time task](#8)**<br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 9: [Real object study time task](#9)**<br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 10: [English complexity norms](#10)**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 11: [Cross-linguistic analysis](#11)** <br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 12: [Simultaneous frequency task](#12)**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 13: [Sequential frequency task](#12)**<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 8a: [Geon study time task](#8a)**<br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 8a: [Real object study time task](#8a)**<br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 9: [English complexity norms](#9)**<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 10: [Cross-linguistic analysis](#10)** <br/> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 11: [Simultaneous frequency task](#11)**<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 12: [Sequential frequency task](#12)**<br/>
   
-This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/RC/blob/master/analysis/refComplex_paper_analyses_SI.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/analysis/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
+This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/RC/blob/master/analysis/refComplex_paper_analyses_LF.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/analysis/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
 
 ***
 ***
@@ -389,7 +389,7 @@ dc$len[dc$langCondition=='"five"'] <- 5
 ```{r, warning = F, message = F, echo = F, fig.width = ps1, fig.height = ps1}
 ## plot by length condition
 # get props
-ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")})
+ms = ddply(dc, .(len), function (d, dv) {p.fc(d,"\"complex\"")})
 
 # plot
 geon_control_plot = qplot(len,p_complex, position=position_dodge(),
@@ -859,8 +859,8 @@ cor.test(md$log.length, md$rt.norms)
 summary(lmer(scale(log.length) ~ scale(rt.norms) + (1 + log.trial|workerid), md))
 ```
 
-<a name="8"/>
-<h3> Study 8: Geon study time task</h3> 
+<a name="8a"/>
+<h3> Study 8a: Geon study time task</h3> 
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment37/ref_complex_37.html" target="_blank"> here</a>.
 
@@ -868,7 +868,7 @@ We excluded subjects who performed at or below chance on the memory task (20 or 
 
 Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. Below is a histogram of study times after these exclusions (_M_ = 7.40, _SD_ = .66). The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
-```{r 8:geon_rt_norms, include = F}
+```{r 8a:geon_rt_norms, include = F}
 ## get data into long form (accuracy and RT df) and do exclusions
 if (processNorms) {
   # read in data
@@ -992,7 +992,7 @@ if (processNorms) {
   D.agg = D.agg[D.agg$good == 1,]
 
   ## stats: paired t-test
-   t.test(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"],
+  t.test(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"],
           D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"], paired = TRUE)
   mean(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"])
   sd(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"])
@@ -1074,8 +1074,8 @@ cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
 
 Study times did not predict memory performance. The study times for hits (correct "yes" responses; _M_ = 7.33, _SD_ = .52) did not differ from misses (correct "no" responses; _M_ = 7.34, _SD_ = .59; _t_(223) = .61, _p_=.54).
 
-<a name="9"/>
-<h3> Study 9: Real object study time task</h3> 
+<a name="8b"/>
+<h3> Study 8b: Real object study time task</h3> 
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment30/ref_complex_30.html" target="_blank"> here</a>.
 
@@ -1083,7 +1083,7 @@ We excluded subjects who performed at or below chance on the memory task (30 or 
 
 Participants were also excluded based on study times. We transformed the time into log space, and excluded responses that were 2 standard deviations above or below the mean. This excluded 4% of responses. Below is a histogram of study times after these exclusions (_M_ = 7.36, _SD_ = .72). The solid line indicates the mean, and the dashed lines indicate two standard deviations above and below the mean.
 
-```{r 9:objects_rt_norms, warning = F, echo = F, message = F}
+```{r 8b:objects_rt_norms, warning = F, echo = F, message = F}
 ## get data into long form (accuracy and RT df) and do exclusions
 if (processNorms){
   raw <- read.csv("data/experiment/RefComplex30.results_A.csv")
@@ -1242,12 +1242,12 @@ cor.test(co_norms$meanRating, co_norms$log.rt)
 ```
 For the real objects, study times predicted memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24, _SD_ = .60) were greater than for misses (correct “no” responses; _M_ = 7.11, _SD_ = .66; _t_(393) = 9.74, _p_<.0001).
 
-<a name="10"/>
-<h3> Study 10: English complexity norms</h3> 
+<a name="9"/>
+<h3> Study 9: English complexity norms</h3> 
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment26/ref_complex_26.html" target="_blank"> here</a>.
 
-```{r 10:english_norms, warning= F, include = F}
+```{r 9:english_norms, warning= F, include = F}
 ## preprocess and merge in stuff
 if (processNorms) {
   d <- read.csv("data/experiment/RefComplex26_all.results_A.csv")
@@ -1690,14 +1690,14 @@ xling.eng$class = as.factor(xling.eng$class)
 xling.eng$clx.morph = as.factor(xling.eng$clx.morph)
 ```
 
-<a name="11"/>
-<h3> Study 11: Cross-linguistic analysis</h3> 
+<a name="10"/>
+<h3> Study 10: Cross-linguistic analysis</h3> 
 
 We translated all 499 words from Study 10 into 79 languages using <a href="http://www.translate.google.com" target="_blank">Google translate</a> (retrieved March 2014). We translated the set of words into all languages available in Google translate. Words that were translated as English words were removed from the data set. We also removed words that were translated into a script that was different from the target language (e.g. an English word listed for Japanese).
 
 Native speakers evaluated the accuracy of these translations for 12 of the 79 languages. Native speakers were told to look at the translations provided by Google, and in cases where the translation was bad or not given, provide a "better translation." Translations were not marked as inaccurate if the translation was missing. Plotted below is the proportion native speaker agreement with the Google translations across all 499 words. The dashed line indicates the mean (_M_ = .92).
 
-```{r 11:google_xling, echo = F, fig.width = ps1, fig.height = ps1}
+```{r 10:google_xling, echo = F, fig.width = ps1, fig.height = ps1}
 ## translation accuracy
 checksR = read.csv("data/corpus/xling_translation_accuracy.csv")[1:499,]
 
@@ -1909,14 +1909,14 @@ mean(c_l$open.cor)
 mean(c_l$p.corr)
 ```
 
-<a name="12"/>
-<h3> Study 12: Simultaneous frequency task</h3> 
+<a name="11"/>
+<h3> Study 11: Simultaneous frequency task</h3> 
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment17_2/ref_complex_17_2.html" target="_blank"> here</a>.
 
 Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ.
 
-```{r 12: simul_freq, include = F}
+```{r 11: simul_freq, include = F}
 # read in data
 d_simultaneous <- read.csv("data/experiment/RefComplex6_all.results_A.csv")
 ```
@@ -1951,8 +1951,8 @@ qplot(Answer.lang_condition, p_complex, fill = Answer.lang_condition,
 chisq.test(table(d_simultaneous$responseValue, d_simultaneous$Answer.lang_condition))
 ```
 
-<a name="13"/>
-<h3> Study 13: Sequential frequency task</h3> 
+<a name="12"/>
+<h3> Study 12: Sequential frequency task</h3> 
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment16/ref_complex_16.html" target="_blank"> here</a>.
 
@@ -1967,7 +1967,7 @@ levels(d_sequential$Answer.crit_selection) = c("\"high_freq\"", "\"low_freq\"")
 names(d_sequential)[35] = "responseValue"
 ```
 
-```{r 13:sequential_freq, echo = F, fig.width = ps1, fig.height = ps1}
+```{r 12:sequential_freq, echo = F, fig.width = ps1, fig.height = ps1}
 ## plot proportion low freq by language condition
 # get proportions by condition
 ms_seq = ddply(d_sequential,.(Answer.lang_condition), 
