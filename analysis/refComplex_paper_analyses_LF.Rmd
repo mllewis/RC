@@ -1218,7 +1218,7 @@ ms.chars <- aggregate(complexity ~ word + nchars + subt.log.freq + mrc.conc, dat
 ms.chars2 <- aggregate(complexity ~ word + nchars, data=eng, mean)
 ms.chars2$cih <- aggregate(complexity ~ word + nchars, data=eng, ci.high)$complexity
 ms.chars2$cil <- aggregate(complexity ~ word + nchars, data=eng, ci.low)$complexity
-# write.csv(ms.chars2, "data/norms/complexNormsEnglish_BYWORD_exp9.csv")
+# write.csv(ms.chars2, "data/norms/complexityNormsEnglishexp9.csv.csv")
 
 ```
 
