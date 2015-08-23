@@ -1,34 +1,92 @@
+# Helper functions for refComplex analysis
 
-library(bootstrap)
+# bootstrap CIs for correlations (http://dodonovs.com/R/002-r.htm)
+boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){ 
+  w = length(x); x.r = x; y.r = y 
+  sm = 1:w; cor.b = 1:n 
+  for (k in 1:n){ 
+    s = sample(sm, w, replace = T) 
+    for (i in 1:w) 
+    { 
+      x.r[i] = x[s[i]] 
+      y.r[i] = y[s[i]] 
+    } 
+    cor.b[k] = cor(x.r, y.r, use = "pairwise", method) 
+  } 
+  cor.b = sort(cor.b); a = round(n*(1-p)/2,0); b = round(n*(p+1)/2,0) 
+  vec = c(cor.b[a+1], cor(x, y, use = "pairwise", method), cor.b[b-1]) 
+  n.r = c("value"); n.c = c("lower_bound", "correlation", "upper_bound") 
+  matrix(vec,1,3,dimnames = list(n.r,n.c)) 
+}
 
-## add some style elements for ggplot2
+# proportions and CIs for forced choice tasks
+p.fc <- function(d, dv){ 
+  # get proportions
+  complex_proport_c = sum(d$responseValue==dv)/length(d$responseValue)
+  
+  # get bootstrapped 95% CIs
+  if (!is.na(complex_proport_c)) { 
+    # bootstrap across subjects proportion responses for each category
+    b <- boot(d$responseValue, function(u, i) table(u[i])[dv]/length(u), R = 1000) 
+    ci <- boot.ci(b, type = "basic")  
+    ciwl = ci$basic[4]
+    ciwu = ci$basic[5]
+    
+    es <- data.frame(p_complex = complex_proport_c,
+                     ciwl = ciwl,
+                     ciul = ciwu,
+                     n=length(d$workerid))
+    
+  } else {
+    es <- data.frame(p_c = NA,
+                     ciwl = NA,
+                     ciul = NA,
+                     n = NA)
+    
+  }
+  return (es)
+}
+
+# effect sizes for forced choice tasks
+d.fc <- function(d) {
+  d <- d[d$langCondition == "\"long\"" | d$langCondition ==  "\"short\"",]
+  d <- droplevels(d)
+  
+  # use odds ratio to calculate d
+  ns = table(d$langCondition, d$responseValue)
+  or = (ns["\"long\"", "\"complex\""] * ns["\"short\"", "\"simple\""]) / 
+    (ns["\"short\"", "\"complex\""] * ns["\"long\"", "\"simple\""])
+  cf = sqrt(3)/pi
+  effect_size = log(or) * cf # calculate d
+  
+  # calculate 95 CI
+  ## parametrically
+  var_lor = (1/ns[1]) + (1/ns[2]) + (1/ns[3]) + (1/ns[4]) # sampling variance of lor
+  var_d  = (3/(pi^2)) * var_lor # sampling variance of d
+  d_err = sqrt(var_d) * 1.96
+  
+  cill = effect_size - d_err
+  ciul = effect_size + d_err
+  rt.Mratio = mean(d$rt.ratio, na.rm = T)
+  c.Mratio = mean(d$c.ratio, na.rm = T)
+  
+  es <- data.frame(effect_size=effect_size,
+                   cill = cill,
+                   ciul = ciul,
+                   rt.Mratio = rt.Mratio,
+                   c.Mratio = c.Mratio)
+  return (es)
+}
+
 theme_set(theme_bw())
+themeML = theme(text = element_text(size=fs),
+                plot.title=element_text(size=ts, face = "bold"),
+                plot.background = element_blank(),
+                panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(),
+                panel.border = element_blank(),
+                axis.line = element_line(color = 'black')) 
 
-## standard error of the mean
-sem <- function (x) {
-  sd(x,na.rm=TRUE) / sqrt(length(x))
-}
-
-## NA functions
-na.mean <- function(x) {mean(x,na.rm=T)}
-na.median <- function(x) {median(x,na.rm=T)}
-na.sum <- function(x) {sum(x,na.rm=T)}
-na.sd <- function(x) {sd(x,na.rm=T)}
-
-## convert to number
-to.n <- function(x) {
-  as.numeric(as.character(x))
-}
-
-## inverse logistic
-inv.logit <- function (x) {
-  exp(x) / (1 + exp(x)) 
-}
-
-## number of unique subs
-n.unique <- function (x) {
-  length(unique(x))
-}
 
 ## for bootstrapping 95% confidence intervals
 theta <- function(x,xdata,na.rm=T) {mean(xdata[x],na.rm=na.rm)}
@@ -36,26 +94,6 @@ ci.low <- function(x,na.rm=T) {
   as.numeric(mean(x,na.rm=na.rm) - quantile(bootstrap(1:length(x),1000,theta,x,na.rm=na.rm)$thetastar,.025,na.rm=na.rm))}
 ci.high <- function(x,na.rm=T) {
   as.numeric(quantile(bootstrap(1:length(x),1000,theta,x,na.rm=na.rm)$thetastar,.975,na.rm=na.rm) - mean(x,na.rm=na.rm))}
-
-## for basic plots, add linear models with correlations
-lm.txt <- function (p1,p2,x=7.5,yoff=.05,lt=2,c="black",data=data)
-{
-  l <- lm(p2 ~ p1)
-  regLine(l,lty=lt,col=c)
-  cl <- coef(l)
-  text(x,cl[1] + cl[2] * x + yoff,
-       paste("r = ",sprintf("%2.2f",sqrt(summary(l)$r.squared)),
-            getstars(anova(l)$"Pr(>F)"[1]),sep=""),
-       xpd="n")
-}
-
-## get stars for significance testing
-getstars <- function(x) {
-  if (x > .1) {return("")}
-  if (x < .001) {return("***")}
-  if (x < .01) {return("**")}
-  if (x < .05) {return("*")}
-}
 
 ## Multiple plot function
 # note, from internet. 
@@ -102,18 +140,6 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
                                       layout.pos.col = matchidx$col))
     }
   }
-}
-
-# anonymize subject ids by giving them a value 1:num_subjects
-anonymize.sids <- function(df, subject_column_label) {
-  subj_col = which(names(df) == subject_column_label) # get workerid column index
-  temp <- data.frame(workerid = unique(df[,subj_col])) # make new df of unique workerids
-  temp$subid <- 1:length(unique(df[,subj_col])) # make list of subids
-  index <- match(df[,subj_col], temp$workerid) 
-  df$subids <- temp$subid[index]
-  df[,subj_col] <- NULL 
-  df$subids  = as.factor(df$subids)
-  return(df)
 }
 
 pcor.test <- function(x,y,z,use="mat",method="p",na.rm=T){
@@ -182,7 +208,7 @@ pcor.test <- function(x,y,z,use="mat",method="p",na.rm=T){
   }
   
   data.frame(estimate=pcor,p.value=p.value,statistic=statistic,n=n,gn=gn,Method=p.method,Use=p.use)
-}			
+}	
 
 # By using var-cov matrix
 pcor.mat <- function(x,y,z,method="p",na.rm=T){
@@ -270,5 +296,18 @@ pcor.rec <- function(x,y,z,method="p",na.rm=T){
     
     rxy.z <- (rxy.zc - rxz0.zc*ryz0.zc)/( sqrt(1-rxz0.zc^2)*sqrt(1-ryz0.zc^2) )
     return(rxy.z)
-  }			
+  }
 }
+
+# anonymize subject ids by giving them a value 1:num_subjects
+anonymize.sids <- function(df, subject_column_label) {
+  subj_col = which(names(df) == subject_column_label) # get workerid column index
+  temp <- data.frame(workerid = unique(df[,subj_col])) # make new df of unique workerids
+  temp$subid <- 1:length(unique(df[,subj_col])) # make list of subids
+  index <- match(df[,subj_col], temp$workerid) 
+  df$subids <- temp$subid[index]
+  df[,subj_col] <- NULL 
+  df$subids  = as.factor(df$subids)
+  return(df)
+}
+
