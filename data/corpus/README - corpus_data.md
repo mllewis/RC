@@ -1,6 +1,8 @@
 README - corpus_data
 ---
 
+This folder contains all of the data used in Experiment 9 and Study 10 in the paper.
+
 [1] CELEX2_numMorph.csv - Celex2 corpus for number of morphemes
 (Baayen, R., Piepenbrock, R., & Gulikers, L. (1995). Celex2, ldc96l14. Web download, Linguistic Data Consortium, Philadelpha, PA.)
 
