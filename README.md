@@ -1,4 +1,4 @@
-RC
+The length of words reflects their conceptual complexity (Lewis & Frank, under review)
 ==
 
-Data, code, and writeup for project on the relationship between word length and referential complexity.
+Analysis, data, stimuli, and writeup for project on the relationship between word length and referential complexity. All experimental paradigms can be viewed directly here: [Experiment Library] (https://mllewis.github.io/projects/RC/RCindex.html "Experiment Library").
