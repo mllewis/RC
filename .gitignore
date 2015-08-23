@@ -1,12 +1,13 @@
 writeup/misc/
 writeup/nature/figs/misc/
 
-analysis/figure/
+analysis/rsconnect/
 analysis/refComplex_paper_analyses_SI.md
 analysis/refComplex_paper_analyses_SI.html
 analysis/refComplex_paper_analyses.Rmd
 analysis/refComplex_paper_analyses.md
 analysis/refComplex_paper_analyses.html
+analysis/refComplex_paper_analyses_LF_cache/analysis/refComplex_paper_analyses_LF_files/
 analysis/.RData
 analysis/.Rhistory
 analysis/.Rprofile
