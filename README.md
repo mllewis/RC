@@ -6,3 +6,5 @@ Analysis, data, stimuli, and writeup for project on the relationship between wor
 All experimental paradigms can be viewed directly here: [RC experiment library] (https://mllewis.github.io/projects/RC/RCindex.html "Experiment Library"). 
 
 Experimental code can be accessed here: [experimental code] (https://github.com/mllewis/mllewis.github.io/tree/master/projects/RC "experimental code").
+
+Rendered analyses can be found here: [analyses] (http://rpubs.com/mll/RCSI).
