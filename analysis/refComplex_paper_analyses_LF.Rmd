@@ -8,8 +8,8 @@ output: html_document
 ***
 
 **TABLE OF CONTENTS**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 1: [Geon mapping task](#1)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 2: [Geon complexity norms](#2)**<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 1: [Geon complexity norms](#1)** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 2: [Geon mapping task](#2)**<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 3: [Geon mapping task control (random syllables)](#3)**<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 4: [Real object complexity norms](#4)** <br/> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 5: [Real object mappping task](#5)**<br/> 
@@ -65,16 +65,92 @@ opts_chunk$set(echo=F, message=F, warning=F, error=F, cache=T)
 
 All experimental studies (Studies 1-9 and 11-12) were completed on Amazon Mechanical Turk (AMT). AMT is an online crowdsourcing platform that provides a reliable subject pool for web-based studies [17]. Participants were paid US$0.15-0.30 for their participation, depending on the length of the task. 
 
+
 <a name="1"/>
-<h3> Study 1: Geon mapping task</h3>
+<h3> Study 1: Geon complexity norms</h3> 
 
-The task can be found <a href="https://mllewis.github.io/projects/RC/experiment34/ref_complex_34.html" target="_blank"> here</a>. 
-
-The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "gronan," "ralex," "vatrus." The long word items were: "tupabugorn," "gaburatum," "fepolopus," "pakuwugnum," "mipatorun," "kibagronan," "tiburalex," "binivatrus."
+The task can be found <a href="https://mllewis.github.io/projects/RC/experiment34/ref_complex_34.html" target="_blank"> here</a>.
 
 Across all experiments, some participants completed more than one study. The results presented here include the data from all participants, but all reported results remain reliable when excluding participants who completed more than one study. Participants were counted as a repeat participant if they completed a study using the same stimuli (e.g., completed both Studies 1 and 2 with geons).
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative is from the first quintile and the other is from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 2). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio [18]. In this and all subsequent plots, errors bars reflect 95% confidence intervals.
+The relationship between number of geons and complexity rating is plotted below (_M_ = .47, _SD_ = .18). Each point corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting. The confidence intervals are calculated via non-parametric bootstrapping.
+
+```{r 2:geon_complexity_norms, warning = F, include = F}
+## read in data and pre-process
+if (processNorms) {
+  # read in data
+  d <- read.csv("../data/experiment/RefComplex1.results_A.csv")
+  
+  # melt
+  md <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("obj",names(d))])
+  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
+  md$obj <- unlist(matrix(lapply(str_split(md$value,"j"),function(x) {x[2]})))
+  md$obj <- unlist(matrix(lapply(str_split(md$obj,".p"),function(x) {x[1]})))
+  md$complexityLevel <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[1]})))
+  md$objID <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[2]})))
+  md$value <- NULL; md$variable <- NULL
+  md = md[(md$trial != 0 & md$trial != 1),] # remove ball and circuit
+  
+  # get rating info
+  mdr <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("rating",names(d))])
+  mdr$trial <- matrix(lapply(str_split(mdr$variable,"_"),function(x) {x[2]}))
+  mdr$variable <- NULL
+  
+  # merge together based on trial and workerid
+  m = merge(md, mdr, by=c("workerid","trial"))
+  m$value <- as.numeric(as.character(m$value))
+  
+  # get norms by objects
+  ms_all <- aggregate(value ~ obj, data=m, mean)
+  ms_all$cih <- aggregate(value ~ obj, data=m, ci.high)$value
+  ms_all$cil <- aggregate(value ~ obj, data=m, ci.low)$value
+  
+  names(ms_all)[2] = "meanRating"
+  ms_all <- ms_all[order(ms_all$meanRating),]
+
+  # save complexity by item
+  write.csv(ms_all, "../data/norms/complicatedNormsGeons_BYITEM_exp1.csv")
+  } 
+
+cg_norms = read.csv("../data/norms/complicatedNormsGeons_BYITEM_exp1.csv")
+```
+
+```{r, echo = F, fig.width=ps1, fig.height=ps1}
+## plot complexity norm by number of geons
+# remove quotes from norms
+cg_norms$obj = as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
+cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
+cg_norms$obj_item = as.numeric(substr(cg_norms$obj, 2, 2))
+
+# make object class numeric
+cg_norms$obj_class = as.numeric(cg_norms$obj_class) 
+
+# plot
+ggplot(cg_norms, aes(y=meanRating, x=jitter(obj_class))) +
+  geom_pointrange(aes(ymax = meanRating+cih,ymin=meanRating-cil)) + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  annotate("text", x=4, y=.25, color = "red", size=rs,
+           label=paste("r=",round(cor(cg_norms$obj_class, cg_norms$meanRating), 2))) +
+  xlab("Object condition") +
+  ylab("Complexity rating") +
+  ggtitle("complexity rating vs. # of geons") +
+  themeML
+```
+
+```{r, include = F}
+## stats: correlation between complexity norms and num geons (BY ITEM)
+cor.test(cg_norms$obj_class, cg_norms$meanRating)
+```
+
+
+<a name="2"/>
+<h3> Study 2: Geon mapping task</h3>
+
+The task can be found <a href="https://mllewis.github.io/projects/RC/experiment38/ref_complex_38.html" target="_blank"> here</a>. 
+
+The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "gronan," "ralex," "vatrus." The long word items were: "tupabugorn," "gaburatum," "fepolopus," "pakuwugnum," "mipatorun," "kibagronan," "tiburalex," "binivatrus."
+
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative is from the first quintile and the other is from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 1). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio [18]. In this and all subsequent plots, errors bars reflect 95% confidence intervals.
 
 ```{r 1:geon_mapping, warning=F, include=F}
 ## get data into long form
@@ -184,80 +260,6 @@ multiplot(geon_c_plot, geon_rt_plot, cols = 2)
 ## stats: correlations between norms and effect sizes
 cor.test(de$c.Mratio, de$effect_size)
 cor.test(de$rt.Mratio, de$effect_size)
-```
-
-<a name="2"/>
-<h3> Study 2: Geon complexity norms</h3> 
-
-The task can be found <a href="https://mllewis.github.io/projects/RC/experiment38/ref_complex_38.html" target="_blank"> here</a>.
-
-The relationship between number of geons and complexity rating is plotted below (_M_ = .47, _SD_ = .18). Each point corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting. The confidence intervals are calculated via non-parametric bootstrapping.
-
-```{r 2:geon_complexity_norms, warning = F, include = F}
-## read in data and pre-process
-if (processNorms) {
-  # read in data
-  d <- read.csv("../data/experiment/RefComplex1.results_A.csv")
-  
-  # melt
-  md <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("obj",names(d))])
-  md$trial <- matrix(lapply(str_split(md$variable,"_"),function(x) {x[2]}))
-  md$obj <- unlist(matrix(lapply(str_split(md$value,"j"),function(x) {x[2]})))
-  md$obj <- unlist(matrix(lapply(str_split(md$obj,".p"),function(x) {x[1]})))
-  md$complexityLevel <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[1]})))
-  md$objID <- unlist(matrix(lapply(str_split(md$obj,"-"),function(x) {x[2]})))
-  md$value <- NULL; md$variable <- NULL
-  md = md[(md$trial != 0 & md$trial != 1),] # remove ball and circuit
-  
-  # get rating info
-  mdr <- melt(d,id.vars=c("workerid"),measure.vars=names(d)[grepl("rating",names(d))])
-  mdr$trial <- matrix(lapply(str_split(mdr$variable,"_"),function(x) {x[2]}))
-  mdr$variable <- NULL
-  
-  # merge together based on trial and workerid
-  m = merge(md, mdr, by=c("workerid","trial"))
-  m$value <- as.numeric(as.character(m$value))
-  
-  # get norms by objects
-  ms_all <- aggregate(value ~ obj, data=m, mean)
-  ms_all$cih <- aggregate(value ~ obj, data=m, ci.high)$value
-  ms_all$cil <- aggregate(value ~ obj, data=m, ci.low)$value
-  
-  names(ms_all)[2] = "meanRating"
-  ms_all <- ms_all[order(ms_all$meanRating),]
-
-  # save complexity by item
-  write.csv(ms_all, "../data/norms/complicatedNormsGeons_BYITEM_exp1.csv")
-  } 
-
-cg_norms = read.csv("../data/norms/complicatedNormsGeons_BYITEM_exp1.csv")
-```
-
-```{r, echo = F, fig.width=ps1, fig.height=ps1}
-## plot complexity norm by number of geons
-# remove quotes from norms
-cg_norms$obj = as.factor(as.numeric(gsub("[[:punct:]]", "", cg_norms$obj)))
-cg_norms$obj_class = as.numeric(substr(cg_norms$obj, 1, 1))
-cg_norms$obj_item = as.numeric(substr(cg_norms$obj, 2, 2))
-
-# make object class numeric
-cg_norms$obj_class = as.numeric(cg_norms$obj_class) 
-
-# plot
-ggplot(cg_norms, aes(y=meanRating, x=jitter(obj_class))) +
-  geom_pointrange(aes(ymax = meanRating+cih,ymin=meanRating-cil)) + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  annotate("text", x=4, y=.25, color = "red", size=rs,
-           label=paste("r=",round(cor(cg_norms$obj_class, cg_norms$meanRating), 2))) +
-  xlab("Object condition") +
-  ylab("Complexity rating") +
-  ggtitle("complexity rating vs. # of geons") +
-  themeML
-```
-
-```{r, include = F}
-## stats: correlation between complexity norms and num geons (BY ITEM)
-cor.test(cg_norms$obj_class, cg_norms$meanRating)
 ```
 
 <a name="3"/>
@@ -422,9 +424,9 @@ cor.test(co_norms$rating_1, co_norms$rating_2)
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment35/ref_complex_35.html" target="_blank"> here</a>.
 
-The linguistic items were identical to Study 1.
+The linguistic items were identical to Study 2.
 
-Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. In the left plot, complexity is operationalized as the explicit complexity norms (Study 4). In the right plot, complexity is operationalized in terms of study times (Study 9). 
+Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. In the left plot, complexity is operationalized as the explicit complexity norms (Study 4). In the right plot, complexity is operationalized in terms of study times (Study 8). 
 
 ```{r 5:objects_mapping, warning = F, include = F}
 ## read in data get into long form
@@ -606,7 +608,7 @@ There were 26 productions (4%) that included more than one word. These productio
 
 For each object, we analyzed the log length of the production in characters as a function of the complexity norms (Study 4, left below). Length of production was correlated with the complexity norms: Longer labels were coined for objects that were rated as more complex (_r_=.17, _p_<.0001). 
 
-We also analyzed the log length of the production in characters (_M_ = 1.89, _SD_ = .26) as a function of study times (Study 9, right below). Length of production was correlated with study times: Longer labels were coined for objects that were studied longer (_r_ = .16, _p_<.001). 
+We also analyzed the log length of the production in characters (_M_ = 1.89, _SD_ = .26) as a function of study times (Study 8, right below). Length of production was correlated with study times: Longer labels were coined for objects that were studied longer (_r_ = .16, _p_<.001). 
 
 ```{r 7:objects_production_labels, warning = F, message = F, output = F, include = F}
 ## read in data and get into long form
@@ -1204,7 +1206,7 @@ if (processNorms) {
 eng = read.csv("../data/corpus/english_complexity_norms.csv")
 ```
 
-We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database [19]. We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database [16]. Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with each other (phonemes and syllables: _r_ = .89; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 11 (phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
+We selected 499 English words that were broadly distributed in their length. All of these words were included in the MRC Psycholinguistic Database [19]. We considered three different metrics of word length: phonemes, syllables, and morphemes. Measures of phonemes and syllables were taken from the MRC corpus and measures of morphemes were taken from CELEX2 database [16]. Below are histograms of the number of words as a function of each of the three length metrics. All three metrics were highly correlated with each other (phonemes and syllables: _r_ = .89; phonemes and morphemes: _r_ = .65; morphemes and syllables: _r_ = .67). All three metrics were also highly correlated with number of characters, the length metric we use for the cross-linguistic analyses in Study 10 (phonemes: _r_ = .92; morphemes: _r_ = .69; syllables: _r_ = .87).
 
 ```{r, include = F}
 ## aggregate across participants
@@ -1749,9 +1751,11 @@ mean(c_l$p.corr)
 <a name="11"/>
 <h3> Study 11: Simultaneous frequency task</h3> 
 
-The task can be found <a "href="https://mllewis.github.io/projects/RC/experiment17_2/ref_complex_17_2.html" target="_blank"> here</a>. Study 11 and Study 12 are not reported in the paper. 
+The task can be found <a href="https://mllewis.github.io/projects/RC/experiment17_2/ref_complex_17_2.html" target="_blank"> here</a>. 11 and 12 are not reported in the paper. 
 
-Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ.
+In Study 11 (N = 477), we presented participants with 10 objects on a single screen. The objects were composed of a single geon. There were two types of objects. One object type appeared nine times and the second object type appeared once. After this training period, par- ticipants completed a forced choice mapping task, as in Studies 1 and 5. We presented a word that was either 2 or 4 syllables long and asked participants to make a judgment about whether the word referred to the low or high frequency object. Each participant completed a single mapping trial, and word length was manipulated between participants.
+
+Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ (χ2(1) = 0.02, p = .89).
 
 ```{r 11: simul_freq, include = F}
 # read in data
@@ -1788,7 +1792,9 @@ chisq.test(table(d_simultaneous$responseValue, d_simultaneous$Answer.lang_condit
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment16/ref_complex_16.html" target="_blank"> here</a>.
 
-Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ.
+In Study 12 (N = 97), we manipulated object frequency by sequentially presenting objects. Participants saw 60 objects from the set of normed real objects one at a time. One object was presented 10 times and a second object was presented 40 times. Ten additional objects were included as fillers. After this training phase, participants completed a single mapping trial as in Study 12. Word length was manipulated between participants.
+
+Plotted below is the proportion of low frequency object selections as a function of language condition (long vs. short). Selections between the two conditions did not differ (χ2(1) = 0.01, p = .92).
 
 ```{r, include = F}
 ## read in data and pre-process
