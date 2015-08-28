@@ -7,7 +7,8 @@ analysis/refComplex_paper_analyses_SI.html
 analysis/refComplex_paper_analyses.Rmd
 analysis/refComplex_paper_analyses.md
 analysis/refComplex_paper_analyses.html
-analysis/refComplex_paper_analyses_LF_cache/analysis/refComplex_paper_analyses_LF_files/
+analysis/refComplex_paper_analyses_LF_cache/
+analysis/refComplex_paper_analyses_LF_files/
 analysis/.RData
 analysis/.Rhistory
 analysis/.Rprofile
@@ -15,7 +16,10 @@ analysis/.Rapp.history
 analysis/Results with repeat subjects removed.txt
 
 *.DS_Store
-
+*.dcf
+*.Rdata
+*.rdb
+*.rdx
 
 # LaTeX #
 *.bet
@@ -35,7 +39,6 @@ analysis/Results with repeat subjects removed.txt
 *.ind
 *.ist
 *.lof
-*.log
 *.lot
 *.maf
 *.mtc

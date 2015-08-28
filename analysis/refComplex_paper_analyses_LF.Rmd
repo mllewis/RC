@@ -75,7 +75,7 @@ Across all experiments, some participants completed more than one study. The res
 
 The relationship between number of geons and complexity rating is plotted below (_M_ = .47, _SD_ = .18). Each point corresponds to an object item (8 per condition). The x-coordinates have been jittered to avoid over-plotting. The confidence intervals are calculated via non-parametric bootstrapping.
 
-```{r 2:geon_complexity_norms, warning = F, include = F}
+```{r 1:geon_complexity_norms, warning = F, include = F}
 ## read in data and pre-process
 if (processNorms) {
   # read in data
@@ -140,6 +140,8 @@ ggplot(cg_norms, aes(y=meanRating, x=jitter(obj_class))) +
 ```{r, include = F}
 ## stats: correlation between complexity norms and num geons (BY ITEM)
 cor.test(cg_norms$obj_class, cg_norms$meanRating)
+mean(cg_norms$meanRating)
+sd(cg_norms$meanRating)
 ```
 
 
@@ -152,7 +154,7 @@ The short word items were: "bugorn," "ratum," "lopus," "wugnum," "torun," "grona
 
 Plotted below is the effect size (bias to select complex alternative in long vs. short word condition) as a function of the complexity ratio between the two object alternatives. Each point corresponds to an object condition. Conditions are labeled by the quintiles of the two alternatives. For example, the "1/5" condition corresponds to the condition in which one alternative is from the first quintile and the other is from the fifth quintile. In the left plot, complexity is operationalized as the explicit complexity norms (Study 1). On the right, complexity is operationalized in terms of study times (Study 8). Effect sizes were calculated using the log odds ratio [18]. In this and all subsequent plots, errors bars reflect 95% confidence intervals.
 
-```{r 1:geon_mapping, warning=F, include=F}
+```{r 2:geon_mapping, warning=F, include=F}
 ## get data into long form
 if (doSlow){
   # read in data
@@ -417,6 +419,10 @@ qplot(rating_1,rating_2, position=position_dodge(),
 ```{r, include = F}
 ## stats: correlation between sample #1 and #2
 cor.test(co_norms$rating_1, co_norms$rating_2)
+mean(co_norms$rating_1)
+sd(co_norms$rating_1)
+mean(co_norms$rating_2)
+sd(co_norms$rating_2)
 ```
 
 <a name="5"/>
@@ -673,6 +679,12 @@ md.agg = md.agg[md.agg$good == 1,]
 t.test(md.agg[md.agg$condition == '"complex"',"log.length"],
        md.agg[md.agg$condition == '"simple"',"log.length"], paired = T)
 summary(lmer(log.length~condition + (1+log.trial|workerid), md))
+
+# means and sds
+mean(md.agg[md.agg$condition == '"complex"',"log.length"])
+sd(md.agg[md.agg$condition == '"complex"',"log.length"])
+mean(md.agg[md.agg$condition == '"simple"',"log.length"])
+sd(md.agg[md.agg$condition == '"simple"',"log.length"])
 ```
 
 ```{r, include = F}
@@ -752,7 +764,7 @@ if (processNorms) {
   
   # look at accuracy, and exclude those below chance
   #boxplot(raw$Answer.correct, main = "distribution before accuracy exclusions")
-  raw = raw[raw$Answer.correct > 20, ]
+  raw = raw[raw$Answer.correct > 20, ] # excludes 9 participants
 
   # prep accuracy and RT dataframes
   # accuracy data frame
@@ -781,7 +793,7 @@ if (processNorms) {
   numH = length(which(da$Answer.test_answerEval == "\"H\""))
 
   correct = (numCR + numH)/ dim(da)[1]
-  #print(paste("percent correct:", round(correct,2)))
+  print(paste("percent correct:", round(correct,2)))
   
   # get obj condition variable
   da$test_image2 <- as.character(matrix(lapply(str_split(da$Answer.test_image,"j"), 
@@ -816,8 +828,12 @@ if (processNorms) {
   total = dim(d)[1]
   sd2 = 2*sd(d$log.rt)
   d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
-  #print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
-  }
+  print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
+  
+  # mean and sd
+  mean(d$log.rt)
+  sd(d$log.rt)
+}
 ```
 
 ```{r, echo = F, fig.width = ps1, fig.height = ps1, warning = F, message = F}
@@ -867,7 +883,8 @@ if (processNorms) {
   D.agg$good = ifelse(is.element(D.agg$workerid, goodIDs), 1, 0)
   D.agg = D.agg[D.agg$good == 1,]
 
-  ## stats: paired t-test
+  ## stats: relationship between study times and memory performance
+  # paired t-test
    t.test(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"],
           D.agg[D.agg$Answer.test_answerEval == "\"H\"","log.rt"], paired = T)
   mean(D.agg[D.agg$Answer.test_answerEval == "\"M\"","log.rt"])
@@ -966,7 +983,7 @@ if (processNorms){
     
   # look at accuracy, and exclude those below chance
   # boxplot(raw$Answer.correct, main = "distribution before accuracy exclusions")
-  raw = raw[raw$Answer.correct > 30, ]
+  raw = raw[raw$Answer.correct > 30, ] # excludes 6 participants
   
   # accuracy dataframe
   n <- names(raw)
@@ -991,7 +1008,7 @@ if (processNorms){
   numH = length(which(da$Answer.test_answerEval == "\"H\""))
 
   correct = (numCR + numH)/ dim(da)[1]
-  #print(paste("percent correct:" , round(correct,2)))
+  print(paste("percent correct:" , round(correct,2)))
   
   # RT dataframe
   n <- names(raw)
@@ -1017,13 +1034,16 @@ if (processNorms){
   sd2 = 2*sd(d$log.rt)
   d = d[(d$log.rt > (mean(d$log.rt) - sd2)) & (d$log.rt < (mean(d$log.rt) + sd2)),]
   #print(paste("percent trimmed:" , round((total - dim(d)[1])/total,2)))
+  
+  # mean and sd
+  mean(d$log.rt)
+  sd(d$log.rt)
 }
 ```
 
 ```{r, echo = F, fig.width = ps1, fig.height = ps1, warning = F, message = F}
 if (processNorms){
   # plot histogram
-  sd = sd(d$log.rt)
   ggplot(d, aes(x=log.rt)) + 
     geom_histogram(fill = "black", alpha = .6) +
     geom_vline(aes(xintercept=mean(log.rt, na.rm=T)), 
@@ -1116,6 +1136,7 @@ ggplot(co_norms, aes(meanRating, log.rt))+
 ```{r include = F}
 ## stats: correlation between between complexity rating and RT
 cor.test(co_norms$meanRating, co_norms$log.rt)
+
 ```
 For the real objects, study times predicted memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24, _SD_ = .60) were greater than for misses (correct “no” responses; _M_ = 7.11, _SD_ = .66; _t_(393) = 9.74, _p_<.0001).
 
@@ -1129,7 +1150,7 @@ The task can be found <a href="https://mllewis.github.io/projects/RC/experiment2
 if (processNorms) {
   d <- read.csv("../data/experiment/RefComplex9_all.results_A.csv")
   
-  # remove subjects who participated in two different samples
+  # remove subjects who participated in two different hits of this experiment
   d$workerid <- as.factor(d$workerid)
   d$duplicate = as.factor(ifelse(((d$workerid == 24) | (d$workerid == 43) | (d$workerid == 66) 
                                   | (d$workerid == 67)) & d$hitid == '2Z3KH1Q6SVQ801EMMZXLBOBYHFW2LF', 1, 0))
@@ -1405,6 +1426,11 @@ multiplot(cp_o, cp_c, cp_m, cols = 3)
 
 ```{r, include = F}
 ## stats: correlations between length and complexity in English - all words and subsets
+
+# mean and sd
+mean(ms.phon$complexity)
+sd(ms.phon$complexity)
+
 ## ALL
 # correlation between phonemes and complexity
 cor.test(ms.phon$complexity, ms.phon$mrc.phon)
@@ -1706,7 +1732,7 @@ We counted the number of unicode characters for each translation. Variability in
 ```{r, echo = F, fig.width = 2*ps2, fig.height = ps2}
 ## plot correlations by language
 
-# fix several label s
+# fix several labels
 levels(c_l$language)[levels(c_l$language)=="haitian.creole"] <- "haitian creole"
 levels(c_l$language)[levels(c_l$language)=="espernto"] <- "esperanto"
 
@@ -1737,6 +1763,9 @@ ggplot(c_l, aes(language, corr, fill = checked)) +
 ```{r, include = F, }
 # grand mean correlation between complexity and length
 mean(c_l$corr) 
+
+# grand mean correlation between complexity and length, checked languages only
+mean(c_l[c_l$checked == "yes", "corr"]) 
 
 # grand mean correlation between complexity and length, mono-morphemic only
 mean(c_l$mono.cor)
