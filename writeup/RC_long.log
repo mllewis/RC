@@ -392,4 +392,65 @@ Package pdftex.def Info: figures/study3_plots.png used on input line 326.
  [27 <./figures/study3_plots.png>]
 Missing character: There is no Ó in font ptmr7t!
  [28] [29]
-<figures/study4a_plot.png, id=113
+<figures/study4a_plot.png, id=113, 3011.25pt x 3011.25pt>
+File: figures/study4a_plot.png Graphic file (type png)
+
+<use figures/study4a_plot.png>
+Package pdftex.def Info: figures/study4a_plot.png used on input line 366.
+(pdftex.def)             Requested size: 216.81pt x 216.78227pt.
+ [30] [31 <./figures/study4a_plot.png>] [32]
+<figures/xling_plot.png, id=125, 6022.5pt x 3011.25pt>
+File: figures/xling_plot.png Graphic file (type png)
+
+<use figures/xling_plot.png>
+Package pdftex.def Info: figures/xling_plot.png used on input line 417.
+(pdftex.def)             Requested size: 455.30121pt x 227.62598pt.
+
+Overfull \hbox (21.68121pt too wide) in paragraph at lines 417--418
+ [] 
+ []
+
+[33] [34 <./figures/xling_plot.png>] [35] [36] [37]
+
+Class apa Warning: \bibliographystyle command ignored on input line 467.
+
+(./RC_long.bbl [38]
+Missing character: There is no Â in font ptmr7t!
+Missing character: There is no ’ in font ptmr7t!
+ [39
+
+] [40]
+! Misplaced alignment tab character &.
+l.945 \BIn{} W.~MacWhinney B~&
+                              ~O'Grady\ (\BED), \APACrefbtitle {The handbook of
+
+? 
+[41]) [42] [43] (./RC_long.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 3808 strings out of 493093
+ 51548 string characters out of 6134989
+ 121037 words of memory out of 5000000
+ 7179 multiletter control sequences out of 15000+600000
+ 43462 words of font info for 106 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 38i,14n,35p,2064b,281s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2015/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
+exlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
+xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texl
+ive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texli
+ve/2015/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2015/
+texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/local/texlive/2015/texmf-dist/
+fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type
+1/urw/times/utmr8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/time
+s/utmri8a.pfb>
+Output written on RC_long.pdf (43 pages, 3337997 bytes).
+PDF statistics:
+ 193 PDF objects out of 1000 (max. 8388607)
+ 124 compressed objects within 2 object streams
+ 0 named destinations out of 1000 (max. 500000)
+ 36 words of extra memory for PDF output out of 10000 (max. 10000000)
+
