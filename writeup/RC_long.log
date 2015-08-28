@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  28 AUG 2015 11:05
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  28 AUG 2015 11:27
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -423,30 +423,31 @@ Missing character: There is no ’ in font ptmr7t!
 ! Misplaced alignment tab character &.
 l.945 \BIn{} W.~MacWhinney B~&
                               ~O'Grady\ (\BED), \APACrefbtitle {The handbook of
+I can't figure out why you would want to use a tab mark
+here. If you just want an ampersand, the remedy is
+simple: Just type `I\&' now. But if some right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
 
-? 
-[41]) [42] [43] (./RC_long.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+[41]) [42] [43] (./RC_long.aux) ) 
 Here is how much of TeX's memory you used:
  3808 strings out of 493093
  51548 string characters out of 6134989
- 121037 words of memory out of 5000000
+ 121038 words of memory out of 5000000
  7179 multiletter control sequences out of 15000+600000
  43462 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,14n,35p,2064b,281s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2015/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
-exlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
-xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texl
-ive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texli
-ve/2015/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2015/
-texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/local/texlive/2015/texmf-dist/
-fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type
-1/urw/times/utmr8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/time
-s/utmri8a.pfb>
+{/usr/local/texlive/2015/texmf-dist/fonts/enc/
+dvips/base/8r.enc}</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmmi10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmsy10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/courier/ucrr8
+a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr
+/local/texlive/2015/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/tex
+live/2015/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2015/
+texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
 Output written on RC_long.pdf (43 pages, 3337997 bytes).
 PDF statistics:
  193 PDF objects out of 1000 (max. 8388607)
