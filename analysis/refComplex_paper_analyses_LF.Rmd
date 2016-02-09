@@ -1403,7 +1403,8 @@ cp_c = ggplot(ms.phon.concL, aes(y=complexity, x=jitter(mrc.phon))) +
 
 ## plot complexity norms vs word length (phonemes) for monomorphemic only
 # aggregate
-ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph == 1,], mean)
+ms_mono.phon = aggregate(complexity ~ word + mrc.phon, 
+                         data=eng[eng$clx.morph == 1,], mean)
 
 # get CIs
 ms_mono.phon$cih <- aggregate(complexity ~ word + mrc.phon, 
@@ -1530,7 +1531,7 @@ cor.test(ms.freq.phon.complexity$subt.log.freq, ms.freq.phon.complexity$mrc.phon
 
 Nonetheless, the relationship between word length and complexity remained reliable controlling for all four of these factors. We created an additive linear model predicting word length in terms of phonemes with complexity, controlling for concreteness, imageability, familiarity, and frequency. Model parameters are presented below. 
 
-```{r, results='asis', echo = F, warning = F}
+```{r, results = 'asis', echo = F, warning = F}
 ## are the correlations between length and complexity reliable, controlling for everything? [yes]
 # all
 m_phon = lm(mrc.phon ~ complexity + mrc.fam + mrc.imag + mrc.conc + subt.log.freq, eng)
@@ -1574,7 +1575,7 @@ index <- match(xling.eng$word, morph$ENGLISH)
 xling.eng$clx.morph <- morph$clx.numMorph[index]
 
 # -- add frequency --
-freqs = read.table("../data/corpus/SUBTLEXus_corpus.txt", header=T)
+freqs = read.table("../data/corpus/SUBTLEXus_corpus.txt", header = T)
 index <- match(xling.eng$word, freqs$Word)
 xling.eng$subt.log.freq <- freqs$Lg10WF[index]
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  28 AUG 2015 11:27
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.7.16)  5 SEP 2015 18:53
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -423,13 +423,8 @@ Missing character: There is no ’ in font ptmr7t!
 ! Misplaced alignment tab character &.
 l.945 \BIn{} W.~MacWhinney B~&
                               ~O'Grady\ (\BED), \APACrefbtitle {The handbook of
-I can't figure out why you would want to use a tab mark
-here. If you just want an ampersand, the remedy is
-simple: Just type `I\&' now. But if some right brace
-up above has ended a previous alignment prematurely,
-you're probably due for more error messages, and you
-might try typing `S' now just to see what is salvageable.
 
+? 
 [41]) [42] [43] (./RC_long.aux) ) 
 Here is how much of TeX's memory you used:
  3808 strings out of 493093
