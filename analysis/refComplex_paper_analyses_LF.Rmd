@@ -1,28 +1,16 @@
 ---
-output: html_document
+title: The length of words reflects their conceptual complexity 
+author: "Molly Lewis"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+    theme: cerulean
 ---
-<h2> The length of words reflects their conceptual complexity </h2>
-<h3> Supplementary Information </h3>
 
-***
-***
-
-**TABLE OF CONTENTS**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 1: [Geon complexity norms](#1)** <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 2: [Geon mapping task](#2)**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 3: [Geon mapping task control (random syllables)](#3)**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 4: [Real object complexity norms](#4)** <br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 5: [Real object mappping task](#5)**<br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 6: [Real object mapping task control (random syllables)](#6)** <br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 7: [Real object production task](#7)**<br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 8a: [Geon study time task](#8a)**<br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 8b: [Real object study time task](#8b)**<br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 9: [English complexity norms](#9)**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 10: [Cross-linguistic analysis](#10)** <br/> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 11: [Simultaneous frequency task](#11)**<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Study 12: [Sequential frequency task](#12)**<br/>
-  
 This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/RC/blob/master/analysis/refComplex_paper_analyses_LF.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
+
 
 ***
 ***
@@ -31,7 +19,7 @@ This document was created from an R Markdown file. The R Markdown file can be fo
 ## SET GLOBAL VARIABLES
 rm(list=ls())
 
-processNorms = T # process norms or load norms? (process to see study time histograms)
+processNorms = F # process norms or load norms? (process to see study time histograms)
 doSlow = F # do very time-consuming pre-processing steps?
 fs = 11 # set graphical params
 ts = 11
@@ -52,6 +40,7 @@ library(plyr)
 library(stringr)
 library(reshape2)
 library(lme4)
+library(dplyr)
 source("useful_ML.R") # helper function
 
 # stuff for rendering to html in R markdown 
@@ -60,14 +49,12 @@ library(bitops)
 library(knitr)
 
 opts_chunk$set(echo=F, message=F, warning=F, error=F, cache=T)
-
 ```
 
 All experimental studies (Studies 1-9 and 11-12) were completed on Amazon Mechanical Turk (AMT). AMT is an online crowdsourcing platform that provides a reliable subject pool for web-based studies [17]. Participants were paid US$0.15-0.30 for their participation, depending on the length of the task. 
 
 
-<a name="1"/>
-<h3> Study 1: Geon complexity norms</h3> 
+## Study 1: Geon complexity norms
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment34/ref_complex_34.html" target="_blank"> here</a>.
 
@@ -145,8 +132,7 @@ sd(cg_norms$meanRating)
 ```
 
 
-<a name="2"/>
-<h3> Study 2: Geon mapping task</h3>
+## Study 2: Geon mapping task
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment38/ref_complex_38.html" target="_blank"> here</a>. 
 
@@ -202,13 +188,13 @@ if (doSlow){
   write.csv(dc, "../data/experiment/RC2_long.csv")
   }
 
-dc <- read.csv('../data/experiment/RC2_long.csv')
+dc2 <- read.csv('../data/experiment/RC2_long.csv')
 ```
 
 ```{r, warning = F, echo = F, fig.height = ps2, fig.width = 2*ps2}
 ## plot complexity ratios as a function of effect size
 # get effect sizes
-de <- ddply(dc, .(objCondition), function (d) {d.fc(d)})
+de <- ddply(dc2, .(objCondition), function (d) {d.fc(d)})
 
 # get obj conditions
 de$cond1 <- as.factor(unlist(matrix(lapply(str_split(de$objCondition ,"-"),
@@ -264,8 +250,7 @@ cor.test(de$c.Mratio, de$effect_size)
 cor.test(de$rt.Mratio, de$effect_size)
 ```
 
-<a name="3"/>
-<h3> Study 3: Geon mapping task control</h3> 
+## Study 3: Geon mapping task control
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment40/ref_complex_40.html" target="_blank"> here</a>.
 
@@ -319,8 +304,24 @@ qplot(len,p_complex, position=position_dodge(),
 summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 ```
 
-<a name="4"/>
-<h3> Study 4: Real object complexity norms</h3> 
+Compare to Experiment 2
+```{r}
+# experiment 2
+exp2 = dc2 %>%
+  filter(objCondition ==  "\"1-5\"") %>%
+  ddply(. ,.(langCondition), function (d, dv) {p.fc(d,"\"complex\"")}) %>%
+  rename(len = langCondition) 
+exp2$len = as.numeric(c(4, 2))
+both.exps = rbind(exp2, ms)
+both.exps$exp = as.factor(c(2,2,3,3,3))
+
+ggplot(both.exps, aes(x = len, y = p_complex, size = n, color = exp)) +
+  geom_point()
+
+# No evidence for effect of stimuli
+```
+
+## Study 4: Real object complexity norms
 
 The task can be found <a href="http://langcog.stanford.edu/expts/MLL/refComplex/Experiment9/ref_complex_9.html" target="_blank"> here</a>.
 
@@ -425,8 +426,7 @@ mean(co_norms$rating_2)
 sd(co_norms$rating_2)
 ```
 
-<a name="5"/>
-<h3> Study 5: Real object mapping task</h3> 
+## Study 5: Real object mapping task 
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment35/ref_complex_35.html" target="_blank"> here</a>.
 
@@ -548,8 +548,7 @@ cor.test(de$effect_size, de$c.Mratio)
 cor.test(de$effect_size, de$rt.Mratio)
 ```
 
-<a name="6"/>
-<h3> Study 6: Real object mapping task control</h3> 
+## Study 6: Real object mapping task control
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment41/ref_complex_41.html" target="_blank"> here</a>.
 
@@ -605,8 +604,7 @@ qplot(len,p_complex, position=position_dodge(),
 summary(glm(responseValue ~ len, data=dc, family = "binomial"))
 ```
 
-<a name="7"/>
-<h3> Study 7: Real object production task</h3> 
+## Study 7: Real object production task
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment27/ref_complex_27.html" target="_blank"> here</a>.
 
@@ -708,12 +706,24 @@ obj_c_p_plot = ggplot(ms, aes(c.norms,log.length)) +
     label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
   ggtitle('Label length vs. Complicated norms') +
   themeML
+
+# plot
+ ggplot(md, aes(c.norms,log.length)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  xlab("Object complexity norms") +
+  ylab("Log word length (characters)") +
+  annotate("text", x=.755, y=1.7, color = "red", size = rs,
+    label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
+  ggtitle('Label length vs. Complicated norms') +
+  themeML
 ```
 
 ```{r, include = F}
 ## stats: relationship between length and complexity norms
 cor.test(md$log.length, md$c.norms)
 summary(lmer(scale(log.length)~scale(c.norms) + (1+log.trial|workerid), md))
+
 ```
 
 ```{r, echo = F, fig.width = 2*ps1, fig.height = ps1}
@@ -747,8 +757,7 @@ cor.test(md$log.length, md$rt.norms)
 summary(lmer(scale(log.length) ~ scale(rt.norms) + (1 + log.trial|workerid), md))
 ```
 
-<a name="8a"/>
-<h3> Study 8a: Geon study time task</h3> 
+## Study 8a: Geon study time task 
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment37/ref_complex_37.html" target="_blank"> here</a>.
 
@@ -967,8 +976,7 @@ cor.test(cg_norms$rt_meanRating, cg_norms$meanRating)
 
 Study times did not predict memory performance. The study times for hits (correct "yes" responses; _M_ = 7.33, _SD_ = .52) did not differ from misses (correct "no" responses; _M_ = 7.34, _SD_ = .59; _t_(223) = .61, _p_=.54).
 
-<a name="8b"/>
-<h3> Study 8b: Real object study time task</h3> 
+## Study 8b: Real object study time task 
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment30/ref_complex_30.html" target="_blank"> here</a>.
 
@@ -1140,8 +1148,7 @@ cor.test(co_norms$meanRating, co_norms$log.rt)
 ```
 For the real objects, study times predicted memory performance. Study times for hits (correct “yes” responses; _M_ = 7.24, _SD_ = .60) were greater than for misses (correct “no” responses; _M_ = 7.11, _SD_ = .66; _t_(393) = 9.74, _p_<.0001).
 
-<a name="9"/>
-<h3> Study 9: English complexity norms</h3> 
+## Study 9: English complexity norms 
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment26/ref_complex_26.html" target="_blank"> here</a>.
 
@@ -1210,6 +1217,7 @@ if (processNorms) {
   class = read.csv("../data/corpus/english_classCodes.csv")
   index <- match(md$word, class$ENGLISH)
   md$class <- class$class_MLL[index]
+  md$obj <- class$objects_MLL[index]
   
   # -- add morphemes --
   morph = read.csv("../data/corpus/CELEX2_numMorph.csv")
@@ -1355,8 +1363,9 @@ textplot(ms.phon$mrc.phon, ms.phon$complexity, ms.phon$word,
 The relationship between length and complexity remained reliable for the subset of words that were open class, low in concreteness, and monomorphemic. The subset of low-concreteness words was determined by a median split based on the concreteness norms in the MRC corpus [19]. Word class was coded by the authors. Plotted below are complexity ratings versus number of phonemes for closed class words (left), low concreteness words (center), and monomorphemic words (right).
 
 ```{r, echo = F, fig.width = 3*ps1, fig.height = ps1}
-## plot complexity norms vs. word length (phonemes) for open class and monomorphemic
+## plot complexity norms vs. word length (phonemes) for open class, low concreteness, monomorphemic, and object labels only
 
+## open class
 # aggregate
 ms_open.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$class != 0,], mean)
 
@@ -1376,7 +1385,7 @@ cp_o = ggplot(ms_open.phon, aes(y=complexity, x=jitter(mrc.phon))) +
   ggtitle("Open Class:\nComplexity Rating vs. # of phonemes") +
   themeML
 
-## plot complexity norms vs word length (phonemes) for low concreteness words
+## low concreteness
 # aggregate
 ms.phon.conc <- aggregate(complexity ~ word + mrc.phon + mrc.conc, data=eng, mean) # do this again without freq because drops missing words
 
@@ -1401,7 +1410,7 @@ cp_c = ggplot(ms.phon.concL, aes(y=complexity, x=jitter(mrc.phon))) +
   ggtitle("Low Concretenesss:\nComplexity Rating vs. # of phonemes") +
   themeML
 
-## plot complexity norms vs word length (phonemes) for monomorphemic only
+## monomorphemic
 # aggregate
 ms_mono.phon = aggregate(complexity ~ word + mrc.phon, 
                          data=eng[eng$clx.morph == 1,], mean)
@@ -1422,12 +1431,34 @@ cp_m = ggplot(ms_mono.phon, aes(y=complexity, x=jitter(mrc.phon))) +
   ggtitle("Monomorphemic:\nComplexity Rating vs. # of phonemes") +
   themeML
 
-multiplot(cp_o, cp_c, cp_m, cols = 3)
+## object labels only
+# aggregate
+ms_obj.phon = aggregate(complexity ~ word + mrc.phon + obj, 
+                         data=eng, mean)
+
+# get CIs
+ms_obj.phon$cih <- aggregate(complexity ~ word + mrc.phon + obj, 
+                              data=eng, ci.high)$complexity
+ms_obj.phon$cil <- aggregate(complexity ~ word + mrc.phon + obj, 
+                              data=eng, ci.low)$complexity
+ms_obj.phon$obj = as.factor(ms_obj.phon$obj)
+
+cp_obj = ggplot(ms_obj.phon, aes(y = complexity, 
+                                 x = jitter(mrc.phon), 
+                                 group = obj)) +
+  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  geom_smooth(method = "lm", formula = y ~ x, aes(color = obj)) +
+  xlab("# of phonemes") +
+  ylab("Complexity rating") +
+  ggtitle("Object labels:\nComplexity Rating vs. # of phonemes") +
+  themeML
+
+# what does it look like for non objects? Factor by object
+multiplot(cp_o, cp_c, cp_m, cp_obj, cols = 2)
 ```
 
 ```{r, include = F}
 ## stats: correlations between length and complexity in English - all words and subsets
-
 # mean and sd
 mean(ms.phon$complexity)
 sd(ms.phon$complexity)
@@ -1506,6 +1537,31 @@ cor.test(ms_mono.syl$complexity, ms_mono.syl$mrc.syl)
 # correlation between phonemes and complexity [mono-morphemic only]
 ms_mono.phon = aggregate(complexity ~ word + mrc.phon, data=eng[eng$clx.morph == 1,], mean)
 cor.test(ms_mono.phon$complexity, ms_mono.phon$mrc.phon)
+
+## SUBSET 4: object labels
+ms_obj.syl = aggregate(complexity ~ word + mrc.syl + obj, data=eng, mean)
+ms_obj.phon = aggregate(complexity ~ word + mrc.phon + obj, data=eng, mean)
+ms_obj.morph = aggregate(complexity ~ word + clx.morph + obj, data=eng, mean)
+
+# correlation between syllables and complexity [obj vs. non-obj]
+cor.test(ms_obj.syl[ms_obj.syl$obj == 1, "complexity"], ms_obj.syl[ms_obj.syl$obj == 1, "mrc.syl"])
+cor.test(ms_obj.syl[ms_obj.syl$obj == 0, "complexity"], ms_obj.syl[ms_obj.syl$obj == 0, "mrc.syl"])
+
+# correlation between phonemes and complexity [obj vs. non-obj]
+cor.test(ms_obj.phon[ms_obj.phon$obj == 1, "complexity"], ms_obj.phon[ms_obj.phon$obj == 1, "mrc.phon"])
+cor.test(ms_obj.phon[ms_obj.phon$obj == 0, "complexity"], ms_obj.phon[ms_obj.phon$obj == 0, "mrc.phon"])
+
+# correlation between morphemes and complexity [obj vs. non-obj]
+cor.test(ms_obj.morph[ms_obj.morph$obj == 1, "complexity"], ms_obj.morph[ms_obj.morph$obj == 1, "clx.morph"])
+cor.test(ms_obj.morph[ms_obj.morph$obj == 0, "complexity"], ms_obj.morph[ms_obj.morph$obj == 0, "clx.morph"])
+
+# partial out frequency
+ms_obj.freq.phon.obj = aggregate(complexity ~ word + mrc.phon + subt.log.freq, data=eng[eng$obj == 1,], mean)
+pcor.test(ms_obj.freq.phon.obj$complexity,ms_obj.freq.phon.obj$mrc.phon,
+          ms_obj.freq.phon.obj$subt.log.freq)
+
+summary(lm(mrc.phon~ complexity*as.factor(obj), eng))
+summary(lm(complexity~ mrc.phon + as.factor(obj) + subt.log.freq, eng))
 ```
 
 Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus [19], and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; [20]). All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (phonemes: _r_ = -.53, _p_ <.0001). 
@@ -1583,8 +1639,7 @@ xling.eng$class = as.factor(xling.eng$class)
 xling.eng$clx.morph = as.factor(xling.eng$clx.morph)
 ```
 
-<a name="10"/>
-<h3> Study 10: Cross-linguistic analysis</h3> 
+##  Cross-linguistic analysis
 
 We translated all 499 words from Study 10 into 79 languages using <a href="http://www.translate.google.com" target="_blank">Google translate</a> (retrieved March 2014). We translated the set of words into all languages available in Google translate. Words that were translated as English words were removed from the data set. We also removed words that were translated into a script that was different from the target language (e.g. an English word listed for Japanese).
 
@@ -1598,12 +1653,14 @@ accuracy = colSums(checksR[,2:13], dims = 1)/ dim(checksR[,])[1]
 accuracy.df = as.data.frame(accuracy)
 accuracy.df$language = tolower(rownames(accuracy.df))
 
-qplot(accuracy.df$language, accuracy.df$accuracy, fill = I("red"),
-      ylim=c(0,1), position=position_dodge(),
-      data=accuracy.df, geom="bar", ylab="Prop. agreement", 
-      main = "Google translation accuracy",
-      xlab="Language", stat="identity") +
-  geom_abline(intercept = mean(accuracy.df$accuracy), slope = 0, linetype = 2) +
+ggplot(accuracy.df, aes(x=language, y= accuracy)) +
+  geom_bar(stat = "identity", fill = "red") +
+  ylim(0,1) +
+  ylab("Prop. agreement") +
+  xlab("Language") +
+  ggtitle("Google translation accuracy") +
+  geom_abline(intercept = mean(accuracy.df$accuracy), 
+              slope = 0, linetype = 2) +
   theme(legend.position="none",
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
   themeML
@@ -1622,7 +1679,7 @@ xling$X <- NULL
 ```
 
 
-```{r, echo = F, fig.width = 2*ps2, fig.height = ps2, include = F}
+```{r, echo = F, fig.width = 2*ps2, fig.height = ps2, include = FALSE}
 #Plotted below is the  mean number of characters for all 499 words for all 80 languages. The dashed line indicates the grand mean across languages (_M_ = 9.97). Red bars indicate languages where the accuracy was checked by a native speaker and pink bars indicate unchecked languages.
 # get mean length by language
 ML = colMeans(xling[c(2:81)], na.rm = T, dims = 1)
@@ -1778,8 +1835,7 @@ mean(c_l$open.cor)
 mean(c_l$p.corr)
 ```
 
-<a name="11"/>
-<h3> Study 11: Simultaneous frequency task</h3> 
+## Study 11: Simultaneous frequency task
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment17_2/ref_complex_17_2.html" target="_blank"> here</a>. 11 and 12 are not reported in the paper. 
 
@@ -1817,8 +1873,7 @@ qplot(Answer.lang_condition, p_complex, fill = Answer.lang_condition,
 chisq.test(table(d_simultaneous$responseValue, d_simultaneous$Answer.lang_condition))
 ```
 
-<a name="12"/>
-<h3> Study 12: Sequential frequency task</h3> 
+## Study 12: Sequential frequency task 
 
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment16/ref_complex_16.html" target="_blank"> here</a>.
 

@@ -16,3 +16,4 @@ lme4
 bitops
 RCurl
 knitr
+dplyr
