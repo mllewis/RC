@@ -19,6 +19,7 @@ boot.cor = function(x, y, n=5000, p=0.95, method="pearson"){
   matrix(vec,1,3,dimnames = list(n.r,n.c)) 
 }
 
+
 # proportions and CIs for forced choice tasks
 p.fc <- function(d, dv){ 
   # get proportions

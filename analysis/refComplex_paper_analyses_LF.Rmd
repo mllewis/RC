@@ -11,7 +11,6 @@ output:
 
 This document was created from an R Markdown file. The R Markdown file can be found <a href="https://github.com/mllewis/RC/blob/master/analysis/refComplex_paper_analyses_LF.Rmd" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
 
-
 ***
 ***
 
@@ -21,8 +20,8 @@ rm(list=ls())
 
 processNorms = F # process norms or load norms? (process to see study time histograms)
 doSlow = F # do very time-consuming pre-processing steps?
-fs = 11 # set graphical params
-ts = 11
+fs = 14 # set graphical params
+ts = 14
 rs = 5
 ps1 = 3
 ps2 = 4
@@ -255,7 +254,6 @@ cor.test(de$rt.Mratio, de$effect_size)
 The task can be found <a href="https://mllewis.github.io/projects/RC/experiment40/ref_complex_40.html" target="_blank"> here</a>.
 
 Plotted below is the proportion complex object selections as a function of the number of syllables in the target label. The dashed line reflects chance selection between the simple and complex alternatives. 
-
 ```{r 3:geon_random_syllables, include = F}
 ## read in data 
 d <- read.csv("../data/experiment/RefComplex3.results_A.csv")
@@ -271,28 +269,32 @@ md <- colwise(as.factor)(md)
 
 md$seq <- with(md, ave(value, workerid, variable, trial, FUN = seq_along))
 dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
-dc$seq <- NULL
-
-# make everything factors
-dc <- colwise(as.factor)(dc)
 
 # re-label length to be numeric
 dc$len <- 1
 dc$len[dc$langCondition=='"three"'] <- 3
 dc$len[dc$langCondition=='"five"'] <- 5
+
+# get participant-wise means
+p.means = dc %>%
+  group_by(workerid,len) %>%
+  summarise (n_complex = sum(responseValue == "\"complex\"") ,
+             n = n()) %>%
+  mutate(prop_complex = n_complex/ n)
 ```
 
 ```{r, warning = F, message = F, echo = F, fig.width = ps1, fig.height = ps1}
-## plot by length condition
-# get props
-ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")})
+# get condition-wise means
+ms = p.means %>%
+  group_by(len) %>%
+  multi_boot_standard(column = "prop_complex")
 
 # plot
-qplot(len,p_complex, position=position_dodge(),
+qplot(len,mean, position=position_dodge(),
       data=ms,geom="line",ylab="Prop. selection complex object", 
       xlab="Number of syllables")  +
-  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
-  geom_point(aes(len,p_complex), position=position_dodge(.9)) +
+  geom_linerange(aes(ymin=ci_lower, ymax=ci_upper), position=position_dodge(.9)) +
+  geom_point(aes(len,mean), position=position_dodge(.9)) +
   geom_abline(intercept = .5, slope = 0, linetype = 2) + #
   ylim(0,1) +
   ggtitle("Complex choices vs. # of syllables") +
@@ -301,25 +303,39 @@ qplot(len,p_complex, position=position_dodge(),
 
 ```{r include = F}
 ## stats: predict selections with word length
-summary(glm(responseValue ~ len, data=dc, family = "binomial"))
+# across all trials
+summary(glm(as.factor(responseValue) ~ len, data=dc, family = "binomial"))
+
+# across participant means
+summary(lm(prop_complex ~ len, data=p.means))
 ```
 
 Compare to Experiment 2
-```{r}
+```{r, warning = F, message = F, echo = F, fig.width = ps1, fig.height = ps1}
 # experiment 2
 exp2 = dc2 %>%
   filter(objCondition ==  "\"1-5\"") %>%
   ddply(. ,.(langCondition), function (d, dv) {p.fc(d,"\"complex\"")}) %>%
-  rename(len = langCondition) 
+  rename(len = langCondition) %>%
+  select(-n)
 exp2$len = as.numeric(c(4, 2))
-both.exps = rbind(exp2, ms)
+
+# experiment 3
+exp3 = ms %>%
+  rename(p_complex = mean, ciwl = ci_lower , ciul = ci_upper )
+
+both.exps = rbind(exp2, exp3)
 both.exps$exp = as.factor(c(2,2,3,3,3))
 
-ggplot(both.exps, aes(x = len, y = p_complex, size = n, color = exp)) +
-  geom_point()
-
-# No evidence for effect of stimuli
+ggplot(both.exps, aes(x = len, y = p_complex)) +
+  geom_pointrange(aes(color = exp, ymin=ciwl, ymax=ciul), size = 1) +
+  geom_smooth(method = "lm", color = "black", se = F) +
+  themeML +
+  xlab("Number of syllables") +
+  ylab("Prop. selecting complex object") +
+  ggtitle("Experiments 2 and 3, 1-5 condition only") 
 ```
+
 
 ## Study 4: Real object complexity norms
 
@@ -350,23 +366,23 @@ if (processNorms){
   msb = aggregate(value ~ rating, mdb, mean)
   
   # merge two samples together to get lists for experiments 
-  all_ratings = rbind(md, mdb)
-  all_ms = aggregate(value ~ rating, all_ratings, mean)
+  all_ratings <-rbind(md, mdb)
+  all_ms <- aggregate(value ~ rating, all_ratings, mean)
   all_ms$ratingNum <- matrix(sapply(str_split(matrix(sapply(str_split(all_ms$rating,"rating"),
                                                             function(x) {x[2]})),"_"),
                                     function(x){x[1]}))
-  all_ms$ratingNum<- as.numeric(str_replace_all(as.character(all_ms$ratingNum),"\\\"",""))
-  all_ms$cil = aggregate(value ~ rating, all_ratings, ci.low)$value
-  all_ms$cih = aggregate(value ~ rating, all_ratings, ci.high)$value
+  all_ms$ratingNum <- as.numeric(str_replace_all(as.character(all_ms$ratingNum),"\\\"",""))
+  all_ms$cil <- aggregate(value ~ rating, all_ratings, ci.low)$value
+  all_ms$cih <- aggregate(value ~ rating, all_ratings, ci.high)$value
   
-  all_ms = all_ms[!is.na(all_ms$ratingNum),] # get rid of ball and motherboard
+  all_ms <- all_ms[!is.na(all_ms$ratingNum),] # get rid of ball and motherboard
   
   # add back in ratings for each samples
   all_ms = merge(all_ms, ms, by="rating")
   all_ms = merge(all_ms, msb, by="rating")
   
   all_ms$rating <- NULL
-  names(all_ms) = c("meanRating", "ratingNum", "cil", "cih" ,"rating_1","rating_2")
+  names(all_ms) <- c("meanRating", "ratingNum", "cil", "cih" ,"rating_1","rating_2")
   all_ms <- all_ms[c(2, 1, 3:6)]
   
   # get quintiles
@@ -573,26 +589,31 @@ md$seq <- with(md, ave(value, workerid,  variable, trial, FUN = seq_along))
 dc = dcast(workerid  + seq + trial ~ variable, data = md, value.var = "value")
 dc$seq <- NULL
 
-# make everything factors
-dc <- colwise(as.factor)(dc)
-
 # re-label length to be numeric
 dc$len <- 1
-dc$len[dc$langCondition =='"three"'] <- 3
-dc$len[dc$langCondition =='"five"'] <- 5
+dc$len[dc$langCondition=='"three"'] <- 3
+dc$len[dc$langCondition=='"five"'] <- 5
+
+# get participant-wise means
+p.means = dc %>%
+  group_by(workerid, len) %>%
+  summarise (n_complex = sum(responseValue == "\"complex\"") ,
+             n = n()) %>%
+  mutate(prop_complex = n_complex/ n) 
 ```
 
-```{r, warning = F, message = F, output = F, echo=F, fig.width = ps1, fig.height = ps1}
-## plot proportion complex selections by length condition
-# get props
-ms = ddply(dc ,.(len), function (d, dv) {p.fc(d,"\"complex\"")})
+```{r, warning = F, message = F, echo = F, fig.width = ps1, fig.height = ps1}
+# get condition-wise means
+ms = p.means %>%
+  group_by(len) %>%
+  multi_boot_standard(column = "prop_complex")
 
-#plot
-qplot(len,p_complex, position=position_dodge(),
+# plot
+qplot(len,mean, position=position_dodge(),
       data=ms,geom="line",ylab="Prop. selection complex object", 
       xlab="Number of syllables")  +
-  geom_linerange(aes(ymin=ciwl,ymax=ciul), position=position_dodge(.9)) +
-  geom_point(aes(len,p_complex), position=position_dodge(.9)) +
+  geom_linerange(aes(ymin=ci_lower, ymax=ci_upper), position=position_dodge(.9)) +
+  geom_point(aes(len,mean), position=position_dodge(.9)) +
   geom_abline(intercept = .5, slope = 0, linetype = 2) + #
   ylim(0,1) +
   ggtitle("Complex choices vs. # of syllables") +
@@ -601,7 +622,7 @@ qplot(len,p_complex, position=position_dodge(),
 
 ```{r, include = F}
 ## stats: predict reference selection by word length
-summary(glm(responseValue ~ len, data=dc, family = "binomial"))
+summary(glm(as.factor(responseValue) ~ len, data=dc, family = "binomial"))
 ```
 
 ## Study 7: Real object production task
@@ -647,24 +668,55 @@ md4$trial <- as.numeric(matrix(lapply(str_split(md4$variable,"_"),function(x) {x
 names(md4)[3] = "condition"
 md4 = md4[,-2]
 
-md12 <- join(md1, md2,type = "inner")
-md123 <- join(md12, md3,type = "inner")
-md <- join(md123, md4,type = "inner")
+md12 <- join(md1, md2, type = "inner")
+md123 <- join(md12, md3, type = "inner")
+md <- join(md123, md4, type = "inner")
 
 # add columns
 md$numWords = sapply(gregexpr("\\W+", md$description), length) - 1
 md <- md[md$numWords == 1,] #remove multi word responses
+md$description <- str_trim(gsub(" ", "", md$description, fixed = T))#get rid of whitespace
+md$length = nchar(md$description)-2
 md$log.length <- log(md$length) 
 md$log.trial <- log(md$trial)
 ```
 
-```{r, include = F}
+```{r}
 ## look at relationship between condition and label length
 # aggregate across participants
-md.agg <- ddply(md, .(workerid, condition), function (d){mean(d$log.length)})
-md.agg$condition = as.factor(md.agg$condition)
-names(md.agg)[3] = "log.length"
+md.ms = md %>%
+        group_by(workerid,condition) %>%
+        summarise(log.length = mean(log.length)) 
 
+# summary statistics
+md.ms %>%
+      group_by(condition) %>%
+      summarise(mean = mean(log.length),
+                  sd = sd(log.length))
+```
+
+```{r, include = F}
+## look at relationship between complicated norms and label length
+# merge and aggregate
+md <- md %>% 
+      mutate(picture = as.numeric(picture)) %>%
+      left_join(co_norms, by=c("picture"= "ratingNum")) %>%
+      rename(c.norms = meanRating)
+
+# plot
+ggplot(md, aes(c.norms,log.length)) +
+  geom_point() + 
+  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
+  xlab("Object complexity norms") +
+  ylab("Log word length (characters)") +
+  annotate("text", x=.755, y=1.7, color = "red", size = rs,
+    label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
+  ggtitle('Label length vs. Complicated norms') +
+  themeML
+```
+
+```{r, include = F}
+## stats: t-test (categorical analysis)
 # remove subjects that don't have both hits and misses for (1 participant #33, due to multi word responses)
 m = as.data.frame(table(md.agg$workerid))
 names(m)[1] = "workerid"
@@ -673,89 +725,16 @@ goodIDs = m[which(m$Freq != 1),"workerid"]
 md.agg$good = ifelse(is.element(md.agg$workerid, goodIDs), 1, 0)
 md.agg = md.agg[md.agg$good == 1,]
 
-## stats: paired t-test of length between simple and complex conditions 
+# paired t-test of length between simple and complex conditions 
 t.test(md.agg[md.agg$condition == '"complex"',"log.length"],
        md.agg[md.agg$condition == '"simple"',"log.length"], paired = T)
 summary(lmer(log.length~condition + (1+log.trial|workerid), md))
 
-# means and sds
-mean(md.agg[md.agg$condition == '"complex"',"log.length"])
-sd(md.agg[md.agg$condition == '"complex"',"log.length"])
-mean(md.agg[md.agg$condition == '"simple"',"log.length"])
-sd(md.agg[md.agg$condition == '"simple"',"log.length"])
-```
-
-```{r, include = F}
-## look at relationship between complicated norms and label length
-# merge and aggregate
-index <- match(md$picture, co_norms$ratingNum)
-md$c.norms <- co_norms$meanRating[index]
-
-ms <- aggregate(log.length ~ c.norms + picture, data=md, mean)
-ms$cih <- aggregate(log.length ~ c.norms + picture, data=md, ci.high)$log.length
-ms$cil <- aggregate(log.length ~ c.norms + picture, data=md, ci.low)$log.length
-
-# plot
-obj_c_p_plot = ggplot(ms, aes(c.norms,log.length)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2) +
-  xlab("Object complexity norms") +
-  ylab("Log word length (characters)") +
-  annotate("text", x=.755, y=1.7, color = "red", size = rs,
-    label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
-  ggtitle('Label length vs. Complicated norms') +
-  themeML
-
-# plot
- ggplot(md, aes(c.norms,log.length)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  xlab("Object complexity norms") +
-  ylab("Log word length (characters)") +
-  annotate("text", x=.755, y=1.7, color = "red", size = rs,
-    label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
-  ggtitle('Label length vs. Complicated norms') +
-  themeML
-```
-
-```{r, include = F}
-## stats: relationship between length and complexity norms
+## stats: relationship between length and complexity norms (continous analysis)
 cor.test(md$log.length, md$c.norms)
 summary(lmer(scale(log.length)~scale(c.norms) + (1+log.trial|workerid), md))
-
 ```
 
-```{r, echo = F, fig.width = 2*ps1, fig.height = ps1}
-## look at relationship between study time and label length
-# merge and aggregate
-index <- match(md$picture, rto_norms$Answer.train_image)
-md$rt.norms <- rto_norms$log.rt[index]
-
-ms <- aggregate(log.length ~ rt.norms + picture, data=md, mean)
-ms$cih <- aggregate(log.length ~ rt.norms + picture, data=md, ci.high)$log.length
-ms$cil <- aggregate(log.length ~ rt.norms + picture, data=md, ci.low)$log.length
-
-# plot
-obj_rt_p_plot = ggplot(ms, aes(rt.norms,log.length)) +
-  geom_point() + 
-  geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  geom_errorbar(aes(ymax=log.length+cih,ymin=log.length-cil), size=0.2) +
-  xlab("Object study time") +
-  ylab("Log word length (characters)") +
-  annotate("text", x=7.5, y=1.7, color = "red", size = rs,
-    label=paste("r=",round(cor(md$log.length,md$rt.norms), 2))) +
-  ggtitle('Label length vs. Study time') +
-  themeML
-  
-multiplot(obj_c_p_plot, obj_rt_p_plot, cols = 2)
-```
-
-```{r, include = F}
-## stats: relationship between length and RT norms
-cor.test(md$log.length, md$rt.norms)
-summary(lmer(scale(log.length) ~ scale(rt.norms) + (1 + log.trial|workerid), md))
-```
 
 ## Study 8a: Geon study time task 
 
@@ -1442,16 +1421,18 @@ ms_obj.phon$cih <- aggregate(complexity ~ word + mrc.phon + obj,
 ms_obj.phon$cil <- aggregate(complexity ~ word + mrc.phon + obj, 
                               data=eng, ci.low)$complexity
 ms_obj.phon$obj = as.factor(ms_obj.phon$obj)
+ms_obj.phon$obj2 = factor(ms_obj.phon$obj, labels = c("non-object", "object"))
 
 cp_obj = ggplot(ms_obj.phon, aes(y = complexity, 
                                  x = jitter(mrc.phon), 
                                  group = obj)) +
   geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
-  geom_smooth(method = "lm", formula = y ~ x, aes(color = obj)) +
+  geom_smooth(method = "lm", formula = y ~ x, aes(color = obj2)) +
   xlab("# of phonemes") +
   ylab("Complexity rating") +
   ggtitle("Object labels:\nComplexity Rating vs. # of phonemes") +
-  themeML
+  themeML +
+  theme(legend.title=element_blank())
 
 # what does it look like for non objects? Factor by object
 multiplot(cp_o, cp_c, cp_m, cp_obj, cols = 2)
@@ -1561,7 +1542,6 @@ pcor.test(ms_obj.freq.phon.obj$complexity,ms_obj.freq.phon.obj$mrc.phon,
           ms_obj.freq.phon.obj$subt.log.freq)
 
 summary(lm(mrc.phon~ complexity*as.factor(obj), eng))
-summary(lm(complexity~ mrc.phon + as.factor(obj) + subt.log.freq, eng))
 ```
 
 Complexity and length are intuitively related to a number of other psycholinguistic variables. We estimated concreteness, familiarity and imageability from the MRC corpus [19], and word frequency from a corpus of transcripts of American English movies (Subtlex-us database; [20]). All of these variables were reliably correlated with complexity (concreteness: _r_ = -.27; familiarity: _r_ = -.43; imageability: _r_ = -.21; frequency: _r_ = -.42, all _ps_ <.0001). Length was also highly correlated with frequency (phonemes: _r_ = -.53, _p_ <.0001). 
@@ -1623,7 +1603,7 @@ summary(m_morph_o)
 
 ```{r, include = F}
 ## create english word data frame with relevant variables for xling analysis
-xling.eng <- aggregate(complexity ~ word + class, data=eng, mean)
+xling.eng <- aggregate(complexity ~ word + class, data= eng, mean)
 
 # -- add morphemes --
 morph = read.csv("../data/corpus/CELEX2_numMorph.csv")
@@ -1666,7 +1646,7 @@ ggplot(accuracy.df, aes(x=language, y= accuracy)) +
   themeML
 ```
 
-```{r, include = F}
+```{r}
 ## read in xling data and merge with English complexity norms
 xling = read.csv("../data/corpus/xling_lens.csv") 
 index <- match(xling$ENGLISH, xling.eng$word)
@@ -1833,6 +1813,44 @@ mean(c_l$open.cor)
 
 # grand mean correlation between complexity and length, partialling out frequency
 mean(c_l$p.corr)
+```
+
+Finally, we ask whether the relationship between length and number of characters remains reliable, controling for language family. 
+```{r}
+ld_plos_data = read.table("../data/corpus/LD_plos_data.txt", fill = T, 
+                          header = T, sep = "\t", na.strings = "*") 
+
+# fix language labels
+ld_plos_data$ethnologue_lang_name = tolower(ld_plos_data$ethnologue_lang_name)
+ld_plos_data$ethnologue_lang_name[ld_plos_data$ethnologue_lang_name == "standard german"] <- "german"
+ld_plos_data$ethnologue_lang_name[ld_plos_data$ethnologue_lang_name == "tosk albanian"] <- "albanian"
+ld_plos_data$ethnologue_lang_name[ld_plos_data$ethnologue_lang_name == "catalan-valencian-balear"] <- "catalan"
+ld_plos_data$ethnologue_lang_name[ld_plos_data$ethnologue_lang_name == "haitian creole french"] <- "haitian.creole"
+ld_plos_data$ethnologue_lang_name[ld_plos_data$ethnologue_lang_name == "irish gaelic"] <- "irish"
+ld_plos_data$ethnologue_lang_name[ld_plos_data$ethnologue_lang_name == "central khmer"] <- "khmer"
+
+# Need to collapse across different dialects of same language (e.g. "eastern mongolian" and "peripherial mongolian") [arabic, azerbaijani, chinese, hmong, mongolian, yiddish]
+
+# but first, remove sign languages (e.g."chinese sign language")
+ld_plos_data = ld_plos_data[-which(grepl("sign language", ld_plos_data$ethnologue_lang_name)),]
+
+ld_plos_data$lang2= ifelse(grepl("arabic", ld_plos_data$ethnologue_lang_name), "arabic",
+                   ifelse(grepl("azerbaijani", ld_plos_data$ethnologue_lang_name), "azerbaijani",
+                          ifelse(grepl("chinese", ld_plos_data$ethnologue_lang_name), "chinese",
+                                 ifelse(grepl("hmong", ld_plos_data$ethnologue_lang_name), "hmong",
+                                        ifelse(grepl("mongolian", ld_plos_data$ethnologue_lang_name), "mongolian",
+                                               ifelse(grepl("yiddish", ld_plos_data$ethnologue_lang_name), "yiddish",
+                                                      ld_plos_data$ethnologue_lang_name))))))
+
+xling.long = gather(xling, "language", "length",2:81) %>%
+              mutate(language = as.character(tolower(lapply(str_split(language,"_"),
+                                                            function(x) {x[1]})))) 
+
+              
+
+
+
+
 ```
 
 ## Study 11: Simultaneous frequency task
