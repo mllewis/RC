@@ -56,7 +56,7 @@ Read in BNC data and complexity norms.
 ```{r}
 bnc.2gram = read.table('../data/corpus/English-KNN-H-2.txt', header = T) %>%
   mutate(log.bnc.frequency = log(context.count)) %>%
-  top_n(25000, abs(log.bnc.frequency)) # following Piantadosi, resttrict to most frequent words
+  top_n(25000, abs(log.bnc.frequency)) # following Piantadosi, restrict to most frequent words
 
 lf.data = read.csv("../data/corpus/english_complexity_norms.csv") %>%
   group_by(word) %>%
@@ -80,7 +80,7 @@ ggplot(lf.data, aes(x=log.bnc.frequency)) +
   themeML
 ```
 
-Surprisal and complexity are correlated with each other (r = .29), and both are correlated with length (surprisal: r = .42, complexity: .67).
+Surprisal and complexity are correlated with each other (r = .28), and both are correlated with length (surprisal: r = .36, complexity: .67).
 ```{r, echo = F}
 ggplot(lf.data, aes(x=surprisal, complexity)) + 
   geom_point() +
@@ -111,110 +111,8 @@ ggplot(lf.data, aes(x=complexity, mrc.phon)) +
   themeML
 ```
 
-Do Piantadosi analysis complexity words and all words (UNIGRAM surprisals).
-```{r, echo = F, fig.width = 11}
-bnc.1gram = read.table('../data/corpus/English-KNN-H-1.txt', header = T) %>%
-  mutate(log.bnc.frequency = log(context.count)) %>%
-  top_n(25000, abs(log.bnc.frequency)) # following Piantadosi, resttrict to most frequent words
-
-lf.data = read.csv("../data/corpus/english_complexity_norms.csv") %>%
-  group_by(word) %>%
-  select(-X, -workerid, -trial) %>%
-  summarise_each(funs(mean)) %>%
-  left_join(bnc.1gram, by="word")
-
-## complexity words
-# get correlations
-complexity.piantadosi.df = rbind(tidy(cor.test(lf.data$nchars,lf.data$log.bnc.frequency, method = "spearman")),
-                                 tidy(cor.test(lf.data$nchars,lf.data$subt.log.freq, method = "spearman")),
-                                 tidy(cor.test(lf.data$nchars, lf.data$surprisal, method = "spearman")),
-                                 tidy(cor.test(lf.data$nchars, lf.data$complexity, method = "spearman")))
-complexity.piantadosi.df$corr = c("freq.bnc", "freq.subt", "surprisal", "complexity")
-complexity.piantadosi.df$corr <- factor(complexity.piantadosi.df$corr, 
-                             levels = rev(levels(factor(complexity.piantadosi.df$corr))))
-complexity.piantadosi.df$words = "complexity words"
-
-# get partial correlations for length 
-p.cor.surp.f.bnc = pcor.test(lf.data$nchars, lf.data$surprisal, lf.data$log.bnc.frequency, method = "spearman")$estimate
-p.cor.surp.f.subt = pcor.test(lf.data$nchars, lf.data$surprisal, lf.data$subt.log.freq, method = "spearman")$estimate
-p.cor.surp.c = pcor.test(lf.data$nchars, lf.data$surprisal, lf.data$complexity, method = "spearman")$estimate
-p.cor.freq.bnc.s = pcor.test(lf.data$nchars, lf.data$log.bnc.frequency, lf.data$surprisal, method = "spearman")$estimate
-p.cor.freq.subt.s = pcor.test(lf.data$nchars, lf.data$subt.log.freq, lf.data$surprisal, method = "spearman")$estimate
-p.cor.freq.bnc.c = pcor.test(lf.data$nchars, lf.data$log.bnc.frequency, lf.data$complexity, method = "spearman")$estimate
-p.cor.freq.subt.c = pcor.test(lf.data$nchars, lf.data$subt.log.freq, lf.data$complexity, method = "spearman")$estimate
-p.cor.complex.s = pcor.test(lf.data$nchars, lf.data$complexity, lf.data$surprisal, method = "spearman")$estimate
-p.cor.complex.f.bnc = pcor.test(lf.data$nchars, lf.data$complexity, lf.data$log.bnc.frequency, method = "spearman")$estimate
-p.cor.complex.f.subt = pcor.test(lf.data$nchars, lf.data$complexity, lf.data$subt.log.freq, method = "spearman")$estimate
-
-complexity.partials = data.frame(p.corrs = c(p.cor.surp.f.bnc, p.cor.surp.f.subt, p.cor.surp.c, p.cor.freq.bnc.s, p.cor.freq.subt.s,
-                                             p.cor.freq.bnc.c, p.cor.freq.subt.c, p.cor.complex.s, p.cor.complex.f.bnc, p.cor.complex.f.subt), 
-                                 corr = c("surprisal", "surprisal", "surprisal", "freq.bnc", "freq.subt",
-                                          "freq.bnc", "freq.subt","complexity", "complexity", "complexity"),
-                                 partialed = c("freq.bnc", "freq.subt","complexity", "surprisal", "surprisal",
-                                               "complexity", "complexity", "surprisal",  "freq.bnc", "freq.subt"))
-complexity.partials$words = "complexity words"
-
-# all words
-# merge in subt.lex.us frequency
-freqs = read.table("../data/corpus/SUBTLEXus_corpus.txt", header=T)
-
-bnc.1gram = bnc.1gram %>%
-  left_join(freqs, by=c("word" = "Word")) %>%
-  rename(subt.log.freq = Lg10WF)
-
-# get correlations
-full.piantadosi.df = rbind(tidy(cor.test(bnc.1gram$len, bnc.1gram$log.bnc.frequency, method = "spearman")),
-                           tidy(cor.test(bnc.1gram$len, bnc.1gram$subt.log.freq, method = "spearman")),
-                           tidy(cor.test(bnc.1gram$len, bnc.1gram$surprisal, method = "spearman")))
-full.piantadosi.df$corr = c("freq.bnc", "freq.subt", "surprisal")
-full.piantadosi.df$words = "all words"
-
-# get partial correlations
-full.p.cor.surp.f.bnc = pcor.test(bnc.1gram$len, bnc.1gram$surprisal, bnc.1gram$log.bnc.frequency, method = "spearman")$estimate
-full.p.cor.surp.f.subt = pcor.test(bnc.1gram$len, bnc.1gram$surprisal, bnc.1gram$subt.log.freq, method = "spearman")$estimate
-full.p.cor.freq.bnc.s = pcor.test(bnc.1gram$len, bnc.1gram$log.bnc.frequency,bnc.1gram$surprisal, method = "spearman")$estimate
-full.p.cor.freq.subt.s = pcor.test(bnc.1gram$len, bnc.1gram$subt.log.freq,bnc.1gram$surprisal, method = "spearman")$estimate
-full.partials = data.frame(p.corrs = c(full.p.cor.surp.f.bnc, full.p.cor.surp.f.subt, full.p.cor.freq.bnc.s, full.p.cor.freq.subt.s), 
-                           corr =c("surprisal", "surprisal", "freq.bnc", "freq.subt"),
-                           partialed = c("freq.bnc", "freq.subt", "surprisal", "surprisal"))
-full.partials$words = "all words"
-
-both.piantadosi.df = rbind(complexity.piantadosi.df, full.piantadosi.df)
-both.partials.df = rbind(complexity.partials, full.partials)
-
-both.piantadosi.df$corr  <- factor(both.piantadosi.df$corr, 
-                                   c( "freq.bnc", "freq.subt", "surprisal", "complexity"))
-both.partials.df$corr  <- factor(both.partials.df$corr, 
-                                   c( "freq.bnc", "freq.subt", "surprisal", "complexity"))
-
-ggplot(both.piantadosi.df) +
-  geom_bar(stat = "identity", aes(y = abs(estimate), x = corr, fill = corr))+
-  #geom_linerange(aes(ymax=abs(conf.high), ymin=abs(conf.low), x = corr),
-  #               position=position_dodge(width=0.9)) +
-  scale_fill_manual(values = c("blue", "lightblue", "red" ,"yellow"),guide = FALSE) +
-  facet_grid(. ~ words,  scales = "free_x", space = "free_x") +
-  geom_point(data=both.partials.df, 
-             mapping=aes(x=corr, y=abs(p.corrs), 
-                         shape = partialed), size=4) +
-  ylab("absolute pearson's r") +
-  scale_x_discrete(name = "", drop = T)  +
-  themeML +
-  theme(text = element_text(size=20))
-```
-
-
 Do Piantadosi analysis complexity words and all words (BIGRAM surprisals).
 ```{r, echo = F, fig.width = 11}
-bnc.2gram = read.table('../data/corpus/English-KNN-H-2.txt', header = T) %>%
-  mutate(log.bnc.frequency = log(context.count)) %>% 
-  top_n(25000, abs(log.bnc.frequency)) # following Piantadosi, resttrict to most frequent words
-
-lf.data = read.csv("../data/corpus/english_complexity_norms.csv") %>%
-  group_by(word) %>%
-  select(-X, -workerid, -trial) %>%
-  summarise_each(funs(mean)) %>%
-  left_join(bnc.2gram, by="word")
-
 ## complexity words
 # get correlations
 complexity.piantadosi.df = rbind(tidy(cor.test(lf.data$nchars,lf.data$log.bnc.frequency, method = "spearman")),
@@ -281,105 +179,12 @@ both.partials.df$corr  <- factor(both.partials.df$corr,
 
 ggplot(both.piantadosi.df) +
   geom_bar(stat = "identity", aes(y = abs(estimate), x = corr, fill = corr))+
-  #geom_linerange(aes(ymax=abs(conf.high), ymin=abs(conf.low), x = corr),
-  #               position=position_dodge(width=0.9)) +
   scale_fill_manual(values = c("blue", "lightblue", "red" ,"yellow"),guide = FALSE) +
   facet_grid(. ~ words,  scales = "free_x", space = "free_x") +
   geom_point(data=both.partials.df, 
              mapping=aes(x=corr, y=abs(p.corrs), 
                          shape = partialed), size=4) +
-  ylab("absolute pearson's r") +
-  scale_x_discrete(name = "", drop = T)  +
-  themeML +
-  theme(text = element_text(size=20))
-```
-
-Do Piantadosi analysis complexity words and all words (TRIGRAM surprisals).
-```{r, echo = F, fig.width = 11}
-bnc.3gram = read.table('../data/corpus/English-KNN-H-3.txt', header = T) %>%
-  mutate(log.bnc.frequency = log(context.count)) %>%
-  top_n(25000, abs(log.bnc.frequency)) # following Piantadosi, resttrict to most frequent words
-
-lf.data = read.csv("../data/corpus/english_complexity_norms.csv") %>%
-  group_by(word) %>%
-  select(-X, -workerid, -trial) %>%
-  summarise_each(funs(mean)) %>%
-  left_join(bnc.3gram, by="word")
-
-## complexity words
-# get correlations
-complexity.piantadosi.df = rbind(tidy(cor.test(lf.data$nchars,lf.data$log.bnc.frequency, method = "spearman")),
-                                 tidy(cor.test(lf.data$nchars,lf.data$subt.log.freq, method = "spearman")),
-                                 tidy(cor.test(lf.data$nchars, lf.data$surprisal, method = "spearman")),
-                                 tidy(cor.test(lf.data$nchars, lf.data$complexity, method = "spearman")))
-complexity.piantadosi.df$corr = c("freq.bnc", "freq.subt", "surprisal", "complexity")
-complexity.piantadosi.df$corr <- factor(complexity.piantadosi.df$corr, 
-                             levels = rev(levels(factor(complexity.piantadosi.df$corr))))
-complexity.piantadosi.df$words = "complexity words"
-
-# get partial correlations for length 
-p.cor.surp.f.bnc = pcor.test(lf.data$nchars, lf.data$surprisal, lf.data$log.bnc.frequency, method = "spearman")$estimate
-p.cor.surp.f.subt = pcor.test(lf.data$nchars, lf.data$surprisal, lf.data$subt.log.freq, method = "spearman")$estimate
-p.cor.surp.c = pcor.test(lf.data$nchars, lf.data$surprisal, lf.data$complexity)$estimate
-p.cor.freq.bnc.s = pcor.test(lf.data$nchars, lf.data$log.bnc.frequency, lf.data$surprisal, method = "spearman")$estimate
-p.cor.freq.subt.s = pcor.test(lf.data$nchars, lf.data$subt.log.freq, lf.data$surprisal, method = "spearman")$estimate
-p.cor.freq.bnc.c = pcor.test(lf.data$nchars, lf.data$log.bnc.frequency, lf.data$complexity, method = "spearman")$estimate
-p.cor.freq.subt.c = pcor.test(lf.data$nchars, lf.data$subt.log.freq, lf.data$complexity, method = "spearman")$estimate
-p.cor.complex.s = pcor.test(lf.data$nchars, lf.data$complexity, lf.data$surprisal, method = "spearman")$estimate
-p.cor.complex.f.bnc = pcor.test(lf.data$nchars, lf.data$complexity, lf.data$log.bnc.frequency, method = "spearman")$estimate
-p.cor.complex.f.subt = pcor.test(lf.data$nchars, lf.data$complexity, lf.data$subt.log.freq, method = "spearman")$estimate
-
-complexity.partials = data.frame(p.corrs = c(p.cor.surp.f.bnc, p.cor.surp.f.subt, p.cor.surp.c, p.cor.freq.bnc.s, p.cor.freq.subt.s,
-                                             p.cor.freq.bnc.c, p.cor.freq.subt.c, p.cor.complex.s, p.cor.complex.f.bnc, p.cor.complex.f.subt), 
-                                 corr = c("surprisal", "surprisal", "surprisal", "freq.bnc", "freq.subt",
-                                          "freq.bnc", "freq.subt","complexity", "complexity", "complexity"),
-                                 partialed = c("freq.bnc", "freq.subt","complexity", "surprisal", "surprisal",
-                                               "complexity", "complexity", "surprisal",  "freq.bnc", "freq.subt"))
-complexity.partials$words = "complexity words"
-
-# all words
-# merge in subt.lex.us frequency
-freqs = read.table("../data/corpus/SUBTLEXus_corpus.txt", header=T)
-
-bnc.3gram = bnc.3gram %>%
-  left_join(freqs, by=c("word" = "Word")) %>%
-  rename(subt.log.freq = Lg10WF)
-
-# get correlations
-full.piantadosi.df = rbind(tidy(cor.test(bnc.3gram$len, bnc.3gram$log.bnc.frequency, method = "spearman")),
-                           tidy(cor.test(bnc.3gram$len, bnc.3gram$subt.log.freq, method = "spearman")),
-                           tidy(cor.test(bnc.3gram$len, bnc.3gram$surprisal, method = "spearman")))
-full.piantadosi.df$corr = c("freq.bnc", "freq.subt", "surprisal")
-full.piantadosi.df$words = "all words"
-
-# get partial correlations
-full.p.cor.surp.f.bnc = pcor.test(bnc.3gram$len, bnc.3gram$surprisal, bnc.3gram$log.bnc.frequency, method = "spearman")$estimate
-full.p.cor.surp.f.subt = pcor.test(bnc.3gram$len, bnc.3gram$surprisal, bnc.3gram$subt.log.freq, method = "spearman")$estimate
-full.p.cor.freq.bnc.s = pcor.test(bnc.3gram$len, bnc.3gram$log.bnc.frequency,bnc.3gram$surprisal, method = "spearman")$estimate
-full.p.cor.freq.subt.s = pcor.test(bnc.3gram$len, bnc.3gram$subt.log.freq,bnc.3gram$surprisal, method = "spearman")$estimate
-full.partials = data.frame(p.corrs = c(full.p.cor.surp.f.bnc, full.p.cor.surp.f.subt, full.p.cor.freq.bnc.s, full.p.cor.freq.subt.s), 
-                           corr =c("surprisal", "surprisal", "freq.bnc", "freq.subt"),
-                           partialed = c("freq.bnc", "freq.subt", "surprisal", "surprisal"))
-full.partials$words = "all words"
-
-both.piantadosi.df = rbind(complexity.piantadosi.df, full.piantadosi.df)
-both.partials.df = rbind(complexity.partials, full.partials)
-
-both.piantadosi.df$corr  <- factor(both.piantadosi.df$corr, 
-                                   c( "freq.bnc", "freq.subt", "surprisal", "complexity"))
-both.partials.df$corr  <- factor(both.partials.df$corr, 
-                                   c( "freq.bnc", "freq.subt", "surprisal", "complexity"))
-
-ggplot(both.piantadosi.df) +
-  geom_bar(stat = "identity", aes(y = abs(estimate), x = corr, fill = corr))+
-  #geom_linerange(aes(ymax=abs(conf.high), ymin=abs(conf.low), x = corr),
-    #             position=position_dodge(width=0.9)) +
-  scale_fill_manual(values = c("blue", "lightblue", "red" ,"yellow"),guide = FALSE) +
-  facet_grid(. ~ words,  scales = "free_x", space = "free_x") +
-  geom_point(data=both.partials.df, 
-             mapping=aes(x=corr, y=abs(p.corrs), 
-                         shape = partialed), size=4) +
-  ylab("absolute pearson's r") +
+  ylab("absolute spearman's r") +
   scale_x_discrete(name = "", drop = T)  +
   themeML +
   theme(text = element_text(size=20))
@@ -389,15 +194,12 @@ ggplot(both.piantadosi.df) +
 ```{r}
 paired.r(abs(cor(bnc.2gram$len, bnc.2gram$log.bnc.frequency, method = "spearman")), 
          cor(bnc.2gram$len, bnc.2gram$surprisal, method = "spearman"),n=length(bnc.2gram$len))
-
-paired.r(abs(cor(bnc.3gram$len, bnc.3gram$log.bnc.frequency, method = "spearman")), 
-         cor(bnc.3gram$len, bnc.3gram$surprisal, method = "spearman"),n=length(bnc.3gram$len))
 ```
 
 # stats for surpisal and complexity analysis
 ```{r}
-pcor.test(bnc.2gram$len, bnc.2gram$log.bnc.frequency,bnc.2gram$surprisal,method = "spearman")
-tidy(lm(mrc.phon ~ complexity + surprisal + log.bnc.frequency, lf.data))
+pcor.test(lf.data$mrc.phon, lf.data$complexity,lf.data$surprisal)
+summary(lm(mrc.phon ~ complexity + surprisal + log.bnc.frequency, lf.data))
 ```
 
 
@@ -544,6 +346,4 @@ mean(c_l$p.corr.f)
 # grand mean correlation between complexity and length, partialling out frequency
 mean(c_l$p.corr.surp)
 ```
-
-
 

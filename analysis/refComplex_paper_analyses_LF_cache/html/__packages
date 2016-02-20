@@ -17,3 +17,6 @@ bitops
 RCurl
 knitr
 dplyr
+langcog
+broom
+tidyr
