@@ -17,7 +17,7 @@ This document was created from an R Markdown file. The R Markdown file can be fo
 ## SET GLOBAL VARIABLES
 rm(list=ls())
 
-processNorms = T # process norms or load norms? (T to see study time histograms)
+processNorms = F # process norms or load norms? (T to see study time histograms)
 doSlow = F # do very time-consuming pre-processing steps?
 fs = 11 # set graphical params
 ts = 11
@@ -39,10 +39,11 @@ library(plyr)
 library(stringr)
 library(reshape2)
 library(lme4)
-library(dplyr)
 library(langcog)
 library(tidyr)
 library(robustlmm)
+library(dplyr)
+
 source("useful_ML.R") # helper function
 
 # stuff for rendering to html in R markdown 
@@ -682,7 +683,6 @@ md = full_join(pictures, descriptions) %>%
       filter(numWords == 1)
 ```
 
-
 ```{r, include = F}
 # summary statistics
 md %>%
@@ -1274,7 +1274,18 @@ p_morph = ggplot(ms.morph, aes(x=clx.morph)) +
     label=paste("n=",dim(ms.morph)[1])) +
   themeML
 
-multiplot(p_phon, p_syl, p_morph, cols = 3)
+multiplot(p_char, p_phon, p_syl, p_morph, cols = 2)
+
+p_char = ggplot(ms.chars2, aes(x=nchars)) + 
+    geom_histogram(fill = "black", alpha = .6 , binwidth = 1, origin = -0.5) +
+  ylab("Frequency") +
+  xlab("Word length (characters)") +
+  ggtitle("Word lengths") +
+  scale_x_continuous(breaks = seq(2,12,2))  +
+  themeML +
+  theme(text = element_text(size=20),                   plot.title=element_text(size=22, face = "bold"))
+
+
 ```
 
 ```{r, include = F}
@@ -2054,7 +2065,7 @@ ggplot(xling.fam.corrs) +
 
 Following Jaeger, et al. (2011) [7], we included random intercepts and slopes by-family and by-native country. We built a model predicting length in terms of number of phonemes with complexity and frequency as fixed effects. The effect of complexity on length remained reliable in this model.  Model parameters are presented below. 
 
-```{r echo = F, fig.width = 6 }
+```{r echo = F, fig.width = 6, results = 'asis' }
 
 #full = summary(lmer(length ~ complexity + subt.log.freq + # doesn't converge
 #                      (1+ complexity*subt.log.freq|langFamily) +
