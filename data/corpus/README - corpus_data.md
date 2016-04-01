@@ -27,6 +27,8 @@ This folder contains all of the data used in Experiment 9 and Study 10 in the pa
 [10] English-KNN-H-2.txt - Bigram surprisal calculated from the British National Corpus (Clear, 1993). Thanks to Steve Piantadosi for sharing this data (Piantadosi, S., Tily, H., & Gibson, E. (2011b). Word lengths are optimized for efficient
 communication. Proceedings of the National Academy of Sciences, 108(9), 3526–3529.). 
 
+[11] wals_family_data.txt - Language family data taken from WALS (Haspelmath, et al., 2005). Thanks to Gary Lupyan and Rick Dale for sharing this dataset with us.
+
 
 
 
