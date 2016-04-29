@@ -54,7 +54,8 @@ library(plyr)
 library(stringr)
 library(reshape2)
 library(lme4)
-source("useful.R")
+library(bootstrap)
+source("useful_ML.R")
 
 # stuff for rendering to html in R markdown 
 library(RCurl)
@@ -139,15 +140,11 @@ d.fc <- function(d) {
                      rt.Mratio = rt.Mratio,
                      c.Mratio = c.Mratio)
   return (es)
-  }
+}
 
-  themeML = theme(text = element_text(size=fs),
-        plot.title=element_text(size=ts, face = "bold"),
-        plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_line(color = 'black')) 
+setwd('../')
+
+
 ```
 
 All experimental studies (Studies 1-10 and 12-13) were completed on Amazon Mechanical Turk (AMT). AMT is an online crowdsourcing platform that provides a reliable subject pool for web-based studies [17]. Participants were paid US$0.15-0.30 for their participation, depending on the length of the task. 
@@ -821,6 +818,7 @@ obj_c_p_plot = ggplot(ms, aes(c.norms,log.length)) +
     label=paste("r=",round(cor(md$log.length,md$c.norms), 2))) +
   ggtitle('Label length vs. Complicated norms') +
   themeML
+```
 
 ```{r, include = F}
 ## stats: relationship between length and complexity norms
@@ -1409,7 +1407,7 @@ ms.morph$cih <- aggregate(complexity ~ word + clx.morph, data=eng, ci.high)$comp
 ms.morph$cil <- aggregate(complexity ~ word + clx.morph, data=eng, ci.low)$complexity
 
 cp = ggplot(ms.phon, aes(y=complexity, x=jitter(mrc.phon))) +
-  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  #geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
   annotate("text", x=10, y=2, color = "red", size=rs,
            label=paste("r=",round(cor(ms.phon$complexity, ms.phon$mrc.phon), 2))) +
@@ -1443,21 +1441,31 @@ multiplot(cp, cs, cm, cols = 3)
 
 ```{r}
 ### STUDY 4 PLOT###
-png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/long_form/figures/study4a_plot.png", height = 6, width = 6, units = "in", res=500)
+png("/Documents/GRADUATE_SCHOOL/Projects/ref_complex/Papers/RC/writeup/figures/exp4a_plot.png", height = 6, width = 6, units = "in", res=500)
 ggplot(ms.phon, aes(y=complexity, x=jitter(mrc.phon))) +
-  geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
+  geom_point() +
+  #geom_pointrange(aes(ymax = complexity+cih,ymin=complexity-cil)) + 
   geom_smooth(method = "lm", color="blue", formula = y ~ x) +
-  annotate("text", x=10, y=2, color = "red", size=rs,
+  annotate("text", x=10, y=2, color = "red", size = rs,
            label=paste("r=",round(cor(ms.phon$complexity, ms.phon$mrc.phon), 2))) +
   xlab("# of phonemes") +
   ggtitle("Experiment 9") +
   ylab("Complexity rating") +
-  scale_x_continuous(breaks=seq(0, 13, 2)) + 
-  themeML
+  scale_x_continuous(breaks=seq(0, 13, 2))  +
+  theme_bw() +
+  theme(text = element_text(size=fs),
+                plot.title=element_text(size=ts, face = "bold"),
+                plot.background = element_blank(),
+                panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(),
+                panel.border = element_blank(),
+                axis.line.x = element_line(color="black", size = .5),
+                axis.line.y = element_line(color="black", size = .5))
+
+themeML
 dev.off()
 ```
 
-```
 
 ```{r, echo = F, fig.width = 2*ps1, fig.height = 2*(.75*ps1), include = F}
 # The plot below shows the relationship between complexity and word length in terms phonemes, where each point is labeled by its word.

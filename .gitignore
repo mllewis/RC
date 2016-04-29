@@ -1,5 +1,7 @@
 writeup/misc/
 writeup/nature/figs/misc/
+writeup/RC_long.log
+writeup/RC_editable/
 
 analysis/rsconnect/
 analysis/refComplex_paper_analyses_SI.md
@@ -9,11 +11,14 @@ analysis/refComplex_paper_analyses.md
 analysis/refComplex_paper_analyses.html
 analysis/refComplex_paper_analyses_LF_cache/
 analysis/refComplex_paper_analyses_LF_files/
+analysis/refComplex_paper_analyses_long_figures.Rmd
+analysis/refComplex_paper_analyses_long_figures.html
 analysis/.RData
 analysis/.Rhistory
 analysis/.Rprofile
 analysis/.Rapp.history
 analysis/Results with repeat subjects removed.txt
+
 
 *.DS_Store
 *.dcf

@@ -86,7 +86,8 @@ themeML = theme(text = element_text(size=fs),
                 panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank(),
                 panel.border = element_blank(),
-                axis.line = element_line(color = 'black')) 
+                axis.line.x = element_line(color="black", size = .5),
+                axis.line.y = element_line(color="black", size = .5))
 
 
 ## for bootstrapping 95% confidence intervals

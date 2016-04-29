@@ -8,7 +8,7 @@ output:
     theme: cerulean
 ---
 
-This document was created from an R Markdown file. The R Markdown file can be found <a href="https://mllewis.github.io/projects/RC/RCSI.html" target="_blank"> here</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
+This document was created from an <a href="https://github.com/mllewis/RC/blob/master/analysis/refComplex_paper_analyses_LF.Rmd" target="_blank">  R Markdown file</a>. All analyses and plots can be reproduced from the <a href="https://github.com/mllewis/RC/tree/master/data" target="_blank">raw data</a> with the code in this file. This document also contains links to the experimental tasks.
 
 ***
 ***
@@ -1283,7 +1283,6 @@ p_char = ggplot(ms.chars2, aes(x=nchars)) +
   annotate("text", x=10, y=100, color = "red", size = rs,
     label=paste("n=",dim(ms.chars2)[1])) +
   themeML
-
 
 multiplot(p_char, p_phon, p_syl, p_morph, cols = 2)
 
