@@ -1,4 +1,4 @@
-#### Lewis, M. & Frank, M. C. (in press). The length of words reflects their conceptual complexity. *Cognition.* 53, 182-195.
+#### Lewis, M. & Frank, M. C. (2016). The length of words reflects their conceptual complexity. *Cognition.* 53, 182-195.
 
 -----
 
