@@ -18,7 +18,7 @@ This folder contains all of the data used in Experiment 9 and Study 10 in the pa
 
 [6] xling_corrs.csv - cross-linguistic correlations in word length
 
-[7] xling_corrs_tidy.csv - cross-linguistic correlations in word length, tidied. This is the file you want if you are intersted in using the cross-linguistic correlations between length and complexity based on teh google translations.
+[7] xling_corrs_tidy.csv - cross-linguistic correlations in word length, tidied. This is the file you want if you are intersted in using the cross-linguistic correlations between length and complexity based on the google translations.
 
 [8] xling_lens.csv - length in unicode characters for all 499 word in all 80 languages
 
