@@ -20,16 +20,16 @@ This folder contains all of the data used in Experiment 9 and Study 10 in the pa
 
 [7] xling_corrs_tidy.csv - cross-linguistic correlations in word length, tidied. This is the file you want if you are intersted in using the cross-linguistic correlations between length and complexity based on teh google translations.
 
-[7] xling_lens.csv - length in unicode characters for all 499 word in all 80 languages
+[8] xling_lens.csv - length in unicode characters for all 499 word in all 80 languages
 
-[8] xling_raw.html - raw google translations for all 79 languagages
+[9] xling_raw.html - raw google translations for all 79 languagages
 
-[9] xling_translation_accuracy.csv - translation accuracy of words for checked languages (1- correct, 0 - incorrect)
+[10] xling_translation_accuracy.csv - translation accuracy of words for checked languages (1- correct, 0 - incorrect)
 
-[10] English-KNN-H-2.txt - Bigram surprisal calculated from the British National Corpus (Clear, 1993). Thanks to Steve Piantadosi for sharing this data (Piantadosi, S., Tily, H., & Gibson, E. (2011b). Word lengths are optimized for efficient
+[11] English-KNN-H-2.txt - Bigram surprisal calculated from the British National Corpus (Clear, 1993). Thanks to Steve Piantadosi for sharing this data (Piantadosi, S., Tily, H., & Gibson, E. (2011b). Word lengths are optimized for efficient
 communication. Proceedings of the National Academy of Sciences, 108(9), 3526–3529.). 
 
-[11] wals_family_data.txt - Language family data taken from WALS (Haspelmath, et al., 2005). Thanks to Gary Lupyan and Rick Dale for sharing this dataset with us.
+[12] wals_family_data.txt - Language family data taken from WALS (Haspelmath, et al., 2005). Thanks to Gary Lupyan and Rick Dale for sharing this dataset with us.
 
 
 
